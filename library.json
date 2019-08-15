@@ -1,0 +1,13 @@
+{
+  "id": "{BC55481C-37C5-4232-979F-6494F9F6893C}",
+  "author": "Ulrich Bittner",
+  "name": "Rollladensteuerung",
+  "url": "https://github.com/ubittner/Rollladensteuerung",
+  "compatibility": {
+    "version": "5.1",
+    "date": 1556668800
+  },
+  "version": "1.00",
+  "build": 2,
+  "date": 1565798400
+}
