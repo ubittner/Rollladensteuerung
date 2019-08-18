@@ -51,6 +51,15 @@ trait RS_blindControl
         // Reset attribute
         $this->WriteAttributeInteger('NextAction', 0);
         // Set next action
+        $this->SetNextAction();
+        $this->UpdateBlindLevel();
+    }
+
+    /**
+     * Sets the next action imformation.
+     */
+    public function SetNextAction()
+    {
         $weeklyEventPlan = $this->ReadPropertyInteger('WeeklyEventPlan');
         if ($weeklyEventPlan != 0 && IPS_ObjectExists($weeklyEventPlan)) {
             $events = IPS_GetEvent($weeklyEventPlan);
@@ -93,7 +102,6 @@ trait RS_blindControl
                 }
             }
         }
-        $this->UpdateBlindLevel();
     }
 
     /**
@@ -103,6 +111,7 @@ trait RS_blindControl
     {
         if ($this->GetValue('AutomaticMode')) {
             $action = $this->GetAction(time());
+            $this->SendDebug('CheckActionResult', $action, 0);
             $useSetBlindLevel = $this->ReadPropertyBoolean('UseSetBlindLevel');
             switch ($action) {
                 // 0 = no actual action found
@@ -132,6 +141,8 @@ trait RS_blindControl
                     }
                     break;
             }
+            // Set next action
+            $this->SetNextAction();
         } else {
             $this->SetValue('NextAction', 'Automatik ist inaktiv.');
         }
