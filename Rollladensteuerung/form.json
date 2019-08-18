@@ -77,7 +77,7 @@
         },
         {
           "type": "Label",
-          "caption": "Bitte wählen Sie aus, ob bei Aktivierung der Automatik die Rollladenposition gemäss Wochenplan direkt verändert werden soll:"
+          "caption": "Bitte wählen Sie aus, ob bei Aktivierung der Automatik die Rollladenposition gemäß Wochenplan direkt verändert werden soll:"
         },
         {
           "type": "CheckBox",
