@@ -12,7 +12,9 @@ Folgende Module beinhaltet das Repository `Rollladensteuerung`:
 
 - __Rollladensteuerung__ ([Dokumentation](Rollladensteuerung))  
 	Integriert [Homematic IP](https://www.homematic-ip.com/start.html) Rollladenaktoren in [IP-Symcon](https://www.symcon.de) und fährt auf Grundlage von definierten Zeiten innerhalb eines Wochenplans einen Rollladen automatisch hoch und runter.  
+	
 	Ebenfalls ist eine manuelle Steuerung jederzeit möglich.  
+	
 	Unterstütze Aktoren:  
 	- HmIP-BROLL
 	- HmIP-FROLL
