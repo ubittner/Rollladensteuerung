@@ -159,7 +159,7 @@ trait RS_blindControl
         $setBlind = true;
         $processID = $this->ReadPropertyInteger('BlindLevelProcess');
         if ($processID != 0 && IPS_ObjectExists($processID)) {
-            $process = GetValueInteger($processID);
+            $process = GetValue($processID);
             if ($process == 1) {
                 $setBlind = false;
             }
