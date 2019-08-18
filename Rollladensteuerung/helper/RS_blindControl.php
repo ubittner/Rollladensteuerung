@@ -103,6 +103,7 @@ trait RS_blindControl
     {
         if ($this->GetValue('AutomaticMode')) {
             $action = $this->GetAction(time());
+            $useSetBlindLevel = $this->ReadPropertyBoolean('UseSetBlindLevel');
             switch ($action) {
                 // 0 = no actual action found
                 case 0:
@@ -111,24 +112,24 @@ trait RS_blindControl
                 // 1 = close blind
                 case 1:
                     $this->WriteAttributeInteger('NextAction', 1);
-                    /*
-                    if ($this->ReadPropertyInteger('ActionDelay') > 0) {
-                        $this->SetControlBlindTimer();
-                    } else {
-                        //$this->ControlBlind();
+                    if ($useSetBlindLevel) {
+                        if ($this->ReadPropertyInteger('ActionDelay') > 0) {
+                            $this->SetControlBlindTimer();
+                        } else {
+                            $this->ControlBlind();
+                        }
                     }
-                    */
                     break;
                 // 2 = open blind
                 case 2:
                     $this->WriteAttributeInteger('NextAction', 2);
-                    /*
-                    if ($this->ReadPropertyInteger('ActionDelay') > 0) {
-                        $this->SetControlBlindTimer();
-                    } else {
-                        $this->ControlBlind();
+                    if ($useSetBlindLevel) {
+                        if ($this->ReadPropertyInteger('ActionDelay') > 0) {
+                            $this->SetControlBlindTimer();
+                        } else {
+                            $this->ControlBlind();
+                        }
                     }
-                    */
                     break;
             }
         } else {

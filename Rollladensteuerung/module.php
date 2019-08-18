@@ -53,6 +53,7 @@ class Rollladensteuerung extends IPSModule
 
         // Automatic
         $this->RegisterPropertyInteger('WeeklyEventPlan', 0);
+        $this->RegisterPropertyBoolean('UseSetBlindLevel', false);
         $this->RegisterPropertyInteger('ActionDelay', 0);
         $this->RegisterPropertyInteger('BlindPositionClosed', 0);
         $this->RegisterPropertyInteger('BlindPositionOpened', 100);
