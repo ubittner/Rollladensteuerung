@@ -111,20 +111,24 @@ trait RS_blindControl
                 // 1 = close blind
                 case 1:
                     $this->WriteAttributeInteger('NextAction', 1);
+                    /*
                     if ($this->ReadPropertyInteger('ActionDelay') > 0) {
                         $this->SetControlBlindTimer();
                     } else {
-                        $this->ControlBlind();
+                        //$this->ControlBlind();
                     }
+                    */
                     break;
                 // 2 = open blind
                 case 2:
                     $this->WriteAttributeInteger('NextAction', 2);
+                    /*
                     if ($this->ReadPropertyInteger('ActionDelay') > 0) {
                         $this->SetControlBlindTimer();
                     } else {
                         $this->ControlBlind();
                     }
+                    */
                     break;
             }
         } else {
