@@ -77,12 +77,12 @@
         },
         {
           "type": "Label",
-          "caption": "Bitte wählen Sie aus, ob bei Aktivierung der Automatik die Rolladenposition direkt verändert werden soll:"
+          "caption": "Bitte wählen Sie aus, ob bei Aktivierung der Automatik die Rollladenposition direkt verändert werden soll:"
         },
         {
           "type": "CheckBox",
           "name": "UseSetBlindLevel",
-          "caption": "Rolladenposition verändern"
+          "caption": "Rollladenposition verändern"
         },
         {
           "type": "Label",
