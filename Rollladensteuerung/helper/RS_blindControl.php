@@ -51,14 +51,14 @@ trait RS_blindControl
         // Reset attribute
         $this->WriteAttributeInteger('NextAction', 0);
         // Set next action
-        $this->SetNextAction();
+        $this->SetNextActionInfo();
         $this->UpdateBlindLevel();
     }
 
     /**
      * Sets the next action imformation.
      */
-    public function SetNextAction()
+    public function SetNextActionInfo()
     {
         $weeklyEventPlan = $this->ReadPropertyInteger('WeeklyEventPlan');
         if ($weeklyEventPlan != 0 && IPS_ObjectExists($weeklyEventPlan)) {
@@ -142,7 +142,7 @@ trait RS_blindControl
                     break;
             }
             // Set next action
-            $this->SetNextAction();
+            $this->SetNextActionInfo();
         } else {
             $this->SetValue('NextAction', 'Automatik ist inaktiv.');
         }

@@ -1,13 +1,14 @@
 # Rollladensteuerung
 
-[![Image](../imgs/HmIP_Logo.png)](https://www.homematic-ip.com/start.html)
+[![Image](../imgs/Rollladensteuerung_Logo.png)](https://www.homematic-ip.com/start.html)
 
-Integriert [Homematic IP](https://www.homematic-ip.com/start.html) Rollladenaktoren in [IP-Symcon](https://www.symcon.de) und fährt auf Grundlage von definierten Zeiten innerhalb eines Wochenplans einen Rollladen automatisch hoch und runter.  
+Integriert [HomeMatic](https://www.homematic.com/licht-schatten.html) und [Homematic IP](https://www.homematic-ip.com/produkte/rolllaeden-jalousien-und-markisen.html) Rollladenaktoren in [IP-Symcon](https://www.symcon.de) und fährt auf Grundlage von definierten Zeiten innerhalb eines Wochenplans einen Rollladen automatisch hoch und runter.  
 
 Ebenfalls ist eine manuelle Steuerung jederzeit möglich.  
 
 Unterstütze Aktoren:  
 
+* HM-LC-Bl1-FM
 * HmIP-BROLL
 * HmIP-FROLL  
 
@@ -53,6 +54,7 @@ Das Modul Rollladensteuerung wird den Rollladenaktor dann immer entsprechend der
 
 - IP-Symcon ab Version 5.1
 - Homematic IP Rollladenaktor:
+    * HM-LC-Bl1-FM
     * HmIP-BROLL
     * HmIP-FROLL  
 
@@ -122,26 +124,26 @@ Der nächste Schaltvorgang wird im WenFront angezeigt, sofern der Automatikmodus
 
 Behanghöhe des Rollladens steuern:
 
-`float RS_SetBlindLevel(integer $InstanzID, float $Level);`  
+```text
+float RS_SetBlindLevel(integer $InstanzID, float $Level);  
   
 Setzt den Rollladen auf die entsprechende Behanghöhe.  
 $Level = 0 ist immer    0% = Geschlossen  
 $Level = 1 ist immer  100% = Geöffnet  
   
 Beispiele:  
-Rollladen geschlossen: `RS_SetBlindLevel(12345, 0);`  
-Rollladen geöffnet: `RS_SetBlindLevel(12345, 1);`  
-Rollladen zu 25% geöffnet: `RS_SetBlindLevel(12345, 0.25);`  
-Rollladen zu 75% geöffnet: `RS_SetBlindLevel(12345, 0.75);`  
-
----
+Rollladen geschlossen: RS_SetBlindLevel(12345, 0);  
+Rollladen geöffnet: RS_SetBlindLevel(12345, 1);  
+Rollladen zu 25% geöffnet: RS_SetBlindLevel(12345, 0.25);  
+Rollladen zu 75% geöffnet: RS_SetBlindLevel(12345, 0.75);  
+```  
 
 Aktuelle Behanghöhe des Rollladens abfragen:
 
-`RS_UpdateBlindLevel(integer $InstanzID);`  
+```text
+RS_UpdateBlindLevel(integer $InstanzID);   
   
-Fragt den aktuellen Status (Behanghöhe) ab und aktualisiert den Schieberegler `Rollladen`.  
+Fragt den aktuellen Status (Behanghöhe) ab und aktualisiert den Schieberegler Rollladen.  
 
-`RS_UpdateBlindLevel(12345);`  
-
----
+RS_UpdateBlindLevel(12345);  
+```
