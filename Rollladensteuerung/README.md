@@ -82,15 +82,15 @@ Das Modul Rollladensteuerung wird den Rollladenaktor dann immer entsprechend der
 
 - Legen Sie die Zeiten zum hoch- und runterfahren fest.
 
-- Nun kann die Rollladensteuerung in IP-Symcon hinzugefügt werden. An beliebiger Stelle im Objektbaum `Instanz hinzufügen` auswählen und `Rollladensteuerung` auswählen, welches unter dem Hersteller `Homematic IP` aufgeführt ist. Es wird eine Instanz angelegt, in der die Eigenschaften zur Steuerung des Rollladens festgelegt werden können.
+- Nun kann die Rollladensteuerung in IP-Symcon hinzugefügt werden. An beliebiger Stelle im Objektbaum `Instanz hinzufügen` auswählen und `Rollladensteuerung` auswählen, welches unter dem Hersteller `HomeMatic` aufgeführt ist. Es wird eine Instanz angelegt, in der die Eigenschaften zur Steuerung des Rollladens festgelegt werden können.
 
 __Konfigurationsseite__:
 
 Name                                | Beschreibung
 ----------------------------------- | ---------------------------------
-(0) Instanzinformationen            | Instanzinformationen, Version, Build
+(0) Instanzinformationen            | Instanzinformationen
 (1) Automatik                       | Auswahl des zu verwendenen Wochenplans und weitere Einstellungen
-(2) Rollladenaktor                  | Auswahl des Rollladenaktors zur Statusermittlung und Steuerung 
+(2) Rollladenaktor                  | Auswahl des Rollladenaktors und weitere Einstellungen 
 (3) Sicherung / Wiederherstellung   | Speichern und Wiederherstellen der Konfiguration  
 
 ### 5. Statusvariablen und Profile  
@@ -103,7 +103,7 @@ Name                    | Typ       | Beschreibung
 ----------------------- | --------- | ----------------
 Automatik               | Boolean   | De- / Aktiviert den Automatikmodus 
 Rollladen               | Float     | Steuert den Rollladen hoch und runter
-Nächster Schaltvorgang  | String    | Zeigt den nächsten automatischen Schaltvorgang an
+Nächster Schaltvorgang  | String    | Zeigt den nächsten Schaltvorgang an
 
 ##### Profile:
 

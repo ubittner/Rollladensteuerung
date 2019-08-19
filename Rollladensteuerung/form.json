@@ -150,7 +150,7 @@
         },
         {
           "type": "Label",
-          "caption": "Bitte wählen Sie den Sensor (Variable) für die Überprüfung aus:"
+          "caption": "Bitte wählen Sie die Variable für die Überprüfung aus:"
         },
         {
           "type": "SelectVariable",
