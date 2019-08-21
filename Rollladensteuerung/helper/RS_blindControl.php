@@ -6,7 +6,7 @@ declare(strict_types=1);
 trait RS_blindControl
 {
     /**
-     * Sets the control blind timer.
+     * Sets the control blind timer for action delay.
      */
     public function SetControlBlindTimer()
     {
@@ -15,7 +15,7 @@ trait RS_blindControl
     }
 
     /**
-     * Controls the blind, used by timer for automatik mode.
+     * Controls the blind, used by timer for action delay and weekplan.
      */
     public function ControlBlind()
     {
@@ -180,6 +180,28 @@ trait RS_blindControl
                 $setBlind = false;
             }
         }
+        // Check blind level position difference
+        $useCheckBlindPosition = $this->ReadPropertyBoolean('UseCheckBlindPosition');
+        if ($useCheckBlindPosition) {
+            $blindLevelState = $this->ReadPropertyInteger('BlindLevelState');
+            if ($blindLevelState != 0 && IPS_ObjectExists($blindLevelState)) {
+                $actualBlindLevel = GetValue($blindLevelState) * 100;
+                $property = $this->ReadPropertyInteger('BlindActuatorProperty');
+                // Check if we have a different actuator logic (0% = opened, 100% = closed) comparing to the module logic (0% = closed, 100% = opened)
+                if ($property == 1) {
+                    $actualBlindLevel = (float)abs($actualBlindLevel - 1) * 100;
+                }
+                $this->SendDebug('SetBlindLevel', 'Actual blind level: ' . $actualBlindLevel . '%', 0);
+                $blindPositionDifference = $this->ReadPropertyInteger('BlindPositionDifference');
+                if ($blindPositionDifference > 0) {
+                    $actualDifference = abs($actualBlindLevel - ($Level * 100));
+                    $this->SendDebug('SetBlindLevel', 'Actual postion difference: ' . $actualDifference . '%', 0);
+                    if ($actualDifference <= $blindPositionDifference) {
+                        $setBlind = false;
+                    }
+                }
+            }
+        }
         // Check property first
         $property = $this->ReadPropertyInteger('BlindActuatorProperty');
         if ($property == 1) {
@@ -197,6 +219,30 @@ trait RS_blindControl
                 HM_WriteValueBoolean($instanceID, 'STOP', true);
                 $this->SendDebug('SetBlindLevel', 'STOP', 0);
             }
+        }
+    }
+
+    /**
+     * Closes the blind (0%).
+     */
+    public function CloseBlind()
+    {
+        $blindActuator = $this->ReadPropertyInteger('BlindActuator');
+        if ($blindActuator != 0 && IPS_ObjectExists($blindActuator)) {
+            $this->SetValue('BlindSlider', 0);
+            RequestAction($blindActuator, 0);
+        }
+    }
+
+    /**
+     * Opens the blind (100%).
+     */
+    public function OpenBlind()
+    {
+        $blindActuator = $this->ReadPropertyInteger('BlindActuator');
+        if ($blindActuator != 0 && IPS_ObjectExists($blindActuator)) {
+            $this->SetValue('BlindSlider', 1);
+            RequestAction($blindActuator, 1);
         }
     }
 }

@@ -35,11 +35,11 @@
         },
         {
           "type": "Label",
-          "caption": "Version:\t\t\t1.00-3"
+          "caption": "Version:\t\t\t1.00-4"
         },
         {
           "type": "Label",
-          "caption": "Datum:\t\t\t18. August 2019"
+          "caption": "Datum:\t\t\t21. August 2019"
         },
         {
           "type": "Label",
@@ -146,7 +146,7 @@
         {
           "type": "CheckBox",
           "name": "UseLockoutProtection",
-          "caption": "Aussperrschutz"
+          "caption": "Aussperrschutz verwenden"
         },
         {
           "type": "Label",
@@ -252,6 +252,37 @@
               "value": 1
             }
           ]
+        },
+        {
+          "type": "Label",
+          "caption": " "
+        },
+        {
+          "type": "Label",
+          "caption": "(2.4) Positionsprüfung"
+        },
+        {
+          "type": "Label",
+          "caption": "Bei aktivierter Funktion wird der Rolladen erst gefahren, wenn die Differenz zwischen aktueller und neuer Position um den vorgegebenen Wert überschritten wird."
+        },
+        {
+          "type": "Label",
+          "caption": "Bitte wählen Sie aus, ob eine Positionsprüfung verwendet werden soll:"
+        },
+        {
+          "type": "CheckBox",
+          "name": "UseCheckBlindPosition",
+          "caption": "Positionsprüfung verwenden"
+        },
+        {
+          "type": "Label",
+          "caption": "Bitte geben Sie den Differenzwert an:"
+        },
+        {
+          "type": "NumberSpinner",
+          "name": "BlindPositionDifference",
+          "caption": "Differenzwert",
+          "suffix": "%"
         }
       ]
     },
