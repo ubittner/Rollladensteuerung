@@ -1,10 +1,10 @@
 # Rollladensteuerung
 
-[![Image](imgs/Rollladensteuerung_Logo.png)](https://www.homematic-ip.com/start.html)  
+[![Image](imgs/UBS3_Logo.png)](https://www.homematic-ip.com/start.html)  
 
 [![Version](https://img.shields.io/badge/Symcon_Version-5.1>-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
 [![Version](https://img.shields.io/badge/Modul_Version-1.00-blue.svg)]()
-[![Version](https://img.shields.io/badge/Modul_Build-4-blue.svg)]()
+[![Version](https://img.shields.io/badge/Modul_Build-5-blue.svg)]()
 [![Version](https://img.shields.io/badge/Code-PHP-blue.svg)]()
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)  
 

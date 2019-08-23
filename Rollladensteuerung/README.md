@@ -1,6 +1,6 @@
 # Rollladensteuerung
 
-[![Image](../imgs/Rollladensteuerung_Logo.png)](https://www.homematic-ip.com/start.html)
+[![Image](../imgs/UBS3_Logo.png)](https://www.homematic-ip.com/start.html)
 
 Integriert [HomeMatic](https://www.homematic.com/licht-schatten.html) und [Homematic IP](https://www.homematic-ip.com/produkte/rolllaeden-jalousien-und-markisen.html) Rollladenaktoren in [IP-Symcon](https://www.symcon.de) und fährt auf Grundlage von definierten Zeiten innerhalb eines Wochenplans einen Rollladen automatisch hoch und runter.  
 

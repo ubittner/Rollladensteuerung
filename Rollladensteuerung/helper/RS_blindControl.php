@@ -15,11 +15,11 @@ trait RS_blindControl
     }
 
     /**
-     * Controls the blind, used by timer for action delay and weekplan.
+     * Controls the blind, used by timer for action delay and used by the assigned weekplan.
      */
     public function ControlBlind()
     {
-        // Stop timer
+        // Stop timer for action delay
         $this->SetTimerInterval('ControlBlind', 0);
         // Get action
         $nextAction = $this->ReadAttributeInteger('NextAction');
@@ -60,6 +60,7 @@ trait RS_blindControl
      */
     public function SetNextActionInfo()
     {
+        $text = 'Es ist kein Wochenplan ausgewählt!';
         $weeklyEventPlan = $this->ReadPropertyInteger('WeeklyEventPlan');
         if ($weeklyEventPlan != 0 && IPS_ObjectExists($weeklyEventPlan)) {
             $events = IPS_GetEvent($weeklyEventPlan);
@@ -98,10 +99,15 @@ trait RS_blindControl
                     }
                     $nextRunDate = date('d.m.Y, H:i:s,', $nextRunTimestamp);
                     $text = $day . ', ' . $nextRunDate . ' Der Rollladen wird ' . $stateText . '.';
-                    $this->SetValue('NextAction', $text);
+                    //$this->SetValue('NextAction', $text);
                 }
             }
         }
+        if (!$this->GetValue('AutomaticMode')) {
+            $text = 'Automatik ist inaktiv.';
+        }
+        $this->SetValue('NextAction', $text);
+
     }
 
     /**
@@ -112,7 +118,6 @@ trait RS_blindControl
         if ($this->GetValue('AutomaticMode')) {
             $action = $this->GetAction(time());
             $this->SendDebug('CheckActionResult', $action, 0);
-            $useSetBlindLevel = $this->ReadPropertyBoolean('UseSetBlindLevel');
             switch ($action) {
                 // 0 = no actual action found
                 case 0:
@@ -121,31 +126,25 @@ trait RS_blindControl
                 // 1 = close blind
                 case 1:
                     $this->WriteAttributeInteger('NextAction', 1);
-                    if ($useSetBlindLevel) {
-                        if ($this->ReadPropertyInteger('ActionDelay') > 0) {
-                            $this->SetControlBlindTimer();
-                        } else {
-                            $this->ControlBlind();
-                        }
+                    if ($this->ReadPropertyInteger('ActionDelay') > 0) {
+                        $this->SetControlBlindTimer();
+                    } else {
+                        $this->ControlBlind();
                     }
                     break;
                 // 2 = open blind
                 case 2:
                     $this->WriteAttributeInteger('NextAction', 2);
-                    if ($useSetBlindLevel) {
-                        if ($this->ReadPropertyInteger('ActionDelay') > 0) {
-                            $this->SetControlBlindTimer();
-                        } else {
-                            $this->ControlBlind();
-                        }
+                    if ($this->ReadPropertyInteger('ActionDelay') > 0) {
+                        $this->SetControlBlindTimer();
+                    } else {
+                        $this->ControlBlind();
                     }
                     break;
             }
-            // Set next action
-            $this->SetNextActionInfo();
-        } else {
-            $this->SetValue('NextAction', 'Automatik ist inaktiv.');
         }
+        // Set next action
+        $this->SetNextActionInfo();
     }
 
     /**
@@ -166,12 +165,26 @@ trait RS_blindControl
     }
 
     /**
+     * Checks the actual blind level in comparison to the actual event.
+     */
+    private function CheckBlindLevel()
+    {
+        $useSetBlindLevel = $this->ReadPropertyBoolean('UseSetBlindLevel');
+        if ($this->GetValue('AutomaticMode') && $useSetBlindLevel) {
+            $this->CheckAction();
+        } else {
+            $this->SetNextActionInfo();
+        }
+    }
+
+    /**
      * Sets the blind level.
      *
      * @param float $Level
      */
     public function SetBlindLevel(float $Level)
     {
+        // Check process, if still running then stop blind
         $setBlind = true;
         $processID = $this->ReadPropertyInteger('BlindLevelProcess');
         if ($processID != 0 && IPS_ObjectExists($processID)) {
@@ -213,7 +226,11 @@ trait RS_blindControl
         if ($blindActuator != 0 && IPS_ObjectExists($blindActuator)) {
             if ($setBlind) {
                 $this->SetValue('BlindSlider', $Level);
-                RequestAction($blindActuator, $Level);
+                $setBlindLevel = @RequestAction($blindActuator, $Level);
+                if (!$setBlindLevel) {
+                    IPS_Sleep(250);
+                    @RequestAction($blindActuator, $Level);
+                }
             } else {
                 $instanceID = IPS_GetParent($blindActuator);
                 HM_WriteValueBoolean($instanceID, 'STOP', true);
@@ -230,7 +247,11 @@ trait RS_blindControl
         $blindActuator = $this->ReadPropertyInteger('BlindActuator');
         if ($blindActuator != 0 && IPS_ObjectExists($blindActuator)) {
             $this->SetValue('BlindSlider', 0);
-            RequestAction($blindActuator, 0);
+            $close = @RequestAction($blindActuator, 0);
+            if (!$close) {
+                IPS_Sleep(250);
+                @RequestAction($blindActuator, 0);
+            }
         }
     }
 
@@ -242,7 +263,11 @@ trait RS_blindControl
         $blindActuator = $this->ReadPropertyInteger('BlindActuator');
         if ($blindActuator != 0 && IPS_ObjectExists($blindActuator)) {
             $this->SetValue('BlindSlider', 1);
-            RequestAction($blindActuator, 1);
+            $open = @RequestAction($blindActuator, 1);
+            if (!$open) {
+                IPS_Sleep(250);
+                @RequestAction($blindActuator, 1);
+            }
         }
     }
 }
