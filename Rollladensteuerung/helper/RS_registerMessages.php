@@ -43,6 +43,5 @@ trait RS_registerMessages
         if ($blindLevelState != 0 && IPS_ObjectExists($blindLevelState)) {
             $this->RegisterMessage($blindLevelState, VM_UPDATE);
         }
-
     }
 }
