@@ -79,7 +79,7 @@ class Rollladensteuerung extends IPSModule
         if (!IPS_VariableProfileExists($blindSliderProfile)) {
             IPS_CreateVariableProfile($blindSliderProfile, 2);
         }
-        IPS_SetVariableProfileIcon($blindSliderProfile,  'Intensity');
+        IPS_SetVariableProfileIcon($blindSliderProfile, 'Intensity');
         IPS_SetVariableProfileText($blindSliderProfile, '', '%');
         IPS_SetVariableProfileDigits($blindSliderProfile, 1);
         IPS_SetVariableProfileValues($blindSliderProfile, 0, 1, 0.05);
@@ -104,7 +104,6 @@ class Rollladensteuerung extends IPSModule
         //#################### Register timer
 
         $this->RegisterTimer('ControlBlind', 0, 'RS_ControlBlind($_IPS[\'TARGET\']);');
-
     }
 
     /**

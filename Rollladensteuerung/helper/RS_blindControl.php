@@ -73,7 +73,7 @@ trait RS_blindControl
                     if ($nextAction == 2) {
                         $stateText = 'hochgefahren';
                     }
-                    $day = date("l", $nextRunTimestamp);
+                    $day = date('l', $nextRunTimestamp);
                     switch ($day) {
                         case 'Monday':
                             $day = 'Montag';
@@ -107,7 +107,6 @@ trait RS_blindControl
             $text = 'Automatik ist inaktiv.';
         }
         $this->SetValue('NextAction', $text);
-
     }
 
     /**
@@ -158,7 +157,7 @@ trait RS_blindControl
             $property = $this->ReadPropertyInteger('BlindActuatorProperty');
             // Check if we have a different actuator logic (0% = opened, 100% = closed) comparing to the module logic (0% = closed, 100% = opened)
             if ($property == 1) {
-                $blindLevel = (float)abs($blindLevel - 1);
+                $blindLevel = (float) abs($blindLevel - 1);
             }
             $this->SetValue('BlindSlider', $blindLevel);
         }
@@ -202,7 +201,7 @@ trait RS_blindControl
                 $property = $this->ReadPropertyInteger('BlindActuatorProperty');
                 // Check if we have a different actuator logic (0% = opened, 100% = closed) comparing to the module logic (0% = closed, 100% = opened)
                 if ($property == 1) {
-                    $actualBlindLevel = (float)abs($actualBlindLevel - 1) * 100;
+                    $actualBlindLevel = (float) abs($actualBlindLevel - 1) * 100;
                 }
                 $this->SendDebug('SetBlindLevel', 'Actual blind level: ' . $actualBlindLevel . '%', 0);
                 $blindPositionDifference = $this->ReadPropertyInteger('BlindPositionDifference');
@@ -219,7 +218,7 @@ trait RS_blindControl
         $property = $this->ReadPropertyInteger('BlindActuatorProperty');
         if ($property == 1) {
             // We have to change the value from 1 to 0 and vise versa
-            $Level = (float)abs($Level - 1);
+            $Level = (float) abs($Level - 1);
             $this->SendDebug('SetBlindLevel', 'Level: ' . $Level, 0);
         }
         $blindActuator = $this->ReadPropertyInteger('BlindActuator');
