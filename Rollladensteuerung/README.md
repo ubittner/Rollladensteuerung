@@ -1,6 +1,6 @@
 # Rollladensteuerung
 
-[![Image](../imgs/Rollladensteuerung_Logo.png)](https://www.homematic-ip.com/start.html)
+[![Image](../imgs/UBS3_Logo.png)](https://www.homematic-ip.com/start.html)
 
 Integriert [HomeMatic](https://www.homematic.com/licht-schatten.html) und [Homematic IP](https://www.homematic-ip.com/produkte/rolllaeden-jalousien-und-markisen.html) Rollladenaktoren in [IP-Symcon](https://www.symcon.de) und fährt auf Grundlage von definierten Zeiten innerhalb eines Wochenplans einen Rollladen automatisch hoch und runter.  
 
@@ -82,7 +82,7 @@ Das Modul Rollladensteuerung wird den Rollladenaktor dann immer entsprechend der
 
 - Legen Sie die Zeiten zum hoch- und runterfahren fest.
 
-- Nun kann die Rollladensteuerung in IP-Symcon hinzugefügt werden. An beliebiger Stelle im Objektbaum `Instanz hinzufügen` auswählen und `Rollladensteuerung` auswählen, welches unter dem Hersteller `HomeMatic` aufgeführt ist. Es wird eine Instanz angelegt, in der die Eigenschaften zur Steuerung des Rollladens festgelegt werden können.
+- Nun kann die Rollladensteuerung in IP-Symcon hinzugefügt werden. An beliebiger Stelle im Objektbaum `Instanz hinzufügen` auswählen und `Rollladensteuerung` auswählen, welches unter dem Hersteller `UBS3` aufgeführt ist. Es wird eine Instanz angelegt, in der die Eigenschaften zur Steuerung des Rollladens festgelegt werden können.
 
 __Konfigurationsseite__:
 

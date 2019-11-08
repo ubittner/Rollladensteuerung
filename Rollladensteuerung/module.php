@@ -12,8 +12,8 @@
  * @license     CC BY-NC-SA 4.0
  *              https://creativecommons.org/licenses/by-nc-sa/4.0/
  *
- * @version     1.00-2
- * @date        2019-08-14, 18:00
+ * @version     1.00-5
+ * @date        2019-08-22, 18:00
  *
  * @see         https://github.com/ubittner/Rollladensteuerung
  *
@@ -65,6 +65,8 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyInteger('BlindLevelProcess', 0);
         $this->RegisterPropertyInteger('BlindActuator', 0);
         $this->RegisterPropertyInteger('BlindActuatorProperty', 0);
+        $this->RegisterPropertyBoolean('UseCheckBlindPosition', false);
+        $this->RegisterPropertyInteger('BlindPositionDifference', 3);
 
         // Backup / Restore
         $this->RegisterPropertyInteger('BackupCategory', 0);
@@ -150,8 +152,8 @@ class Rollladensteuerung extends IPSModule
         // Update blind level
         $this->UpdateBlindLevel();
 
-        // Check action
-        $this->CheckAction();
+        // Check blind level
+        $this->CheckBlindLevel();
     }
 
     /**
@@ -220,7 +222,7 @@ class Rollladensteuerung extends IPSModule
     public function ToggleAutomaticMode(bool $State)
     {
         $this->SetValue('AutomaticMode', $State);
-        $this->CheckAction();
+        $this->CheckBlindLevel();
     }
 
     /**

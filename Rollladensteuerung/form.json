@@ -3,7 +3,11 @@
 
     {
       "type": "Image",
-      "image": "data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAfAAAAAZCAYAAADOkHwYAAAAAXNSR0IArs4c6QAAAAlwSFlzAAALEwAACxMBAJqcGAAABCVpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iCiAgICAgICAgICAgIHhtbG5zOmV4aWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20vZXhpZi8xLjAvIgogICAgICAgICAgICB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iCiAgICAgICAgICAgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyI+CiAgICAgICAgIDx0aWZmOlJlc29sdXRpb25Vbml0PjI8L3RpZmY6UmVzb2x1dGlvblVuaXQ+CiAgICAgICAgIDx0aWZmOkNvbXByZXNzaW9uPjA8L3RpZmY6Q29tcHJlc3Npb24+CiAgICAgICAgIDx0aWZmOlhSZXNvbHV0aW9uPjcyPC90aWZmOlhSZXNvbHV0aW9uPgogICAgICAgICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogICAgICAgICA8dGlmZjpZUmVzb2x1dGlvbj43MjwvdGlmZjpZUmVzb2x1dGlvbj4KICAgICAgICAgPGV4aWY6UGl4ZWxYRGltZW5zaW9uPjQ5NjwvZXhpZjpQaXhlbFhEaW1lbnNpb24+CiAgICAgICAgIDxleGlmOkNvbG9yU3BhY2U+MTwvZXhpZjpDb2xvclNwYWNlPgogICAgICAgICA8ZXhpZjpQaXhlbFlEaW1lbnNpb24+MjU8L2V4aWY6UGl4ZWxZRGltZW5zaW9uPgogICAgICAg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"
+      "image": "data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAHsAAAAeCAYAAAAM/mGWAAAAAXNSR0IArs4c6QAAAAlwSFlzAAAuIwAALiMBeKU/dgAABCdpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iCiAgICAgICAgICAgIHhtbG5zOmV4aWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20vZXhpZi8xLjAvIgogICAgICAgICAgICB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iCiAgICAgICAgICAgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyI+CiAgICAgICAgIDx0aWZmOlJlc29sdXRpb25Vbml0PjI8L3RpZmY6UmVzb2x1dGlvblVuaXQ+CiAgICAgICAgIDx0aWZmOkNvbXByZXNzaW9uPjA8L3RpZmY6Q29tcHJlc3Npb24+CiAgICAgICAgIDx0aWZmOlhSZXNvbHV0aW9uPjMwMDwvdGlmZjpYUmVzb2x1dGlvbj4KICAgICAgICAgPHRpZmY6T3JpZW50YXRpb24+MTwvdGlmZjpPcmllbnRhdGlvbj4KICAgICAgICAgPHRpZmY6WVJlc29sdXRpb24+MzAwPC90aWZmOllSZXNvbHV0aW9uPgogICAgICAgICA8ZXhpZjpQaXhlbFhEaW1lbnNpb24+MTIzPC9leGlmOlBpeGVsWERpbWVuc2lvbj4KICAgICAgICAgPGV4aWY6Q29sb3JTcGFjZT4xPC9leGlmOkNvbG9yU3BhY2U+CiAgICAgICAgIDxleGlmOlBpeGVsWURpbWVuc2lvbj4zMDwvZXhpZjpQaXhlbFlEaW1lbnNpb24+CiAgICAgICAgIDxkYzpzdWJqZWN0PgogICAgICAgICAgICA8cmRmOkJhZy8+CiAgICAgICAgIDwvZGM6c3ViamVjdD4KICAgICAgICAgPHhtcDpNb2RpZnlEYXRlPjIwMTktMDgtMjJUMDk6MDg6OTQ8L3htcDpNb2RpZnlEYXRlPgogICAgICAgICA8eG1wOkNyZWF0b3JUb29sPlBpeGVsbWF0b3IgMy44LjU8L3htcDpDcmVhdG9yVG9vbD4KICAgICAgPC9yZGY6RGVzY3JpcHRpb24+CiAgIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cs410LEAAAJiSURBVGgF7VfRTcQwDD1ghmMIRmEA1mmXgCFgHhji/uEX/JB8ehfVVztpm+NwJCtO+vxeYittuttlywxkBjIDmQF/BvYCHcTexb5XMPCOYtDJ1jkDo+ivUeSSEzrZOmdgrRNdFhs6rnbjQiWoJgMoylbNVcfbrVaTOv0zkMXuX4MuK+BvgWcBUbzFyTweH9+oQaz1Fop48IDPo8sYCZltjGd/NvAMgHnYPxMy/SgaHMVPq8YTrbqDReicHwWnXNHeI2FxemItzGKcTGSJ8XwUz7HsM0/Ex4lsaTUnWtfn0VVs2XtiLUzJpWMLfzLPtzgEauN5nSv7KL6M13GUJ4pXnbJfiqfk1THz61xNz7WwOBljauQFzUzN9T3IYl9fTc0dXVqx8ZqaM93MhzqVPcfPaeI5vvGj2F6speGVG7EWLTOWN2yC6EEUT6EnLvN4/YMwPJ6wxAejhHj1GIc4T+MY9j2xFoZ52Lfw5nw0OIq3hJkn4rfexnFCBzHwrKFrcVp58Mw3cfItDkTaeF7nyj6KL+N1HOWJ4lWntY/qMr5Fm2thcTLG1Lq0b7a50HzQnoEsdnsO/wwDFzt6O9VNcpzO1fZ4Tc2ZcrfqzumUz5fSxSs3Yqr7oE5tz8V+qySpjauUO4a9Hr1tnV66T0tuM3o7xS12FENcSytP0NwYuoPYpeta+4jmCica+z2INXG6bnHR1SX+NwMozFbNVUd+jW+1sNTplIEsdqfE95DNYq+X9da/Be/K3DpZbG9K47it/lLcOnfxPWSEMwP4a/gUuxdr/XOYksSJfhF7FvuaAuTcP87AD0h7uMXbEl7aAAAAAElFTkSuQmCC"
+    },
+    {
+      "type": "Label",
+      "caption": "Rollladensteuerung"
     },
     {
       "type": "Label",
@@ -35,11 +39,11 @@
         },
         {
           "type": "Label",
-          "caption": "Version:\t\t\t1.00-3"
+          "caption": "Version:\t\t\t1.00-5"
         },
         {
           "type": "Label",
-          "caption": "Datum:\t\t\t18. August 2019"
+          "caption": "Datum:\t\t\t22. August 2019"
         },
         {
           "type": "Label",
@@ -146,7 +150,7 @@
         {
           "type": "CheckBox",
           "name": "UseLockoutProtection",
-          "caption": "Aussperrschutz"
+          "caption": "Aussperrschutz verwenden"
         },
         {
           "type": "Label",
@@ -252,6 +256,37 @@
               "value": 1
             }
           ]
+        },
+        {
+          "type": "Label",
+          "caption": " "
+        },
+        {
+          "type": "Label",
+          "caption": "(2.4) Positionsprüfung"
+        },
+        {
+          "type": "Label",
+          "caption": "Bei aktivierter Funktion wird der Rolladen erst gefahren, wenn die Differenz zwischen aktueller und neuer Position um den vorgegebenen Wert überschritten wird."
+        },
+        {
+          "type": "Label",
+          "caption": "Bitte wählen Sie aus, ob eine Positionsprüfung verwendet werden soll:"
+        },
+        {
+          "type": "CheckBox",
+          "name": "UseCheckBlindPosition",
+          "caption": "Positionsprüfung verwenden"
+        },
+        {
+          "type": "Label",
+          "caption": "Bitte geben Sie den Differenzwert an:"
+        },
+        {
+          "type": "NumberSpinner",
+          "name": "BlindPositionDifference",
+          "caption": "Differenzwert",
+          "suffix": "%"
         }
       ]
     },
