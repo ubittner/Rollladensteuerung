@@ -293,6 +293,9 @@ class Rollladensteuerung extends IPSModule
             IPS_SetHidden($id, !$this->ReadPropertyBoolean('EnableWeeklySchedule'));
         }
 
+        // Door and window state
+        IPS_SetHidden($this->GetIDForIdent('DoorWindowState'), !$this->ReadPropertyBoolean('EnableDoorWindowState'));
+
         // Blind slider
         IPS_SetHidden($this->GetIDForIdent('BlindSlider'), !$this->ReadPropertyBoolean('EnableBlindSlider'));
     }
