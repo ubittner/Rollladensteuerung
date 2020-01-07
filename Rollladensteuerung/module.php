@@ -8,12 +8,12 @@
  * @file        module.php
  *
  * @developer   Ulrich Bittner
- * @copyright   (c) 2019
+ * @copyright   (c) 2019, 2020
  * @license     CC BY-NC-SA 4.0
  *              https://creativecommons.org/licenses/by-nc-sa/4.0/
  *
- * @version     1.00-5
- * @date        2019-08-22, 18:00
+ * @version     1.00-6
+ * @date        2020-01-06, 18:00, 1578330000
  *
  * @see         https://github.com/ubittner/Rollladensteuerung
  *
@@ -22,113 +22,42 @@
  *
  *              Rollladensteuerung
  *             	{CEAE98E6-EFB4-4D0E-A7DE-3A9764F12DB6}
- *
  */
 
 // Declare
 declare(strict_types=1);
 
 // Include
-include_once __DIR__ . '/helper/RS_autoload.php';
+include_once __DIR__ . '/helper/autoload.php';
 
 class Rollladensteuerung extends IPSModule
 {
-    // Helper
-    use RS_backupRestore;
+    // Traits
     use RS_blindControl;
-    use RS_registerMessages;
-    use RS_weekplanAction;
+    use RS_doorWindowSensors;
+    use RS_weeklySchedule;
 
-    /**
-     * Creates properties and variables.
-     *
-     * @return bool|void
-     */
+    // Constants
+    private const MINIMUM_DELAY_MILLISECONDS = 100;
+
     public function Create()
     {
         // Never delete this line!
         parent::Create();
 
-        //#################### Register properties
+        // Register properties
+        $this->RegisterProperties();
 
-        // Automatic
-        $this->RegisterPropertyInteger('WeeklyEventPlan', 0);
-        $this->RegisterPropertyBoolean('UseSetBlindLevel', false);
-        $this->RegisterPropertyInteger('ActionDelay', 0);
-        $this->RegisterPropertyInteger('BlindPositionClosed', 0);
-        $this->RegisterPropertyInteger('BlindPositionOpened', 100);
-        $this->RegisterPropertyBoolean('UseLockoutProtection', false);
-        $this->RegisterPropertyInteger('LockoutProtectionSensor', 0);
+        // Create profiles
+        $this->CreateProfiles();
 
-        // Blind
-        $this->RegisterPropertyInteger('BlindLevelState', 0);
-        $this->RegisterPropertyInteger('BlindLevelProcess', 0);
-        $this->RegisterPropertyInteger('BlindActuator', 0);
-        $this->RegisterPropertyInteger('BlindActuatorProperty', 0);
-        $this->RegisterPropertyBoolean('UseCheckBlindPosition', false);
-        $this->RegisterPropertyInteger('BlindPositionDifference', 3);
-
-        // Backup / Restore
-        $this->RegisterPropertyInteger('BackupCategory', 0);
-        $this->RegisterPropertyInteger('Configuration', 0);
-
-        //#################### Register profiles
-
-        // Blind slider
-        $blindSliderProfile = 'RS.' . $this->InstanceID . '.BlindSlider.Reversed';
-        if (!IPS_VariableProfileExists($blindSliderProfile)) {
-            IPS_CreateVariableProfile($blindSliderProfile, 2);
-        }
-        IPS_SetVariableProfileIcon($blindSliderProfile, 'Intensity');
-        IPS_SetVariableProfileText($blindSliderProfile, '', '%');
-        IPS_SetVariableProfileDigits($blindSliderProfile, 1);
-        IPS_SetVariableProfileValues($blindSliderProfile, 0, 1, 0.05);
-
-        //#################### Register variables
-
-        $this->RegisterVariableBoolean('AutomaticMode', 'Automatik', '~Switch', 0);
-        $this->EnableAction('AutomaticMode');
-        IPS_SetIcon($this->GetIDForIdent('AutomaticMode'), 'Clock');
-
-        $this->RegisterVariableFloat('BlindSlider', 'Rollladen', $blindSliderProfile, 1);
-        $this->EnableAction('BlindSlider');
-        IPS_SetIcon($this->GetIDForIdent('BlindSlider'), 'Jalousie');
-
-        $this->RegisterVariableString('NextAction', 'Nächster Schaltvorgang', '~TextBox', 2);
-        IPS_SetIcon($this->GetIDForIdent('NextAction'), 'Power');
-
-        //#################### Register attributes
-
-        $this->RegisterAttributeInteger('NextAction', 0);
-
-        //#################### Register timer
-
-        $this->RegisterTimer('ControlBlind', 0, 'RS_ControlBlind($_IPS[\'TARGET\']);');
+        // Register variables
+        $this->RegisterVariables();
     }
 
-    /**
-     * Does destroy the instance.
-     *
-     * @return bool|void
-     */
-    public function Destroy()
-    {
-        // Never delete this line!
-        parent::Destroy();
-
-        // Delete profiles
-        $this->DeleteProfiles();
-    }
-
-    /**
-     * Applies the changes.
-     *
-     * @return bool|void
-     */
     public function ApplyChanges()
     {
-        // Register messages
-        // Base
+        // Wait until IP-Symcon is started
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
 
         // Never delete this line!
@@ -139,102 +68,274 @@ class Rollladensteuerung extends IPSModule
             return;
         }
 
-        // Unregister messages
-        $this->UnregisterMessages();
+        // Create links
+        $this->CreateLinks();
 
-        // Register weekly event plan
-        $this->RegisterWeeklyEventPlan();
+        // Set options
+        $this->SetOptions();
 
-        // Register blind level state
-        $this->RegisterBlindLevelState();
+        // Register messages
+        $this->RegisterMessages();
 
-        // Update blind level
-        $this->UpdateBlindLevel();
+        // Check door and window sensors
+        $this->CheckDoorWindowSensors();
 
-        // Check blind level
-        $this->CheckBlindLevel();
+        // Update blind slider
+        $this->UpdateBlindSlider();
+
+        // Adjust blind level
+        $this->AdjustBlindLevel();
     }
 
-    /**
-     * Checks the message sink.
-     *
-     * @param $TimeStamp
-     * @param $SenderID
-     * @param $Message
-     * @param $Data
-     * @return bool|void
-     */
+    public function Destroy()
+    {
+        // Never delete this line!
+        parent::Destroy();
+
+        // Delete profiles
+        $this->DeleteProfiles();
+    }
+
     public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
     {
-        $this->SendDebug('MessageSink', 'SenderID: ' . $SenderID . ', Message: ' . $Message, 0);
+        $this->SendDebug('MessageSink', 'Message from SenderID ' . $SenderID . ' with Message ' . $Message . "\r\n Data: " . print_r($Data, true), 0);
         switch ($Message) {
             case IPS_KERNELSTARTED:
                 $this->KernelReady();
                 break;
+
+            // $Data[0] = actual value
+            // $Data[1] = difference to last value
+            // $Data[2] = last value
             case VM_UPDATE:
-                $this->UpdateBlindLevel();
+                // Door and window sensors
+                $doorWindowSensors = json_decode($this->ReadPropertyString('DoorWindowSensors'), true);
+                if (!empty($doorWindowSensors)) {
+                    if (array_search($SenderID, array_column($doorWindowSensors, 'ID')) !== false) {
+                        if ($Data[1]) {
+                            $this->CheckDoorWindowSensors();
+                        }
+                    }
+                }
+                // Blind level process
+                $name = 'BlindLevelProcess';
+                if ($this->ValidatePropertyVariable($name)) {
+                    if ($SenderID == $this->ReadPropertyInteger($name)) {
+                        if ($Data[0] == 0 && $Data[1]) {
+                            $this->SendDebug(__FUNCTION__, 'BlindSlider aktualisieren', 0);
+                            $this->UpdateBlindSlider();
+                        }
+                    }
+                }
                 break;
+
+            // $Data[0] = last run
+            // $Data[1] = next run
             case EM_UPDATE:
-                $this->CheckAction();
+                // Weekly schedule
+                if ($this->ValidateEventPlan()) {
+                    $this->SetActualAction(true);
+                }
                 break;
-            default:
-                break;
+
         }
     }
 
-    /**
-     * Applies changes when the kernel is ready.
-     */
-    protected function KernelReady()
+    protected function KernelReady(): void
     {
         $this->ApplyChanges();
     }
 
+    public function ShowRegisteredMessages(): void
+    {
+        $registeredMessages = $this->GetMessageList();
+        echo "Registrierte Nachrichten:\n\n";
+        print_r($registeredMessages);
+    }
+
     //#################### Request action
 
-    /**
-     * Requests the action from WebFront.
-     *
-     * @param $Ident
-     * @param $Value
-     * @return bool|void
-     */
     public function RequestAction($Ident, $Value)
     {
         switch ($Ident) {
             case 'AutomaticMode':
                 $this->ToggleAutomaticMode($Value);
                 break;
+
             case 'BlindSlider':
-                $this->SetBlindLevel($Value);
+                $this->SetBlindSlider($Value);
                 break;
-            default:
-                break;
+
         }
     }
 
-    /**
-     * Toggles the automatic mode.
-     *
-     * @param bool $State
-     */
-    public function ToggleAutomaticMode(bool $State)
+    //##################### Private
+
+    private function RegisterProperties(): void
     {
-        $this->SetValue('AutomaticMode', $State);
-        $this->CheckBlindLevel();
+        // Visibility
+        $this->RegisterPropertyBoolean('EnableAutomaticMode', true);
+        $this->RegisterPropertyBoolean('EnableWeeklySchedule', true);
+        $this->RegisterPropertyBoolean('EnableDoorWindowState', true);
+        $this->RegisterPropertyBoolean('EnableBlindSlider', true);
+
+        // Blind actuator
+        $this->RegisterPropertyInteger('BlindLevelState', 0);
+        $this->RegisterPropertyInteger('BlindLevelProcess', 0);
+        $this->RegisterPropertyInteger('BlindActuator', 0);
+        $this->RegisterPropertyInteger('BlindActuatorProperty', 0);
+
+        // Blind positions
+        $this->RegisterPropertyInteger('BlindPositionClosed', 0);
+        $this->RegisterPropertyInteger('BlindPositionOpened', 100);
+        $this->RegisterPropertyBoolean('UseCheckBlindPosition', false);
+        $this->RegisterPropertyInteger('BlindPositionDifference', 3);
+
+        // Weekly schedule
+        $this->RegisterPropertyInteger('WeeklySchedule', 0);
+        $this->RegisterPropertyBoolean('UseSetBlindLevel', false);
+        $this->RegisterPropertyInteger('ActionDelay', 0);
+
+        // Door and window sensors
+        $this->RegisterPropertyString('DoorWindowSensors', '[]');
     }
 
-    /**
-     * Deletes the profiles.
-     */
-    private function DeleteProfiles()
+    private function ValidatePropertyVariable(string $Name): bool
     {
-        $profiles = ['BlindSlider', 'BlindSlider.Reversed'];
+        $validate = false;
+        $variable = $this->ReadPropertyInteger($Name);
+        if ($variable != 0 && @IPS_ObjectExists($variable)) {
+            $validate = true;
+        }
+        return $validate;
+    }
+
+    private function CreateProfiles(): void
+    {
+        // Door and window state
+        $profile = 'RS.' . $this->InstanceID . '.DoorWindowState';
+        if (!IPS_VariableProfileExists($profile)) {
+            IPS_CreateVariableProfile($profile, 0);
+        }
+        IPS_SetVariableProfileAssociation($profile, 0, 'Geschlossen', 'Window', 0x00FF00);
+        IPS_SetVariableProfileAssociation($profile, 1, 'Geöffnet', 'Window', 0x0000FF);
+
+        // Blind slider
+        $profile = 'RS.' . $this->InstanceID . '.BlindSlider.Reversed';
+        if (!IPS_VariableProfileExists($profile)) {
+            IPS_CreateVariableProfile($profile, 2);
+        }
+        IPS_SetVariableProfileIcon($profile, 'Intensity');
+        IPS_SetVariableProfileText($profile, '', '%');
+        IPS_SetVariableProfileDigits($profile, 1);
+        IPS_SetVariableProfileValues($profile, 0, 1, 0.05);
+    }
+
+    private function DeleteProfiles(): void
+    {
+        $profiles = ['DoorWindowState', 'BlindSlider.Reversed'];
         foreach ($profiles as $profile) {
             $profileName = 'RS.' . $this->InstanceID . '.' . $profile;
             if (@IPS_VariableProfileExists($profileName)) {
                 IPS_DeleteVariableProfile($profileName);
             }
+        }
+    }
+
+    private function RegisterVariables(): void
+    {
+        // Automatic mode
+        $this->RegisterVariableBoolean('AutomaticMode', 'Automatik', '~Switch', 0);
+        $this->EnableAction('AutomaticMode');
+        IPS_SetIcon($this->GetIDForIdent('AutomaticMode'), 'Clock');
+
+        // Door and window state
+        $profile = 'RS.' . $this->InstanceID . '.DoorWindowState';
+        $this->RegisterVariableBoolean('DoorWindowState', 'Tür- / Fensterstatus', $profile, 2);
+
+        // Blind slider
+        $profile = 'RS.' . $this->InstanceID . '.BlindSlider.Reversed';
+        $this->RegisterVariableFloat('BlindSlider', 'Rollladen', $profile, 3);
+        $this->EnableAction('BlindSlider');
+        IPS_SetIcon($this->GetIDForIdent('BlindSlider'), 'Jalousie');
+    }
+
+    private function CreateLinks(): void
+    {
+        // Create link for weekly schedule
+        $weeklySchedule = $this->ReadPropertyInteger('WeeklySchedule');
+        $link = @IPS_GetLinkIDByName('Wochenplan', $this->InstanceID);
+        if ($weeklySchedule != 0 && @IPS_ObjectExists($weeklySchedule)) {
+            // Check for existing link
+            if ($link === false) {
+                $link = IPS_CreateLink();
+            }
+            IPS_SetParent($link, $this->InstanceID);
+            IPS_SetPosition($link, 1);
+            IPS_SetName($link, 'Wochenplan');
+            IPS_SetIcon($link, 'Calendar');
+            IPS_SetLinkTargetID($link, $weeklySchedule);
+        } else {
+            if ($link !== false) {
+                IPS_SetHidden($link, true);
+            }
+        }
+    }
+
+    private function SetOptions(): void
+    {
+        // Automatic mode
+        IPS_SetHidden($this->GetIDForIdent('AutomaticMode'), !$this->ReadPropertyBoolean('EnableAutomaticMode'));
+
+        // Weekly schedule
+        $id = @IPS_GetLinkIDByName('Wochenplan', $this->InstanceID);
+        if ($id !== false) {
+            IPS_SetHidden($id, !$this->ReadPropertyBoolean('EnableWeeklySchedule'));
+        }
+
+        // Blind slider
+        IPS_SetHidden($this->GetIDForIdent('BlindSlider'), !$this->ReadPropertyBoolean('EnableBlindSlider'));
+    }
+
+    private function UnregisterMessages(): void
+    {
+        foreach ($this->GetMessageList() as $id => $registeredMessage) {
+            foreach ($registeredMessage as $messageType) {
+                if ($messageType == VM_UPDATE) {
+                    $this->UnregisterMessage($id, VM_UPDATE);
+                }
+                if ($messageType == EM_UPDATE) {
+                    $this->UnregisterMessage($id, EM_UPDATE);
+                }
+            }
+        }
+    }
+
+    private function RegisterMessages(): void
+    {
+        // Unregister first
+        $this->UnregisterMessages();
+
+        // Weekly schedule
+        $id = $this->ReadPropertyInteger('WeeklySchedule');
+        if ($id != 0 && @IPS_ObjectExists($id)) {
+            $this->RegisterMessage($id, EM_UPDATE);
+        }
+
+        // Door and window sensors
+        $doorWindowSensors = $this->GetDoorWindowSensors();
+        if (!empty($doorWindowSensors)) {
+            foreach ($doorWindowSensors as $id) {
+                if ($id != 0 && @IPS_ObjectExists($id)) {
+                    $this->RegisterMessage($id, VM_UPDATE);
+                }
+            }
+        }
+
+        // Blind level process
+        $id = $this->ReadPropertyInteger('BlindLevelProcess');
+        if ($id != 0 && IPS_ObjectExists($id)) {
+            $this->RegisterMessage($id, VM_UPDATE);
         }
     }
 }

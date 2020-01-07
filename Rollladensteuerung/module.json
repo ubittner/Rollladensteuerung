@@ -2,7 +2,8 @@
   "id": "{CEAE98E6-EFB4-4D0E-A7DE-3A9764F12DB6}",
   "name": "Rollladensteuerung",
   "type": 3,
-  "vendor": "UBS3",
+  "vendor": "NTUB",
+  "url": "https://github.com/ubittner/Heizkoerperthermostatsteuerung",
   "aliases": [
     "Rollladensteuerung"
   ],
