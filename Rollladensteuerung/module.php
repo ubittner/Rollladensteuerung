@@ -180,7 +180,7 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyBoolean('EnableBlindSlider', true);
 
         // Blind actuator
-        $this->RegisterPropertyInteger('BlindLevelState', 0);
+        $this->RegisterPropertyInteger('BlindLevel', 0);
         $this->RegisterPropertyInteger('BlindLevelProcess', 0);
         $this->RegisterPropertyInteger('BlindActuator', 0);
         $this->RegisterPropertyInteger('BlindActuatorProperty', 0);
@@ -198,6 +198,8 @@ class Rollladensteuerung extends IPSModule
 
         // Door and window sensors
         $this->RegisterPropertyString('DoorWindowSensors', '[]');
+        $this->RegisterPropertyBoolean('UseLockoutProtection', false);
+        $this->RegisterPropertyInteger('LockoutPosition', 60);
     }
 
     private function ValidatePropertyVariable(string $Name): bool

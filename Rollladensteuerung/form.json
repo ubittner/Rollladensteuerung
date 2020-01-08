@@ -14,7 +14,7 @@
         },
         {
           "type": "Label",
-          "caption": "Mit dieser Instanz können primär HomeMatic / Homematic IP Rollladenaktoren HM-LC-Bl1-FM, HmIP-BROLL, HmIP-FROLL gesteuert werden.\nWeitere Informationen entnehmen Sie bitte der Dokumentation.\n"
+          "caption": "Mit dieser Instanz können primär HomeMatic und Homematic IP Rollladenaktoren HM-LC-Bl1-FM, HmIP-BROLL, HmIP-FROLL gesteuert werden.\nWeitere Informationen entnehmen Sie bitte der Dokumentation.\n"
         },
         {
           "type": "Label",
@@ -99,16 +99,16 @@
       "items": [
         {
           "type": "Label",
-          "caption": "Bitte wählen Sie die Variable des Rollladenaktors für die Statusmitteilungen aus:"
+          "caption": "Bitte wählen Sie die Variable für die Rollladenposition aus:"
         },
         {
           "type": "SelectVariable",
-          "name": "BlindLevelState",
-          "caption": "Statusmitteilung"
+          "name": "BlindLevel",
+          "caption": "Rollladenposition"
         },
         {
           "type": "Label",
-          "caption": "\nBitte wählen Sie die Variable des Rollladenaktors für den Aktivitätszustand aus:"
+          "caption": "\nBitte wählen Sie die Variable für den Aktivitätszustand aus:"
         },
         {
           "type": "SelectVariable",
@@ -117,7 +117,7 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte wählen Sie die Variable des Rollladenaktors für die Steuerung der Behanghöhe aus:"
+          "caption": "\nBitte wählen Sie die Variable für die Rollladensteuerung aus:"
         },
         {
           "type": "SelectVariable",
@@ -155,7 +155,7 @@
             "items": [
               {
                 "type": "Label",
-                "caption": "Statusmitteilungen:\n\nHomeMatic:\t\tKanal 1, Variable 'LEVEL'\nHomematic IP:\tKanal 3, Variable 'LEVEL'\n\n"
+                "caption": "Rollladenposition:\n\nHomeMatic:\t\tKanal 1, Variable 'LEVEL'\nHomematic IP:\tKanal 3, Variable 'LEVEL'\n\n"
               },
               {
                 "type": "Label",
@@ -163,7 +163,7 @@
               },
               {
                 "type": "Label",
-                "caption": "Steuerung:\n\nHomeMatic:\t\tKanal 1, Variable 'LEVEL'\nHomematic IP:\tKanal 4, Variable 'LEVEL'"
+                "caption": "Rollladensteuerung:\n\nHomeMatic:\t\tKanal 1, Variable 'LEVEL'\nHomematic IP:\tKanal 4, Variable 'LEVEL'"
               }
             ]
           }
@@ -293,12 +293,31 @@
       "items": [
         {
           "type": "Label",
-          "caption": "Bitte wählen Sie die Variablen der Tür- / Fenstersensoren aus, die für einen Aussperrschutz überwacht werden sollen:"
+          "caption": "Bitte wählen Sie aus, ob ein Aussperrschutz verwendet werden soll:"
+        },
+        {
+          "type": "CheckBox",
+          "name": "UseLockoutProtection",
+          "caption": "Aussperrschutz verwenden"
+        },
+        {
+          "type": "Label",
+          "caption": "\nBitte geben Sie die Rollladenposition an, ab dem der Aussperrschutz berücksichtigt wird (100% = immer):"
+        },
+        {
+          "type": "NumberSpinner",
+          "name": "LockoutPosition",
+          "caption": "Rollladenposition",
+          "suffix": "%"
+        },
+        {
+          "type": "Label",
+          "caption": "\nBitte wählen Sie die Variablen der Tür- und Fenstersensoren aus:"
         },
         {
           "type": "List",
           "name": "DoorWindowSensors",
-          "caption": "Tür- / Fenstersensoren",
+          "caption": "Tür- und Fenstersensoren",
           "rowCount": 3,
           "add": true,
           "delete": true,
@@ -339,7 +358,7 @@
             "items": [
               {
                 "type": "Label",
-                "caption": "Bei aktivierten Tür- und Fenstersensoren wird der Rollladen nur heruntergefahren, wenn alle Türen und Fenster geschlossen sind."
+                "caption": "Bei aktiviertem Aussperrschutz wird der Rollladen nur heruntergefahren, wenn alle Türen und Fenster geschlossen sind, bzw. die Rollladenpositon der Vorgabe entspricht."
               }
             ]
           }
@@ -382,12 +401,12 @@
         {
           "type": "Button",
           "caption": "Rollladen runterfahren",
-          "onClick": "RS_ToggleBlind($id, false);"
+          "onClick": "RS_ToggleBlind($id, false, false);"
         },
         {
           "type": "Button",
           "caption": "Rollladen hochfahren",
-          "onClick": "RS_ToggleBlind($id, true);"
+          "onClick": "RS_ToggleBlind($id, true, false);"
         }
       ]
     },

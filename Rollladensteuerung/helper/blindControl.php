@@ -29,32 +29,41 @@ trait RS_blindControl
      * false    = close blind
      * true     = open blind
      *
+     * @param bool $CheckLogic
+     * false    = don't check logic, set blind level immediately
+     * true     = check logic
+     *
      * @return bool
      * Returns the result of the toggle mode.
      */
-    public function ToggleBlind(bool $State): bool
+    public function ToggleBlind(bool $State, bool $CheckLogic): bool
     {
         $result = false;
+        switch ($State) {
+            // Close blind
+            case false:
+                $value = 0;
+                $stateText = 'geschlossen';
+                break;
+
+            // Open blind
+            case true:
+                $value = 1;
+                $stateText = 'geöffnet';
+                break;
+
+            default:
+                $value = 0;
+                $stateText = 'geschlossen';
+
+        }
+        if ($CheckLogic) {
+            if (!$this->CheckLogic($value)) {
+                return $result;
+            }
+        }
         $name = 'BlindActuator';
         if ($this->ValidatePropertyVariable($name)) {
-            switch ($State) {
-                // Close blind
-                case false:
-                    $value = 0;
-                    $stateText = 'geschlossen';
-                    break;
-
-                // Open blind
-                case true:
-                    $value = 1;
-                    $stateText = 'geöffnet';
-                    break;
-
-                default:
-                    $value = 0;
-                    $stateText = 'geschlossen';
-
-            }
             $this->SetValue('BlindSlider', $value);
             $id = $this->ReadPropertyInteger($name);
             $toggleBlind = @RequestAction($id, $value);
@@ -126,7 +135,7 @@ trait RS_blindControl
      */
     private function UpdateBlindSlider(): void
     {
-        $name = 'BlindLevelState';
+        $name = 'BlindLevel';
         if ($this->ValidatePropertyVariable($name)) {
             $blindLevelState = $this->ReadPropertyInteger($name);
             $blindLevel = GetValue($blindLevelState);
@@ -152,14 +161,14 @@ trait RS_blindControl
     {
         $Level = $Level * 100;
         $setBlindLevel = true;
-        // Door and window sensors
-        if ($this->GetValue('DoorWindowState') && ($Level < 50)) {
+        // Check lockout protection
+        if ($this->ReadPropertyBoolean('UseLockoutProtection') && $this->GetValue('DoorWindowState') && ($Level <= $this->ReadPropertyInteger('LockoutPosition'))) {
             $setBlindLevel = false;
             $this->SendDebug(__FUNCTION__, 'Abbruch, eine Tür oder ein Fenster ist offen.', 0);
         }
         // Check blind level position difference
         if ($this->ReadPropertyBoolean('UseCheckBlindPosition')) {
-            $name = 'BlindLevelState';
+            $name = 'BlindLevel';
             if ($this->ValidatePropertyVariable($name)) {
                 $id = $this->ReadPropertyInteger($name);
                 $blindLevel = GetValue($id) * 100;
