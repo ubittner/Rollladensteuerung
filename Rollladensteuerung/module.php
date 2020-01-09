@@ -112,8 +112,10 @@ class Rollladensteuerung extends IPSModule
                 $id = $this->ReadPropertyInteger('Sunset');
                 if ($id != 0 && @IPS_ObjectExists($id)) {
                     if ($SenderID == $id) {
-                        $timeStamp = date('d.m.Y, H:i:s');
-                        $this->LogMessage('Variable Sonnenuntergang hat sich geändert! ' . $timeStamp, 10201);
+                        if ($Data[1]) {
+                            $timeStamp = date('d.m.Y, H:i:s');
+                            $this->LogMessage('Variable Sonnenuntergang hat sich geändert! ' . $timeStamp, 10201);
+                        }
                     }
                 }
 
@@ -121,8 +123,10 @@ class Rollladensteuerung extends IPSModule
                 $id = $this->ReadPropertyInteger('Sunrise');
                 if ($id != 0 && @IPS_ObjectExists($id)) {
                     if ($SenderID == $id) {
-                        $timeStamp = date('d.m.Y, H:i:s');
-                        $this->LogMessage('Variable Sonnenaufgang hat sich geändert! ' . $timeStamp, 10201);
+                        if ($Data[1]) {
+                            $timeStamp = date('d.m.Y, H:i:s');
+                            $this->LogMessage('Variable Sonnenaufgang hat sich geändert! ' . $timeStamp, 10201);
+                        }
                     }
                 }
 
