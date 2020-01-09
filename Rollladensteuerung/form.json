@@ -14,7 +14,7 @@
         },
         {
           "type": "Label",
-          "caption": "Mit dieser Instanz können primär HomeMatic und Homematic IP Rollladenaktoren HM-LC-Bl1-FM, HmIP-BROLL, HmIP-FROLL gesteuert werden.\nWeitere Informationen entnehmen Sie bitte der Dokumentation.\n"
+          "caption": "Mit dieser Instanz können HomeMatic (HM-LC-Bl1-FM) und Homematic IP (HmIP-BROLL, HmIP-FROLL) Rollladenaktoren gesteuert werden.\nWeitere Informationen entnehmen Sie bitte der Dokumentation.\n"
         },
         {
           "type": "Label",
@@ -73,23 +73,6 @@
           "type": "CheckBox",
           "name": "EnableBlindSlider",
           "caption": "Rolladensteuerung"
-        },
-        {
-          "type": "Label",
-          "caption": " "
-        },
-        {
-          "type": "PopupButton",
-          "caption": "Hinweis",
-          "popup": {
-            "caption": "Anzeigeoptionen",
-            "items": [
-              {
-                "type": "Label",
-                "caption": "Es können verschiedene Funktionen und Informationen angezeigt oder ausgeblendet werden."
-              }
-            ]
-          }
         }
       ]
     },
@@ -99,7 +82,34 @@
       "items": [
         {
           "type": "Label",
-          "caption": "Bitte wählen Sie die Variable für die Rollladenposition aus:"
+          "caption": "Bitte wählen Sie den Gerätetypen aus:"
+        },
+        {
+          "type": "Select",
+          "name": "DeviceType",
+          "caption": "Gerätetyp",
+          "options": [
+            {
+              "caption": "Bitte auswählen",
+              "value": 0
+            },
+            {
+              "caption": "HM-LC-Bl1-FM",
+              "value": 1
+            },
+            {
+              "caption": "HmIP-BROLL",
+              "value": 2
+            },
+            {
+              "caption": "HmIP-FROLL",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "type": "Label",
+          "caption": "\nBitte wählen Sie die Variable für die Rollladenposition (HM: Kanal 1 LEVEL, HmIP: Kanal 3 LEVEL) aus:"
         },
         {
           "type": "SelectVariable",
@@ -108,7 +118,7 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte wählen Sie die Variable für den Aktivitätszustand aus:"
+          "caption": "\nBitte wählen Sie die Variable für den Aktivitätszustand (HM: Kanal 1 WORKING, HmIP: Kanal 3 PROCESS) aus:"
         },
         {
           "type": "SelectVariable",
@@ -117,7 +127,7 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte wählen Sie die Variable für die Rollladensteuerung aus:"
+          "caption": "\nBitte wählen Sie die Variable für die Rollladensteuerung (HM: Kanal 1 LEVEL, HmIP: Kanal 4 LEVEL) aus:"
         },
         {
           "type": "SelectVariable",
@@ -142,31 +152,6 @@
               "value": 1
             }
           ]
-        },
-        {
-          "type": "Label",
-          "caption": " "
-        },
-        {
-          "type": "PopupButton",
-          "caption": "Hinweis",
-          "popup": {
-            "caption": "Rollladenaktor",
-            "items": [
-              {
-                "type": "Label",
-                "caption": "Rollladenposition:\n\nHomeMatic:\t\tKanal 1, Variable 'LEVEL'\nHomematic IP:\tKanal 3, Variable 'LEVEL'\n\n"
-              },
-              {
-                "type": "Label",
-                "caption": "Aktivitätszustand:\n\nHomeMatic:\t\tKanal 1, Variable 'WORKING'\nHomematic IP:\tKanal 3, Variable 'PROCESS'\n\n"
-              },
-              {
-                "type": "Label",
-                "caption": "Rollladensteuerung:\n\nHomeMatic:\t\tKanal 1, Variable 'LEVEL'\nHomematic IP:\tKanal 4, Variable 'LEVEL'"
-              }
-            ]
-          }
         }
       ]
     },
@@ -176,7 +161,7 @@
       "items": [
         {
           "type": "Label",
-          "caption": "Bitte geben Sie die Rollladenposition für den geschlossenen Zustand an:"
+          "caption": "Bitte geben Sie die Rollladenposition in % für den geschlossenen Zustand an:"
         },
         {
           "type": "NumberSpinner",
@@ -186,7 +171,7 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition für den geöffneten Zustand an:"
+          "caption": "\nBitte geben Sie die Rollladenposition in % für den geöffneten Zustand an:"
         },
         {
           "type": "NumberSpinner",
@@ -205,30 +190,37 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie den Differenzwert an:"
+          "caption": "\nBitte geben Sie den Differenzwert in % an:"
         },
         {
           "type": "NumberSpinner",
           "name": "BlindPositionDifference",
           "caption": "Differenzwert",
           "suffix": "%"
+        }
+      ]
+    },
+    {
+      "type": "ExpansionPanel",
+      "caption": "Astrofunktion",
+      "items": [
+        {
+          "type": "Label",
+          "caption": "Bitte wählen Sie die Variable für den Sonnenuntergang (Rollladen runterfahren) aus:"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "Sunset",
+          "caption": "Sonnenuntergang"
         },
         {
           "type": "Label",
-          "caption": " "
+          "caption": "Bitte wählen Sie die Variable für den Sonnenaufgang (Rollladen hochfahren) aus:"
         },
         {
-          "type": "PopupButton",
-          "caption": "Hinweis",
-          "popup": {
-            "caption": "Rollladenpositionen",
-            "items": [
-              {
-                "type": "Label",
-                "caption": "Bei aktivierter Positionsprüfung wird der Rolladen erst gefahren, wenn die Differenz zwischen aktueller und neuer Position um den vorgegebenen Wert überschritten wird."
-              }
-            ]
-          }
+          "type": "SelectVariable",
+          "name": "Sunrise",
+          "caption": "Sonnenaufgang"
         }
       ]
     },
@@ -251,39 +243,18 @@
         },
         {
           "type": "CheckBox",
-          "name": "UseSetBlindLevel",
+          "name": "AdjustBlindLevel",
           "caption": "Rollladenposition anpassen"
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie die Aktionsverzögerung in Sekunden an (0 = aus):"
+          "caption": "\nBitte geben Sie die Ausführungsverzögerung in Sekunden (0 = deaktiviert) für den Wochenplan an:"
         },
         {
           "type": "NumberSpinner",
-          "name": "ActionDelay",
-          "caption": "Aktionsverzögerung",
+          "name": "ExecutionDelay",
+          "caption": "Ausführungsverzögerung",
           "suffix": "s"
-        },
-        {
-          "type": "Label",
-          "caption": " "
-        },
-        {
-          "type": "PopupButton",
-          "caption": "Hinweis",
-          "popup": {
-            "caption": "Wochenplan",
-            "items": [
-              {
-                "type": "Label",
-                "caption": "Der Wochenplan muss folgende Aktionen ohne Aktionstyp beinhalten:\n"
-              },
-              {
-                "type": "Image",
-                "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAkQAAACgCAYAAADtqnPnAAAKw2lDQ1BJQ0MgUHJvZmlsZQAASImVlgdUU9kWhs+96Y0WQEBK6E2QTgApIbQACtJBVEISSCgxJgQQGyKDIzgWVERAHdEBEQXHAshYEAsqDIpKsU6QQUEZBws2VN4FHmHmvfXeW++/69zzrZ199tn7rHuyNgAUwBaJ0mAlANKFGeIwf29aTGwcDfc7gJCHBDSBK5sjETFCQ4MBopn573rfg/giums1Gevff/+vUubyJBwAoFCEE7kSTjrCp5HxjCMSZwCAqkDshlkZokluQVhVjCSI8L1JTp7moUlOnOYvUz4RYUwA0EhVeDKbLU4GgKyN2GmZnGQkDnkBwjZCrkCI8GS+Hhw+m4vwMYTnpaevmOQ+hM0S/xIn+W8xE+Ux2exkOU/XMiW8j0AiSmOv+j+P438rPU06s4cJMsh8cUAYMisgZ9aXuiJIzsLERSEzLOBO+U8xXxoQOcMcCTNuhrlsnyD52rRFwTOcJPBjyeNksCJmmCfxDZ9h8Yow+V5JYiZjhtni2X2lqZFyO5/HksfP4UdEz3CmIGrRDEtSw4NmfZhyu1gaJs+fJ/T3nt3XT157uuQv9QpY8rUZ/IgAee3s2fx5QsZsTEmMPDcuz8d31idS7i/K8JbvJUoLlfvz0vzldklmuHxtBvJBzq4NlZ9hCjswdIYBE9gDBxAA6MAFZAOQwcvOmCyCuUK0SixI5mfQGMjt4tFYQo71PJqdjZ0NAJN3dfpTeNs3dQchdfysjf8EAId4xLhx1ibQAKDJGrkiyrM2IxkA1EwAzpdypOLMaRt68oUBRKAIVJF/AV1gCMyAFbADTsANeAFfEAhCQASIBcsAB/BBOhCDLLAGbAAFoAhsB7tBGTgADoEj4Dg4CRrBOXAJXAPt4DboBg+BDAyCl2AUvAfjEAThIApEhTQhPcgYsoTsIDrkAflCwVAYFAslQMmQEJJCa6CNUBFUDJVBB6Ea6GfoLHQJugF1QfehfmgYegN9hlEwGVaFdWATeD5MhxlwEBwBL4WT4ZVwDpwPb4VL4Ur4GNwAX4Lb4W5YBr+Ex1AARUKpo/RRVig6iokKQcWhklBi1DpUIaoEVYmqQzWj2lB3UTLUCOoTGoumomloK7QbOgAdieagV6LXobegy9BH0A3oK+i76H70KPobhoLRxlhiXDEsTAwmGZOFKcCUYKowZzBXMd2YQcx7LBarjjXFOmMDsLHYFOxq7BbsPmw9tgXbhR3AjuFwOE2cJc4dF4Jj4zJwBbi9uGO4i7g7uEHcRzwJr4e3w/vh4/BCfB6+BH8UfwF/B/8cP05QIhgTXAkhBC5hFWEb4TChmXCLMEgYJyoTTYnuxAhiCnEDsZRYR7xKfER8SyKRDEgupMUkASmXVEo6QbpO6id9IquQLchMcjxZSt5Kria3kO+T31IoFBOKFyWOkkHZSqmhXKY8oXxUoCpYK7AUuArrFcoVGhTuKLxSJCgaKzIUlynmKJYonlK8pTiiRFAyUWIqsZXWKZUrnVXqVRpTpirbKocopytvUT6qfEN5SAWnYqLiq8JVyVc5pHJZZYCKohpSmVQOdSP1MPUqdVAVq2qqylJNUS1SPa7aqTqqpqLmoBallq1WrnZeTaaOUjdRZ6mnqW9TP6neo/55js4cxhzenM1z6ubcmfNBY66GlwZPo1CjXqNb47MmTdNXM1Vzh2aj5mMttJaF1mKtLK39Wle1RuaqznWby5lbOPfk3AfasLaFdpj2au1D2h3aYzq6Ov46Ip29Opd1RnTVdb10U3R36V7QHdaj6nnoCfR26V3Ue0FTozFoabRS2hXaqL62foC+VP+gfqf+uIGpQaRBnkG9wWNDoiHdMMlwl2Gr4aiRntFCozVGtUYPjAnGdGO+8R7jNuMPJqYm0SabTBpNhkw1TFmmOaa1po/MKGaeZivNKs3umWPN6eap5vvMb1vAFo4WfItyi1uWsKWTpcByn2XXPMw8l3nCeZXzeq3IVgyrTKtaq35rdetg6zzrRutX843mx83fMb9t/jcbR5s0m8M2D21VbANt82ybbd/YWdhx7Mrt7tlT7P3s19s32b92sHTgOex36HOkOi503OTY6vjVydlJ7FTnNOxs5JzgXOHcS1elh9K30K+7YFy8Xda7nHP55OrkmuF60vVPNyu3VLejbkMLTBfwFhxeMOBu4M52P+gu86B5JHj86CHz1Pdke1Z6PvUy9OJ6VXk9Z5gzUhjHGK+8bbzF3me8PzBdmWuZLT4oH3+fQp9OXxXfSN8y3yd+Bn7JfrV+o/6O/qv9WwIwAUEBOwJ6WTosDquGNRroHLg28EoQOSg8qCzoabBFsDi4eSG8MHDhzoWPFhkvEi5qDAEhrJCdIY9DTUNXhv6yGLs4dHH54mdhtmFrwtrCqeHLw4+Gv4/wjtgW8TDSLFIa2RqlGBUfVRP1IdonujhaFjM/Zm1Me6xWrCC2KQ4XFxVXFTe2xHfJ7iWD8Y7xBfE9S02XZi+9sUxrWdqy88sVl7OXn0rAJEQnHE34wg5hV7LHElmJFYmjHCZnD+cl14u7izvMc+cV854nuScVJw0luyfvTB7me/JL+CMCpqBM8DolIOVAyofUkNTq1Im06LT6dHx6QvpZoYowVXhlhe6K7BVdIktRgUi20nXl7pWj4iBxlQSSLJU0ZagiTVGH1Ez6nbQ/0yOzPPNjVlTWqWzlbGF2xyqLVZtXPc/xy/lpNXo1Z3XrGv01G9b0r2WsPbgOWpe4rnW94fr89YO5/rlHNhA3pG74Nc8mrzjv3cbojc35Ovm5+QPf+X9XW6BQIC7o3eS26cD36O8F33dutt+8d/O3Qm7hzSKbopKiL1s4W27+YPtD6Q8TW5O2dm5z2rZ/O3a7cHvPDs8dR4qVi3OKB3Yu3Nmwi7arcNe73ct33yhxKDmwh7hHukdWGlzatNdo7/a9X8r4Zd3l3uX1FdoVmys+7OPuu7Pfa3/dAZ0DRQc+/yj4se+g/8GGSpPKkkPYQ5mHnh2OOtz2E/2nmiqtqqKqr9XCatmRsCNXapxrao5qH91WC9dKa4ePxR+7fdzneFOdVd3BevX6ohPghPTEi58Tfu45GXSy9RT9VN1p49MVZ6hnChughlUNo438RllTbFPX2cCzrc1uzWd+sf6l+pz+ufLzaue3XSBeyL8wcTHn4liLqGXkUvKlgdblrQ8vx1y+d2Xxlc6rQVevX/O7drmN0Xbxuvv1czdcb5y9Sb/Z2O7U3tDh2HHmV8dfz3Q6dTbccr7VdNvldnPXgq4LdzzvXLrrc/faPda99u5F3V09kT19vfG9sj5u39D9tPuvH2Q+GH+Y+wjzqPCx0uOSJ9pPKn8z/61e5iQ73+/T3/E0/OnDAc7Ay98lv38ZzH9GeVbyXO95zZDd0Llhv+HbL5a8GHwpejk+UvCH8h8Vr8xenf7T68+O0ZjRwdfi1xNvtrzVfFv9zuFd61jo2JP36e/HPxR+1Px45BP9U9vn6M/Px7O+4L6UfjX/2vwt6NujifSJCRFbzJ5qBVDIgJOSAHhTDQAlFukVbgNAXDLdS08Jmu7/pwj8J57ut6fkBEB1CwARuQBMtkV7ETb2AkAF4VBkjvACsL29fPxTkiR7u+lYpEakNSmZmHiL9I04cwC+9k5MjDdOTHytQpJ9AEDL++keflLBVkh7ZWwTZm/T96A9F/yL/gHU/A8O9fkwPAAAAFZlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA5KGAAcAAAASAAAARKACAAQAAAABAAACRKADAAQAAAABAAAAoAAAAABBU0NJSQAAAFNjcmVlbnNob3TtYke6AAAB1mlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS40LjAiPgogICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgICAgICAgICB4bWxuczpleGlmPSJodHRwOi8vbnMuYWRvYmUuY29tL2V4aWYvMS4wLyI+CiAgICAgICAgIDxleGlmOlBpeGVsWERpbWVuc2lvbj41ODA8L2V4aWY6UGl4ZWxYRGltZW5zaW9uPgogICAgICAgICA8ZXhpZjpVc2VyQ29tbWVudD5TY3JlZW5zaG90PC9leGlmOlVzZXJDb21tZW50PgogICAgICAgICA8ZXhpZjpQaXhlbFlEaW1lbnNpb24+MTYwPC9leGlmOlBpeGVsWURpbWVuc2lvbj4KICAgICAgPC9yZGY6RGVzY3JpcHRpb24+CiAgIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+CgGrah4AAC83SURBVHgB7d0JfExXwwbwZ7JaSywRW2KNJhESoSlqKVFblUotfb/axU43Xtqi1iopWioitfSlokq0tERFEVvUviREqIqlJLaEbLLNd89N7mRmJBrZRO5zf78xc+89d/vPSTw559wZjVaawIkCFKAABShAAQqoWMBExdfOS6cABShAAQpQgAKygJmxw5hZy40XcZ4CFKAABShAAQqUCAGf6aOzvQ62EGXLwoUUoAAFKEABCqhJgIFITe82r5UCFKAABShAgWwFGIiyZeFCClCAAhSgAAXUJMBApKZ3m9dKAQpQgAIUoEC2AgxE2bJwIQUoQAEKUIACahJgIFLTu81rpQAFKEABClAgWwEGomxZuJACFKAABShAATUJMBCp6d3mtVKAAhSgAAUokK0AA1G2LFxIAQpQgAIUoICaBJ74pOqiuPjG/QZiTKMk7J69CVukr1JLff0d+LWpqnfodDx++AChf+7D2pBopOityc/Lt7xGoYtNIs5sXocVF9INdpVxDia6czJYyRkKvMACcr2vrsn2Cq6H+GFeUFq26/51oX1nfNHfBjc2rYOP0c/Tv26brwJmeGPoYPSqGY/9327Ejw/y/7Nsoq2Dd4a4odKVvfDdfz9fZ8eNKUCBF1PguQSi7KmScDEoEL9c00JrVQMerzSFS6e38bntXszcGFFgoQiaMnDu1AH24X8ggt9rm/1bwaUlTyDhJrZs+BOXjK4s0ShMGK0ulrOmJs5oYmMOaCrC8XVrYMvtZzpPEX68Pu6KOrd24ZMNf8nbarTlUNPGGnYaW4CB6Jk8WZgCJUWgGAUiLVJiohF5U/pr72YUVoeeg0u/dzG8USt4OVwuuL9A06X9V6yP/t1PYdZv90rK+8jroMDTBbSpuPuP9PNVAv4I0Larjzpmsbhxuyxq2TaBvSYq33/cpJmEYvGXoU835FoKUKBECxSjQGTsnIpzG87iytRWeLmlK3DhhHGBvM0nRuH8o6po3NQDff7chE13pICUw2TdvAtGta8N6zJmMElLwYN/zmLFD8dwLUUrbyF3RZhexq+JNnijVnlYmqYj4d517Ni4Bw/b9kTflyuinCSckvAQp3cGYE1osu5I+vtGahKiI0KwcPNFxCNj37qCfEGBIhAwt2uFD992RK2XzGGWnoq4B5HYsiYIRxIy6qPczV3rIQ5LIaRF3ZeQ8JfUupL5I2lm1xHTu9eRf06QmoDrJ/7Aot9v6Fp1NaY18PagDmhTPeNn5PGjaPzx42/47dazd4ZrUA6ejSrB5F4Elp+tiBlv2KCtnQYRV3P+uTGp9Ar+O8INtZIjsfpcGQxvmdk93/AN+ExPROimtfALa46JM9xQ4ZJeq5HReYuf4/ADv2P5n5ldanKXYT3EnT6Ee7Waw6mKJcyk3xN3rh3F8h/O4XYJCJ9FUPV4CAoUG4FiPag6zSQMV+9qYVbRGk6a7MdAPLtkMkKk4HFLUwmt3m6Bysh+v2auPTCpmx1KRZ+E76otWH34LjQ13TC+/8uGh7Suj9Yml+H/vVTmQBSSrezQc/h7eLdmAg79+gvmbwnFbalpv0W3zmiZeQ3mDp3xQRc7lHsYjv9J+15zNgFWju3w8ZuVDPfNOQoUgYCJVRtMGdAU1ZOvYJ1UH312/I2H5evjvcFtDH8+SldDi+qPcfbYWRw4eyfzzMrgZVdrxJwKhrd/MEKiNajt3gXvt7aU12tQEW8O7QqPalpEBAdivv9R/A1rdBvQDW3Ms//Ze9olm5R3xcvWprh97RQeHo3E9dSyqN+ybo6bmJjWh9cgVykMXcMPvoE4eTAIC1YewoV44NHVEMxf9Rv8Lz8Zpky01TFwdA/deS9Y+QcOxFjAqVMPjG5sYXC8Gs7NUTX6KPxWBiHw5mNUruuOgW0MyxhswBkKUKBYChTjFiLhlYpU8btKChLSiIECm7QPDmB9aC181MQZQ1qfxleHHj+xb3eHitDEXMVP604iVPyld/M32DYcDg/runDRhOO08tffg0v49vs/M/4avPkLKtgNh6dtAo6t2I6t8viMKPjY1sa85hXgUEODIzeroH8HO1SM+xtff3cwo6n/ZgAqW0uDRBu5w2V7YNa+nzgrLqBAHgXK2mHEtFGGG0edxpgVIajyqg0qpERh33d7cUy0fkpd1mb2NTHC3gbtpMyyRckL2rvY9c0WbM9sIYW92F0qrh7ajCX7M36GblxKhdV/O8KhcTOYHwrB4xbt0KG6Ca7u24zlB0WZq1i6uRJmDWmANu0tcCDoyZ89w5M0nKvesTaq4xGOn3yEtPRzOHvbDb1qO0p/bFxBiPIzmbmJCGPdh7ZH01IPELQyMLO1KxbXpJaeZOma0lMeSV30d+XSxr8INa+9imaVkhGxQzrv4xnneO27eJR/vxdadGiLOmF/SFeSMcVc3IU5m2/IMxdWl0VDqVW7as1a0nzG+KTMYnyiAAWKuYDx74FifroFd3pXfz6Mc/W6oumrHmh+dAeOGO36kP86HDJYlhnODJZJM8mJBk3jUYmiWywVCTHK/yLAvcRUaVkplHoJML1eFzUrmyLmYoTeuIdU/Hk7Dr1qlUM9qeRp6cGJAgUqkN2g6qRY+RDRgZswMdDwaKlG4UJem5SIm6IqG0zJiLuT1fWVponAiVut4VjNSm7VTa1XAZbaGFw8kNVdbHLtJu4k2aN6lWcLDaLVppNtBSDmEvb8I36+UrH77xi8Vasq3N1MEHLc8G65ij27wrV6Gs5v+QU/P6Vr3OByMmeca78E87RYhJ/IOu90zS0EXYtFiyaV0EwqdzWzbHzsrcxXgFYTi/gkQP+eWd1KvqAABYq1QDEPRGYwE63q0i/nrF+5BeOZrrmKVXtvYF6PWujdux6ORBvuV2NWBe3fag8P+8qwstDrWZSa2vMzpVctI0UjaVx3o67S+AXjPSXAur50wdk04RuX5DwFnkngqYOqLeHUuQv6OVujkhgvp9ux9D97HqZHKVIwKZsR7u+VEneDlUVnqXWqs9G+tOWrSEty34qitXVEvYrA3dBQXM0MbJrga7jR2g31mrgAx/XHGVrBxe4R7qVawtpeuhMtNKMFx+gUcpy1LV8aSLqD20YlrsaKgJQlZLSasxSgwAssUKwDkbi9tl4VDVJvRyMsu79Y8wmfeioQO5sOgqd9S3ilGP7yb97vTfSxfYwTQdsRcOYmYqRugoyBpfk7qMmdBIgj3T77K/53zDjmpSE2OqtlKX9H4tYUyJ1AhS69MLp5KVwNCca3IZcQLQ2kVj6XK3d7MCxV3twUSIjHNWlxUpJUxxPvYpv/EVwwLCatzGihMl6c03zztrWlMU3S1Pht+DQ2KlW9Drqbn8zqzsNjXPxjMzZW74mp7h0xOmIDluvd1GC09ROz1x4lApXMUd5ojWMVKShJ++ZEAQqUPIFiHIjM4NynsXR7bSLOh5wqJPlU7N1yBm5jWsDNsax0jAfyccTnlDSrJv3iu38Rq44rf1maoZKl9Is+n1O65jqiYtzgYlMHj/85pOtuEy1SdarGysErn4fg5hR4JoF2ta1gkngNu/dIYSjzDw+bsmLUnmEXVPY7tUC5qlLZCxkhwVRrD7fqpaB9eB9npH2l33iElEZWaGD1ADv1Aol1reqIv5f7YCH2615D+pl8IH0Ex5az0iiirCndsTUmSneONZXGJG3XjUlKwD9hKVJrUhBCGvTFa29IXeMXA3FcGf8kbW6iyfnn+dz1h0ixrwQ3N2mcU+YYItFl17p6OanL7hZOZh2eryhAgRIiUIwCkTRwWrqbzK6mFuWqSQMumzeEo42lNNZmL74rxE/BTX94HGtO1MXUllV0DeHpmhv4OyYFTWvaY2LXRwi8bg538UGRtaTOrvx2mUnjEH4+E40m7ZzwkZcGm7ZHIFq6M+2t9k3QyDQSS5bs1htbVEJqGS+jWAucuxeHLtVroEc/aSD08UTYuTdBy7pS3xTu5eK8zVCn9TuYYH4MWyPN8Fr7V/By6ce4tPek3M1tcvAUQl/pDNcefTC64iHsuJKO2s1a4C2XCriz7yd4H4zLxTGk0ULN7FG3dDpuhx1F6E3DliXTG6G45NIRLzd0R+WgA4jS26MWMfjpxwtoOLYxPPs0xBn/CKRq4pEkjaouX70R2kufdv1X/D+4ZfTh1NqDR3DS9S24d3oHo0sdQuAVMzTv1hpuLyUhfOcBXZed3qH4kgIUeMEFilFneCk0kj6ZevKw3hjbzRENyyTgTNDPBfsp1Tm8WXeDpL8i7+j/NZyKIP/9OHbPBLXd2mBsr+ZoaPIXdkZIv7zLlod9PmNkTHAA5u2IRNxLL2OQdL2TezVFjZRrCFjPMJTDW8TFhShwddtO/BqZhEr1X8GQ/7TBqxUfYvvpO0hHWVR3+rdfEQkIPxWNiq7tMOk/7dDSWou/D/yGZZmtKmKs3solv2J3lAb27bpi8vDu6OtYGlHHduHrXIYhwAydXW1QOu2u1IX98AkJMZD7z38SYVK5JjpZiUGHhlO6fFdpLMo3eA3j3ctIn/R1B9uO38TDUrXQd5gHukvd8saTGEC9dnnWef93eEe0qZiMsKCtWJJ5bcbbcJ4CFHixBTRaadK/hDGzluvP8jUFKEABClCAAhQoMQI+00dney3/9udfthtxIQUoQAEKUIACFChJAgxEJend5LVQgAIUoAAFKJAnAQaiPLFxIwpQgAIUoAAFSpIAA1FJejd5LRSgAAUoQAEK5EmAgShPbNyIAhSgAAUoQIGSJMBAVJLeTV4LBShAAQpQgAJ5EmAgyhMbN6IABShAAQpQoCQJMBCVpHeT10IBClCAAhSgQJ4EGIjyxMaNKEABClCAAhQoSQJPfFL148e5/8LFkgTBa6FASRBoVyqf3ytTTBCCk1KLyZnwNChAgZImYGlpme0lsYUoWxYupAAFKEABClBATQIl489JNb1jvFYKUIACFKBAMRdIT0+HeOhPJiYmEI/iOjEQFdd3hudFAQpQgAIUyKdAWloa9uzZg7i4OHlPZcqUQceOHWFmVvD//esHoJzCj3GZfF5egW5e8CIFenrcGQUoQAEKUIACuRXQarVQHhqNBpcuXUKPHj0MNj9+/DgcHR3lFhwRXEQ58cjvpN/6Ex4ejoCAAN1+xTn17t0bDg4O+T1MoW3PQFRotNwxBShAAQpQoGgFjMNNVFSU3E2ltAilpqYiOjoajRs3Nui+EoElv6Fo6tSpcgAzNzfH7t27ERMTY3DxS5YsgYeHB8Q5NGjQAHPnzjVY/7xnnm9nXvwF7Fg0Gh6TtxaJw/aPXeV0KhKq8nB71RMf+O3HrWc4A60mDD49neE8IeO8000CMdHJCT2/OSPvxXj+GXZtUFQT5oteL/fA0jNag+WcoQAFKEABCugLKF1Ra9euxZAhQyBagc6fP48FCxbIxcR60X0mJrFMrDt27Jhc9vvvv5fDkAhF+ZmCg4MRFBSEXbt2QYQiW1tbg4eFhYW8XpQR3XjFbXouLUSPY85hx9Iv8fXmk4hOBsw6dSkyF3O7gViy4j+oK46YcAunAv2wYPF4jEv8Hv7vuyL7m/GK7PRK3IFECJ2SMgPnlvQscdfGC6IABShQHAREkBHdVXfv3sWUKVNw//59bNiwQR4nJFpjROuQeBaTeL1v3z64u7vLy8S2gYGB6N69O6pWrSp3t+W1pUjsJywsTA5eIoApIU0xUsYVmZqawklqRChu03MJRLtnD8Sckw548/MFKLvmU6wrQhWNpiys7OxgJx9TenZohvL3O+KjtQEIlgLRG0V4LjwUBShAAQpQIL8CSsvOrFmz5DBUqlQpiM8UFCFIhA8lDInjKMtSUlLkViFRVnRtTZs2DcuXL89XIBJBSowTio2NlQNadoFILKtQoQIiIiLye9kFvv1z6TJr/sE2HN7rjxme9VDuuZyBvqMFbGpYIy0uDJfDMpoLtZooHPQZg84tXOSuNdGtNmVLOPL1kZVRh7BsdFe0aCq665qhde8ZCLyWpH8iiDq0HKM6usnHbP76CHxz+q7BejGTfGkbPu3TGm6i269ZS/T9PBDXMk9MdLH1lAbKfbBuv3SsTroygxbk3CWodMvNWL8Q773igqZdl+CEyQ6DLkDlJERrj9JN+G/HUtZP3JGE1KAp8jV9/ItyC2YyIrZNRZ9WGdcqfGfuuKbzNdnxXzRpMA6+Gz9GRzdH3TGV8+AzBShAAQpkCYiWl4cPH2LTpk3yQhF2xCRag0Q32ahRo+TusRMnTmD8+PHyMhGUxJScLHXTSNPmzZvlYKQ/MFpekYt/lEAmwpbyEOegvFaejZeJXSvb5uIwhV7kucSRarVrF6uuqfi4RzA1a4BaTmKUfTKCp/fFCN+/0GTKKuz8fQu8B1bA/s+GYMrWf/L0hmhTjmLBgJFYdast5m3YiZ3+c9DZZBs+GbgUf2buURP2HcaMXYpz9UZhdcBOrJ3mgpPLNuCSfp9u9A58MugT7C/VH/OlMgELeyNt68cY/tVhXZgQu9u3eAbCXWdi7e/+WNSrFs6smYRvf0/M8dy1mmv4ZfFe1PKajpkftM1sPcuxuMGKnI6lbdgf30rNp9M7WsK07WfYuXMnJntkVLeo7Z9h8OQ/UKb/fGzeuQVf9TbFLx8NxeLDWeeYYn4AK30foMtHczGrX/FrWjVA4AwFKECB5yggQoVoddm2bRsaNWokhwwxhkcEERGGvv76azg7O8vdVN7e3rpQJMqIyd7eXt7WysoqTwFF6WITzyJQ6T+L18rDeJ04tlhXXKbnEoiKy8VDE48re70x3/8GyvfsjM7ixK6sx4pNsXht8hp4e7rBztYBHcb4YranGfbM8sGuPJy86ckjCEl2xeiZU+DhKHXTuXaTgk17pNwKxtHMAdN7f1qHy1YD4P2tF1pKZRw7jIGf93uopldZDq5YgN2P38LUlePl/Ti+Pgne45vhtv9PkBpidJPDCF8sHdEKTrau6DxjHHpWjENo+NOaJ0uh+9xN+NKrN3p1dkEl5L6C5ngsi4qoLXVNvmQp/TBYloed9Nq6HJBucgh+XwQCb82A3wQPONk5oP3kLzHONRqbftylC3am6Y3g5bcKk/7vbbzduoHu2viCAhSgAAUMBUSoEF1RLVq0gK+vr/xatAyJVqCRI0fK80orjSjn5eUlrxNlxPzSpUvRqlUr+XVeAorSyiOen+UhrkLZ1vCKns/ccxlD9HwuNeOoyVeXo7/Dcr1TKI2GfRfC/1MPudUqJewczqU64sPXquuVsUAn6VbBMpuP4aIUYDq56K3Kxct09wn4eZ9hQUvTLHpx19r50w9g1qwJWumN6rasaIWXMjcTZc4evwez9q+hi16Z+s4uqJIWjBsXpe6+zF3WsMkKEBptFVSzfnru1WitYWNTyvAEczn3rMcyPXcOx++bom2bTrpWQo22HpxdbZC6NxLh0nFdpYdpWg1UbZj7YJbL02UxClCAAiVaQL/LK6ewIYKSKCfCkJiUW/JLNEwuLi7rf+VcFC4JRfTvMks4+jWGTD+Cpm3awzYzZERcj4Rpem1p4LXhf8baqtVQ7RlaTgytknHjwDosXLIa+0PvIyFzpQnqGxSrZVvLYF5/RquJwb27WiRETITDjon6q6Q2RwvcvC4ForqGi4vjnObBPdyRuiUjJjlh6yTDM7QwuY5IaZEIRJwoQAEKUCB3AiL4iIBz6tQpjB07Vn4tQo8YH7Ry5UosXLhQXqbsbfXq1RDjecRt8GLbcePGwc/PT25hEvN5aSVS9v0iP6suEOnfZaatMxwDf9iN1Sv9McBjGOyld9K+th3SNQ+ReF8KGJWyQpHmpvSftVRR8jJpTvpg6IiNqPvhQmz0c0MDK0vIg449txvs7k7UHYN5/RmNtiIqV9HArvNSrBjUUH+V/Lp0ZakVSKSJYj5prSqjqrY2ui7zw8AGWb7itDUoLXXXcaIABShAgWcREAFG3Ckmbp0Xt9yLMCQCj3hetmyZ/JlAgwcPlsPPunXrsHjxYl0ZEaQuXLggb3vx4kWIcURqnZ7el1LCVTRaJ3hNeBtmZ/zgu/WefLXmTs5obH4cwYG39K4+GUH79yO9nAsaNTX8T1yvUI4vQ48cQFSKOzpL43pEGBLT45gHeJi5hTgPRxcrxIccw2G9W9kMyzREI+eKuHXkHO7bSOOQxEcHSA/bOqWQnlZZHp+TubsCeJL2V02DR3Hxun2JO+9iHyh3iekW5+qFJjVNNzYoXRq852x1E8elLkKbzGsQ11GnVDpSK1tDGmbEiQIUoAAFnkFAdH2JQdU9e2Z83psyWFoZRyQGVTdr1gxubm5YtGiR3Fok1olJdJeJQCW2FftQutGe4fC6FiWxH6V1SXnObj+5LZfdtoW5TNWBSMCaeQyGl0si/vBdD/lzpuv9H0b2qYCD84dgUsAJRF67gD0+ozAtIB4tJ4/J0+cU2TdyQmnzvVg/fQsOnz+Jvas+g+eEdYjSa3F6ve8ANHiwDpPGfYeQ85E4uWMRRkz6Qa+MBTzeHYgG/3yH8cOXYrdUJvLCEfhPHoI+A+Zhd2zeWq+yq1wm6S5wa2WFqI3e+GJ3mO4480Mybs/MbpuclpUtVx7ao3sQIH0q6t+3pKZY8w54d3BjRK4cgxFLduN8ZCTOH/HH5EG9MWzubl1IzGl/XE4BClCAAoYCSsCYPXs2KlWqhKSkJLk1SLQQieAjQo8IOuKh3IovWoZE95j4vKLy5ctjzpw5clB6WpAxPGrWnNiPmJRnZR/Ks1innKP+Mv1txOvnPak+EIkBvQNHeqLs1VVYtl7cVm+BdrN+gt+o+jj75TB06dwbk9bGou1cf3zTt0ae3i9zj8nwmfga4gJnYZindPv+tjQMmjcKDqZXcPlyxu1hWicv+CwbD+crvhjq2QUjvMPRbOy7aCglbmUSZTZs+hJtk37EZKlMl95jsPraK5i6aho8KmSVU8rn/dkCHcd/iTGt4xAw/h106T8eW7ReGPeGxTPv8vW+o+Be9qB0l967WHEi44fGaeQ6/DS/IxJ+nAzPLl3gOXolbrhPx/IZHrpB5M98IG5AAQpQQKUCImSIsFOlShV88cUXeOeddyC+RuPIkSNo166dvE6EIyUYtWnTBiEhIfLXZ4iyYptq1arJgcY4sOSGVH8bcTebOI7yEK1V4qHMi/MQZYzDU26OU9hlNNJJGTQtiLTIiQIUeDEF2pUqGcMCg5MyvmbgxXwXeNYUeD4C4r9z/XAizmK/NNyji/SHp9KNJsYWic8rEl+yqj9lt63++n97LbYXoaxTp044fPjwU4uLjwfYu3evPI7J+HyfumEBrbS0zLyLymh/JeO3p9FFcZYCFKAABSigNgERLkQwUcKJ6BYT308mgop+Y4doDRLLxEOUEdsVRDARrT/r16+Xv0ctIUG5n9rwXShTpgz69esntxiJ8yxOE1uIitO7wXOhQD4F2EKUT0BuToESJiDGEIlvn3/06JEcesR3l+m3GJWwy83V5eTUQsRAlCs+FqLAiyHAQPRivE88SwqUVAHR6qPcwZbTNYqWpIJokcpp//+2PKdAxC6zf5PjegpQgAIUoAAFciUggo4YQP0iTqq/y+xFfNN4zhSgAAUoQAEKFKzAixnjCtaAe6NAiRG4/0mJuRReCAUoQIEiFWALUZFy82AUoAAFKEABChRHAbYQFcd3hedEAQpQgAIUeIEFlNv69S9B3OIvHsV1YiAqru8Mz4sCFKAABSiQTwFxx9eePXsQFxcn70l8DlDHjh0LZeCzCEHKlFP4MS6jlC8OzwxExeFd4DlQgAIUoAAFCkBA+WBG8Szu+Lp06RJ69OhhsOfjx4/D0dGxwD+YUb/1Jzw8HAEBAbrb68X59O7dGw4ODgbnUpxmGIiK07vBc6EABShAAQrkQ0CEIP3P+ImKipK7qZRb4cX3iEVHR6Nx48YG3VdKgMrHoTF16lQ5gImvCdm9ezdiYmIMdrdkyRL5K0PEOTRo0ABz5841WP+8Z55PZ17yJWydPRCdW7jIadGl+RsYtWQ/bhWyxvaPXeXjiYSqPNxe9cQHfs92bK0mDD49neE8Yat8xukmgZjo5ISe35zJdj6vl6UJ80Wvl3tg6ZnC+3hzkx3/hVOjNwv1GOL6jY3yasLtKEABClDgSQGlK2rt2rUYMmQIRCvQ+fPnsWDBArmwWK98YKJYJtYdO3ZMLvv999/LIUqEovxM4gtlg4KC5E/GFqHI1tbW4GFhYSGvF2VEN15xm4q8hUiricKOT4bh04N1MPjzVejbpAz++s0bU5eOx6Sym/DDMPtCNTK3G4glK/6DuuIoCbdwKtAPCxaPx7jE7+H/viuy/8q3Qj0l7pwCFKAABSiQZwERZER31d27dzFlyhTcv39f/j4x0SqkfPu8eBaTWLZv3z64u7vrvnU+MDAQ3bt3l7/3LD8tRWI/YWFhcvASAUwJacqFKeOKxCdVO0mNCMVtKvJAZBK+DWsCY9Hm88WY9GZl2cNu7CJ8cKYd5m4LQpgUiAqTSaMpCys7O9hlHBl2Ds1Q/n5HfLQ2AMFSIHqjuL1DPB8KUIACFKDAUwSUlp1Zs2bJYUh8X5n4MlcRgkT4UMKQ2IWyTHzrvehaE2VF19a0adOwfPly+Yth9bvcnnLYJ1aJ7cQ4odjYWDmgZReIxLIKFSogIiLiie2f94Ii7zLTJJZHo+6D0OPVSlnXrq2ImrbSfHIaMjJs1qrCf2UBmxrWSIsLw+WwjOZC0Yp10GeMrktPdKtN2RKOx/k5mahDWDa6K1o0Fd11zdC69wwEXksy2GPUoeUY1dFN7s5r/voIfHP6rsF6MZN8aRs+7dMabqLbr1lL9P08ENcyT0x0sfWUBsp9sG6/dKxOujKDFvx7l2Dy7a34tLc7mkr7FV2YH/gbXa/R+bfynIJfwg3PH1KZlR966q4xuzJpabew7bN3Mso0bYEuEzYgPF+wTxBxAQUoQAFVCYiWl4cPH2LTpk3ydYuwIybRGiS6yUaNGiV3j504cQLjx4+Xl4mgJKbk5GT5efPmzXIw0h8YLa/IxT9KIBNhS3mIc1BeK8/Gy8SulW1zcZhCL1LkgSjdpT/men+E7nYa3cVpNVcQHnoPZV0d0VS3tOhexMc9gqlZA9RyEueUjODpfTHC9y80mbIKO3/fAu+BFbD/syGYsvWfPJ2UNuUoFgwYiVW32mLehp3Y6T8HnU224ZOBS/Fn5h41Yd9hzNilOFdvFFYH7MTaaS44uWwDLun36UbvwCeDPsH+Uv0xXyoTsLA30rZ+jOFfHTYIa/sWz0C460ys/d0fi3rVwpk1k/Dt74k5nnu6yXX88Nl6WA71wbYtazChRSJ2z5yO7y9lBsSUYHzeewRWXW6MKasDsXPLV3jvpYOYNnAKtt7KLJN8Dj5jJ8AntJ5BmekDp2H7/Ywy4gSu/28a1psPhu+2AKx5vwUeBs3CzDXF7y+FHLG4ggIUoEAxExChQrS6bNu2DY0aNZJDhhjDI4KICENff/01nJ2d5W4qb29vXSgSZcRkb28vb2tlZZWngKK0KIlnEaj0n8Vr5WG8ThxbrCsuU5EHouwu/M7Gr7AstDGGD+mY3erCW6aJx5W93pjvfwPle3ZGZ3GkK+uxYlMsXpu8Bt6ebrCzdUCHMb6Y7WmGPbN8sCsPZ2N68ghCkl0xeuYUeDhK3XWu3aRg0x4pt4JxNHPA9N6f1uGy1QB4f+uFllIZxw5j4Of9HqrpVZaDKxZg9+O3MHXleHk/jq9Pgvf4Zrjt/xN26DXWOIzwxdIRreBk64rOM8ahZ8U4hIbnHDqkRlN0m7sWn78pXa/Dqxj62Qi4moYiIrPF7O+132FLbEtMXLsAnm51pDIdMNpvFnqaBmH+0j9kkdSgdVh5rj5G+uiX+RSdknfgxy2ROrWyXeZg7Yw34WbnCPdhn2Bkc3OEnr+gW88XFKAABSjwbAIiVIiuqBYtWsDX11d+LVqGRCvQyJEj5XmllUaU8/LykteJMmJ+6dKlaNWqlfw6LwFFaeURz8/yEFepbPtsV1w4pYt8DJHxZSSf88WYLw6j7qj/YWjDwk+KyVeXo7/Dcr3TKI2GfRfC/1MPeUB1Stg5nEt1xIevVdcrY4FOHh4os/kYLkoBppOL3qpcvEx3n4Cf9xkWtDTNohd3rZ0//QBmzZqgld6obsuKVngpczNR5uzxezBr/xq66JWp7+yCKmnBuHFRaoXJ3GUNmwa6g2m0VVDN+um5V5NeFTY2pXTbpNtK20g/YBntOskIPRsKk8bj0bp61vujMe8Ajzcq49ej53EGHngcdhppdaUuQb33UGPeDQtPd5P3m46M0FO1ho1u4LpGWxtVrKVm24zWXd3x+YICFKAABfImoN/llVPYEEFJlBNhSEzKLfl5O2LJ2Srrf+XncU2iC2jkUkS1/QI/jS2azjL9u8wSjn6NIdOPoGmb9rDNDBkR1yNhml5bGnid9Z+/oNFWrYZqMFyWe7Jk3DiwDguXrMb+0PtIyNzQBPUNdlHLtpbBvP6MVhODe3e1SIiYCIcdE/VXSW2OFrh5XYovdQ0XF8ScVnMJN65Kf0XYVckciJ6116rVqupm7kTdkc7DFBm90rrFfEEBClCAAoUsIIKPCDinTp3C2LFj5dci9IjxQStXrsTChQvlZcpprF69GmI8j7gNXmw7btw4+Pn5yS1MYj4vrUTKvl/k5+cXiKQw9HGvSTjaXApDS3pCvz2mMEH17zLT1hmOgT/sxuqV/hjgMQz20oHta9shXfMQiWLcS6WsAKS5eR2RUkXJy6Q56YOhIzai7ocLsdHPDQ2sLCEPgPbcbrA7OVQYLMma0UgDzytX0cCu81KsGNQwa0Xmq9KVpVagyCcW53uBRtsQteqYQvMoHvelvekNhceNa9d1+5fDUVga0nRL+IICFKAABYpCQAQYcaeYuHVe3HIvwpAIPOJ52bJlEGOFBg8eLIefdevWYfHixboyIkhduHBB3vbixYsQ44jUOj29L6WQVLRiAO6YaQiuOgpLvIsuDBlfjkbrBK8Jb8PsjB98t96TV5s7OaOx+XEEB97SK56MoP37kV7OBY2aZoUkvQJPfRl65ACiUtzRWRrXI8KQmB7HPMDDzK3EeTi6WCE+5BgO691xZVimIRo5V8StI+dw30YahyQ+OkB62NYphfS0yrAul7mzAn+yQOMmjaE9ugc7MwdQi0NoU/bgQHC8biC8q5MLTP8OwbHMgdgZZYIx782OeP/HGwV+VtwhBShAAQpkCIiuLzGoumfPnvICZbC0Mo5IDKpu1qwZ3NzcsGjRIrm1SKwTk+guE4FKbCv2oXSjyStz+Y/SoiSe9V/ntHluy+W0fWEtL/JAlPHBjGPh85czRs3ogUq3IxEZmfWIzvj+ucK63if2a+YxGF4uifjDd700Fkaa6v0fRvapgIPzh2BSwAlEXruAPT6jMC0gHi0nj8nT5xTZN3JCafO9WD99Cw6fP4m9qz6D54R1iNJrcXq97wA0eLAOk8Z9h5DzkTi5YxFGTPpBr4wFPN4diAb/fIfxw5dit1Qm8sIR+E8egj4D5mF3bN5ar54AyWZB3YFe6F0hBF8N/C8CTlyVjrsHy0dMx9aE1vhgfEd5C7NOAzDc+S+sGKOUOYI1E6bCP9oZHdrVzGavXEQBClCAAgUhoASM2bNno1KlSkhKSpJbg0QLkQg+IvSIoCMeyq34omVIdI+JzysqX7485syZIwclJdA8y3mJ/YhJeVb2oTyLdco56i/T30a8ft5TkXeZaTVSINh5D2npd7DwP12x0Eig27wwLOxVdDlNo62HgSM9sWr0Kixb/w78/q8G2s36CX7VZmL2l8PQJe4xylRwRKe5/pjZu4bR2eZu1txjMnwm3sMnvrMwbJMWL9l3xaR5o/DjB764fFm6PaxpaWidvOCzLBWfT/fFUM9FKGvTBgPHvouY2cqN+VJlk8ps2FQNMz6dj8mePtJYpNKo4SrddbZKunutgtRyVUgNMRrzdpi5xQ/WM+bgy6FdEZdcGlaOb2D2xhnolTnQWmPhjDHLlkCrV0ac2+y1U9BTKpP1Hci5M2MpClCAAhTInYAIGSLsVKlSBV988YX8PWLi84bEN9tPnDgRBw4ckLvIlHJt2rTBV199hfj4ePj4+KB9+/aoVq2aHGiMA0tuzkB/G3E3mwhd+oO2lX2IZSKgiTLG4Ukp8zyfNdJJGTQtiLTIiQIUeDEFnGcW+d84hQJ17vOi/4jWQrkQ7pQCRSgg/jvXDyfi0Pul4R5dunSRxxGJeTG2SHxekYd057T+lN22+uv/7bXYXoSyTp064fDhw08tLj4eYO/evbqQ9tTChbDS0jLzLiqjfZeM355GF8VZClCAAhSggNoERBgSwUQJJ6JFpmrVqnJQ0W/sEK1BSheaKCO2Mw5SebETXXTr16+Xv0ctIUG5n9pwT6LVql+/fnIrkjjP4jSxhag4vRs8FwrkU4AtRPkE5OYUKGECootq165dePTokRx6xHeX6bcYlbDLzdXlsIUoV0wsRAEKUIACFCg5AqLVpmvXrkV2QaLVR7mDLaeDinMqiBapnPaf1+XsMsurHLejAAUoQAEKUMBAQAQdMaj6RZyK7nauF1GH50wBClCAAhSggCoEOIZIFW8zL5ICFKAABShAASGQ0xgithCxflCAAhSgAAUooHoBBiLVVwECUIACFKAABSjAQMQ6QAEKUIACFKCA6gUYiFRfBQhAAQpQgAIUoAADEesABShAAQpQgAKqF2AgUn0VIAAFKEABClCAAgxErAMUoAAFKEABCqhegIFI9VWAABSgAAUoQAEKMBCxDlCAAhSgAAUooHoBBiLVVwECUIACFKAABSjAQMQ6QAEKUIACFKCA6gUYiFRfBQhAAQpQgAIUoAADEesABShAAQpQgAKqF2AgUn0VIAAFKEABClCAAgxErAMUoAAFKEABCqhegIFI9VWAABSgAAUoQAEKMBCxDlCAAhSgAAUooHoBBiLVVwECUIACFKAABSjAQMQ6QAEKUIACFKCA6gUYiFRfBQhAAQpQgAIUoAADEesABShAAQpQgAKqF2AgUn0VIAAFKEABClCAAgxErAMUoAAFKEABCqhegIFI9VWAABSgAAUoQAEKMBCxDlCAAhSgAAUooHoBBiLVVwECUIACFKAABSjAQMQ6QAEKUIACFKCA6gUYiFRfBQhAAQpQgAIUoAADEesABShAAQpQgAKqF2AgUn0VIAAFKEABClCAAgxErAMUoAAFKEABCqhegIFI9VWAABSgAAUoQAEKMBCxDlCAAhSgAAUooHoBBiLVVwECUIACFKAABSjAQMQ6QAEKUIACFKCA6gUYiFRfBQhAAQpQgAIUoAADEesABShAAQpQgAKqF2AgUn0VIAAFKEABClCAAgxErAMUoAAFKEABCqhegIFI9VWAABSgAAUoQAEKMBCxDlCAAhSgAAUooHoBBiLVVwECUIACFKAABSjAQMQ6QAEKUIACFKCA6gUYiFRfBQhAAQpQgAIUoAADEesABShAAQpQgAKqF2AgUn0VIAAFKEABClCAAgxErAMUoAAFKEABCqhegIFI9VWAABSgAAUoQAEKMBCxDlCAAhSgAAUooHoBBiLVVwECUIACFKAABSjAQMQ6QAEKUIACFKCA6gUYiFRfBQhAAQpQgAIUoAADEesABShAAQpQgAKqF2AgUn0VIAAFKEABClCAAgxErAMUoAAFKEABCqhegIFI9VWAABSgAAUoQAEKMBCxDlCAAhSgAAUooHoBBiLVVwECUIACFKAABSjAQMQ6QAEKUIACFKCA6gUYiFRfBQhAAQpQgAIUoAADEesABShAAQpQgAKqF2AgUn0VIAAFKEABClCAAgxErAMUoAAFKEABCqhegIFI9VWAABSgAAUoQAEKMBCxDlCAAhSgAAUooHoBBiLVVwECUIACFKAABSjAQMQ6QAEKUIACFKCA6gUYiFRfBQhAAQpQgAIUoAADEesABShAAQpQgAKqF2AgUn0VIAAFKEABClCAAgxErAMUoAAFKEABCqheQKOVJtUrEIACFKAABShAAVULsIVI1W8/L54CFKAABShAASHAQMR6QAEKUIACFKCA6gUYiFRfBQhAAQpQgAIUoAADEesABShAAQpQgAKqF2AgUn0VIAAFKEABClCAAv8P4oeGbOSsyUIAAAAASUVORK5CYII="
-              }
-            ]
-          }
         }
       ]
     },
@@ -293,26 +264,7 @@
       "items": [
         {
           "type": "Label",
-          "caption": "Bitte wählen Sie aus, ob ein Aussperrschutz verwendet werden soll:"
-        },
-        {
-          "type": "CheckBox",
-          "name": "UseLockoutProtection",
-          "caption": "Aussperrschutz verwenden"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition an, ab dem der Aussperrschutz berücksichtigt wird (100% = immer):"
-        },
-        {
-          "type": "NumberSpinner",
-          "name": "LockoutPosition",
-          "caption": "Rollladenposition",
-          "suffix": "%"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte wählen Sie die Variablen der Tür- und Fenstersensoren aus:"
+          "caption": "Bitte wählen Sie die Variablen der Tür- und Fenstersensoren (HM: Kanal 1 STATE, HmIP: Kanal 1 STATE) aus:"
         },
         {
           "type": "List",
@@ -348,20 +300,22 @@
         },
         {
           "type": "Label",
-          "caption": " "
+          "caption": "\nBitte wählen Sie aus, ob ein Aussperrschutz verwendet werden soll:"
         },
         {
-          "type": "PopupButton",
-          "caption": "Hinweis",
-          "popup": {
-            "caption": "Tür- / Fensterüberwachung",
-            "items": [
-              {
-                "type": "Label",
-                "caption": "Bei aktiviertem Aussperrschutz wird der Rollladen nur heruntergefahren, wenn alle Türen und Fenster geschlossen sind, bzw. die Rollladenpositon der Vorgabe entspricht."
-              }
-            ]
-          }
+          "type": "CheckBox",
+          "name": "UseLockoutProtection",
+          "caption": "Aussperrschutz verwenden"
+        },
+        {
+          "type": "Label",
+          "caption": "\nBitte geben Sie die Rollladenposition in % (100% = immer) für den Aussperrschutz an:"
+        },
+        {
+          "type": "NumberSpinner",
+          "name": "LockoutPosition",
+          "caption": "Rollladenposition",
+          "suffix": "%"
         }
       ]
     }
@@ -383,14 +337,9 @@
       "caption": "Wochenplan",
       "items": [
         {
-          "type": "RowLayout",
-          "items": [
-            {
-              "type": "Button",
-              "caption": "Aktuelle Aktion anzeigen",
-              "onClick": "RS_ShowActualAction($id);"
-            }
-          ]
+          "type": "Button",
+          "caption": "Aktuelle Aktion anzeigen",
+          "onClick": "RS_ShowActualAction($id);"
         }
       ]
     },

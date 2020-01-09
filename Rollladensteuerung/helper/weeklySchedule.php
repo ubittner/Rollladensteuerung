@@ -75,7 +75,7 @@ trait RS_weeklySchedule
             if (isset($level)) {
                 $check = $this->CheckLogic($level);
                 if ($check) {
-                    $executionDelay = $this->ReadPropertyInteger('ActionDelay');
+                    $executionDelay = $this->ReadPropertyInteger('ExecutionDelay');
                     if ($CheckExecutionDelay) {
                         if ($executionDelay > 0) {
                             // Delay
@@ -148,7 +148,7 @@ trait RS_weeklySchedule
      */
     private function AdjustBlindLevel(): void
     {
-        if ($this->GetValue('AutomaticMode') && $this->ReadPropertyBoolean('UseSetBlindLevel')) {
+        if ($this->GetValue('AutomaticMode') && $this->ReadPropertyBoolean('AdjustBlindLevel')) {
             $this->SetActualAction(false);
         }
     }
