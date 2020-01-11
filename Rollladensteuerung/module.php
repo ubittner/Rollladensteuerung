@@ -32,13 +32,15 @@ include_once __DIR__ . '/helper/autoload.php';
 
 class Rollladensteuerung extends IPSModule
 {
-    // Traits
-    use RS_blindControl;
+    // Helper
+    use RS_blindActuator;
     use RS_doorWindowSensors;
+    use RS_emergencySensors;
     use RS_weeklySchedule;
 
     // Constants
     private const MINIMUM_DELAY_MILLISECONDS = 100;
+    private const HOMEMATIC_DEVICE_GUID = '{EE4A81C6-5C90-4DB7-AD2F-F6BBD521412E}';
 
     public function Create()
     {
@@ -53,6 +55,9 @@ class Rollladensteuerung extends IPSModule
 
         // Register variables
         $this->RegisterVariables();
+
+        // Register timers
+        $this->RegisterTimers();
     }
 
     public function ApplyChanges()
@@ -67,6 +72,12 @@ class Rollladensteuerung extends IPSModule
         if (IPS_GetKernelRunlevel() != KR_READY) {
             return;
         }
+
+        // Validate configuration
+        $this->ValidateConfiguration();
+
+        // Disable timers
+        $this->DisableTimers();
 
         // Create links
         $this->CreateLinks();
@@ -115,10 +126,10 @@ class Rollladensteuerung extends IPSModule
                         if ($Data[1]) {
                             $timeStamp = date('d.m.Y, H:i:s');
                             $this->LogMessage('Variable Sonnenuntergang hat sich geändert! ' . $timeStamp, 10201);
+                            $this->SetBlindLevel(0, true);
                         }
                     }
                 }
-
                 // Sunrise
                 $id = $this->ReadPropertyInteger('Sunrise');
                 if ($id != 0 && @IPS_ObjectExists($id)) {
@@ -126,10 +137,20 @@ class Rollladensteuerung extends IPSModule
                         if ($Data[1]) {
                             $timeStamp = date('d.m.Y, H:i:s');
                             $this->LogMessage('Variable Sonnenaufgang hat sich geändert! ' . $timeStamp, 10201);
+                            $this->SetBlindLevel(1, true);
                         }
                     }
                 }
-
+                // Actuator state level
+                $id = $this->ReadPropertyInteger('ActuatorStateLevel');
+                if ($id != 0 && @IPS_ObjectExists($id)) {
+                    if ($SenderID == $id) {
+                        if ($Data[0] == 0 && $Data[1]) {
+                            $this->SendDebug(__FUNCTION__, 'BlindSlider aktualisieren', 0);
+                            $this->UpdateBlindSlider();
+                        }
+                    }
+                }
                 // Door and window sensors
                 $doorWindowSensors = json_decode($this->ReadPropertyString('DoorWindowSensors'), true);
                 if (!empty($doorWindowSensors)) {
@@ -139,13 +160,12 @@ class Rollladensteuerung extends IPSModule
                         }
                     }
                 }
-                // Blind level process
-                $name = 'BlindLevelProcess';
-                if ($this->ValidatePropertyVariable($name)) {
-                    if ($SenderID == $this->ReadPropertyInteger($name)) {
-                        if ($Data[0] == 0 && $Data[1]) {
-                            $this->SendDebug(__FUNCTION__, 'BlindSlider aktualisieren', 0);
-                            $this->UpdateBlindSlider();
+                // Emergency sensors
+                $id = json_decode($this->ReadPropertyString('EmergencySensors'), true);
+                if (!empty($id)) {
+                    if (array_search($SenderID, array_column($id, 'ID')) !== false) {
+                        if ($Data[1]) {
+                            $this->TriggerEmergencySensor($SenderID);
                         }
                     }
                 }
@@ -156,7 +176,7 @@ class Rollladensteuerung extends IPSModule
             case EM_UPDATE:
                 // Weekly schedule
                 if ($this->ValidateEventPlan()) {
-                    $this->SetActualAction(true);
+                    $this->TriggerAction(true);
                 }
                 break;
 
@@ -221,6 +241,10 @@ class Rollladensteuerung extends IPSModule
                 $this->SetBlindSlider($Value);
                 break;
 
+            case 'SleepMode':
+                $this->ToggleSleepMode($Value);
+                break;
+
         }
     }
 
@@ -231,21 +255,29 @@ class Rollladensteuerung extends IPSModule
         // Visibility
         $this->RegisterPropertyBoolean('EnableAutomaticMode', true);
         $this->RegisterPropertyBoolean('EnableWeeklySchedule', true);
-        $this->RegisterPropertyBoolean('EnableDoorWindowState', true);
+        $this->RegisterPropertyBoolean('EnableSunset', true);
+        $this->RegisterPropertyBoolean('EnableSunrise', true);
         $this->RegisterPropertyBoolean('EnableBlindSlider', true);
+        $this->RegisterPropertyBoolean('EnableSleepMode', true);
+        $this->RegisterPropertyBoolean('EnableDoorWindowState', true);
 
         // Blind actuator
         $this->RegisterPropertyInteger('DeviceType', 0);
-        $this->RegisterPropertyInteger('BlindLevel', 0);
-        $this->RegisterPropertyInteger('BlindLevelProcess', 0);
-        $this->RegisterPropertyInteger('BlindActuator', 0);
-        $this->RegisterPropertyInteger('BlindActuatorProperty', 0);
+        $this->RegisterPropertyInteger('ActuatorInstance', 0);
+        $this->RegisterPropertyInteger('ActuatorStateLevel', 0);
+        $this->RegisterPropertyInteger('ActuatorStateProcess', 0);
+        $this->RegisterPropertyInteger('ActuatorControlLevel', 0);
+        $this->RegisterPropertyInteger('ActuatorProperty', 0);
 
         // Blind positions
         $this->RegisterPropertyInteger('BlindPositionClosed', 0);
         $this->RegisterPropertyInteger('BlindPositionOpened', 100);
+        $this->RegisterPropertyInteger('BlindPositionShading', 50);
         $this->RegisterPropertyBoolean('UseCheckBlindPosition', false);
         $this->RegisterPropertyInteger('BlindPositionDifference', 3);
+
+        // Sleep duration
+        $this->RegisterPropertyInteger('SleepDuration', 12);
 
         // Astro
         $this->RegisterPropertyInteger('Sunset', 0);
@@ -258,29 +290,22 @@ class Rollladensteuerung extends IPSModule
 
         // Door and window sensors
         $this->RegisterPropertyString('DoorWindowSensors', '[]');
-        $this->RegisterPropertyBoolean('UseLockoutProtection', false);
+        $this->RegisterPropertyBoolean('LockoutProtection', false);
         $this->RegisterPropertyInteger('LockoutPosition', 60);
-    }
 
-    private function ValidatePropertyVariable(string $Name): bool
-    {
-        $validate = false;
-        $variable = $this->ReadPropertyInteger($Name);
-        if ($variable != 0 && @IPS_ObjectExists($variable)) {
-            $validate = true;
-        }
-        return $validate;
+        // Emergency sensors
+        $this->RegisterPropertyString('EmergencySensors', '[]');
     }
 
     private function CreateProfiles(): void
     {
-        // Door and window state
-        $profile = 'RS.' . $this->InstanceID . '.DoorWindowState';
+        // Automatic mode
+        $profile = 'RS.' . $this->InstanceID . '.AutomaticMode';
         if (!IPS_VariableProfileExists($profile)) {
             IPS_CreateVariableProfile($profile, 0);
         }
-        IPS_SetVariableProfileAssociation($profile, 0, 'Geschlossen', 'Window', 0x00FF00);
-        IPS_SetVariableProfileAssociation($profile, 1, 'Geöffnet', 'Window', 0x0000FF);
+        IPS_SetVariableProfileAssociation($profile, 0, 'Aus', 'Execute', -1);
+        IPS_SetVariableProfileAssociation($profile, 1, 'An', 'Clock', 0x00FF00);
 
         // Blind slider
         $profile = 'RS.' . $this->InstanceID . '.BlindSlider.Reversed';
@@ -291,11 +316,27 @@ class Rollladensteuerung extends IPSModule
         IPS_SetVariableProfileText($profile, '', '%');
         IPS_SetVariableProfileDigits($profile, 1);
         IPS_SetVariableProfileValues($profile, 0, 1, 0.05);
+
+        // Sleep mode
+        $profile = 'RS.' . $this->InstanceID . '.SleepMode';
+        if (!IPS_VariableProfileExists($profile)) {
+            IPS_CreateVariableProfile($profile, 0);
+        }
+        IPS_SetVariableProfileAssociation($profile, 0, 'Aus', 'Sleep', -1);
+        IPS_SetVariableProfileAssociation($profile, 1, 'An', 'Sleep', 0x0000FF);
+
+        // Door and window state
+        $profile = 'RS.' . $this->InstanceID . '.DoorWindowState';
+        if (!IPS_VariableProfileExists($profile)) {
+            IPS_CreateVariableProfile($profile, 0);
+        }
+        IPS_SetVariableProfileAssociation($profile, 0, 'Geschlossen', 'Window', 0x00FF00);
+        IPS_SetVariableProfileAssociation($profile, 1, 'Geöffnet', 'Window', 0x0000FF);
     }
 
     private function DeleteProfiles(): void
     {
-        $profiles = ['DoorWindowState', 'BlindSlider.Reversed'];
+        $profiles = ['BlindSlider.Reversed', 'SleepMode', 'DoorWindowState'];
         foreach ($profiles as $profile) {
             $profileName = 'RS.' . $this->InstanceID . '.' . $profile;
             if (@IPS_VariableProfileExists($profileName)) {
@@ -307,39 +348,80 @@ class Rollladensteuerung extends IPSModule
     private function RegisterVariables(): void
     {
         // Automatic mode
-        $this->RegisterVariableBoolean('AutomaticMode', 'Automatik', '~Switch', 0);
+        $profile = 'RS.' . $this->InstanceID . '.AutomaticMode';
+        $this->RegisterVariableBoolean('AutomaticMode', 'Automatik', $profile, 0);
         $this->EnableAction('AutomaticMode');
-        IPS_SetIcon($this->GetIDForIdent('AutomaticMode'), 'Clock');
-
-        // Door and window state
-        $profile = 'RS.' . $this->InstanceID . '.DoorWindowState';
-        $this->RegisterVariableBoolean('DoorWindowState', 'Tür- / Fensterstatus', $profile, 2);
 
         // Blind slider
         $profile = 'RS.' . $this->InstanceID . '.BlindSlider.Reversed';
-        $this->RegisterVariableFloat('BlindSlider', 'Rollladen', $profile, 3);
+        $this->RegisterVariableFloat('BlindSlider', 'Rollladen', $profile, 4);
         $this->EnableAction('BlindSlider');
         IPS_SetIcon($this->GetIDForIdent('BlindSlider'), 'Jalousie');
+
+        // Sleep mode
+        $profile = 'RS.' . $this->InstanceID . '.SleepMode';
+        $this->RegisterVariableBoolean('SleepMode', 'Ruhe-Modus', $profile, 5);
+        $this->EnableAction('SleepMode');
+
+        // Door and window state
+        $profile = 'RS.' . $this->InstanceID . '.DoorWindowState';
+        $this->RegisterVariableBoolean('DoorWindowState', 'Tür- / Fensterstatus', $profile, 6);
     }
 
     private function CreateLinks(): void
     {
-        // Create link for weekly schedule
-        $weeklySchedule = $this->ReadPropertyInteger('WeeklySchedule');
-        $link = @IPS_GetLinkIDByName('Wochenplan', $this->InstanceID);
-        if ($weeklySchedule != 0 && @IPS_ObjectExists($weeklySchedule)) {
+        // Weekly schedule
+        $targetID = $this->ReadPropertyInteger('WeeklySchedule');
+        $linkID = @IPS_GetLinkIDByName('Wochenplan', $this->InstanceID);
+        if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
             // Check for existing link
-            if ($link === false) {
-                $link = IPS_CreateLink();
+            if ($linkID === false) {
+                $linkID = IPS_CreateLink();
             }
-            IPS_SetParent($link, $this->InstanceID);
-            IPS_SetPosition($link, 1);
-            IPS_SetName($link, 'Wochenplan');
-            IPS_SetIcon($link, 'Calendar');
-            IPS_SetLinkTargetID($link, $weeklySchedule);
+            IPS_SetParent($linkID, $this->InstanceID);
+            IPS_SetPosition($linkID, 1);
+            IPS_SetName($linkID, 'Wochenplan');
+            IPS_SetIcon($linkID, 'Calendar');
+            IPS_SetLinkTargetID($linkID, $targetID);
         } else {
-            if ($link !== false) {
-                IPS_SetHidden($link, true);
+            if ($linkID !== false) {
+                IPS_SetHidden($linkID, true);
+            }
+        }
+        // Sunset
+        $targetID = $this->ReadPropertyInteger('Sunset');
+        $linkID = @IPS_GetLinkIDByName('Sonnenuntergang', $this->InstanceID);
+        if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
+            // Check for existing link
+            if ($linkID === false) {
+                $linkID = IPS_CreateLink();
+            }
+            IPS_SetParent($linkID, $this->InstanceID);
+            IPS_SetPosition($linkID, 1);
+            IPS_SetName($linkID, 'Sonnenuntergang');
+            IPS_SetIcon($linkID, 'Calendar');
+            IPS_SetLinkTargetID($linkID, $targetID);
+        } else {
+            if ($linkID !== false) {
+                IPS_SetHidden($linkID, true);
+            }
+        }
+        // Sunrise
+        $targetID = $this->ReadPropertyInteger('Sunrise');
+        $linkID = @IPS_GetLinkIDByName('Sonnenaufgang', $this->InstanceID);
+        if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
+            // Check for existing link
+            if ($linkID === false) {
+                $linkID = IPS_CreateLink();
+            }
+            IPS_SetParent($linkID, $this->InstanceID);
+            IPS_SetPosition($linkID, 1);
+            IPS_SetName($linkID, 'Sonnenaufgang');
+            IPS_SetIcon($linkID, 'Calendar');
+            IPS_SetLinkTargetID($linkID, $targetID);
+        } else {
+            if ($linkID !== false) {
+                IPS_SetHidden($linkID, true);
             }
         }
     }
@@ -352,14 +434,51 @@ class Rollladensteuerung extends IPSModule
         // Weekly schedule
         $id = @IPS_GetLinkIDByName('Wochenplan', $this->InstanceID);
         if ($id !== false) {
-            IPS_SetHidden($id, !$this->ReadPropertyBoolean('EnableWeeklySchedule'));
+            $hide = true;
+            if ($this->ReadPropertyBoolean('EnableWeeklySchedule') && $this->GetValue('AutomaticMode')) {
+                $hide = false;
+            }
+            IPS_SetHidden($id, $hide);
         }
 
-        // Door and window state
-        IPS_SetHidden($this->GetIDForIdent('DoorWindowState'), !$this->ReadPropertyBoolean('EnableDoorWindowState'));
+        // Sunset
+        $id = @IPS_GetLinkIDByName('Sonnenuntergang', $this->InstanceID);
+        if ($id !== false) {
+            $hide = true;
+            if ($this->ReadPropertyBoolean('EnableSunset') && $this->GetValue('AutomaticMode')) {
+                $hide = false;
+            }
+            IPS_SetHidden($id, $hide);
+        }
+
+        // Sunrise
+        $id = @IPS_GetLinkIDByName('Sonnenaufgang', $this->InstanceID);
+        if ($id !== false) {
+            $hide = true;
+            if ($this->ReadPropertyBoolean('EnableSunrise') && $this->GetValue('AutomaticMode')) {
+                $hide = false;
+            }
+            IPS_SetHidden($id, $hide);
+        }
 
         // Blind slider
         IPS_SetHidden($this->GetIDForIdent('BlindSlider'), !$this->ReadPropertyBoolean('EnableBlindSlider'));
+
+        // Sleep Mode
+        IPS_SetHidden($this->GetIDForIdent('SleepMode'), !$this->ReadPropertyBoolean('EnableSleepMode'));
+
+        // Door and window state
+        IPS_SetHidden($this->GetIDForIdent('DoorWindowState'), !$this->ReadPropertyBoolean('EnableDoorWindowState'));
+    }
+
+    private function RegisterTimers(): void
+    {
+        $this->RegisterTimer('DeactivateSleepMode', 0, 'RS_ToggleSleepMode(' . $this->InstanceID . ', false);');
+    }
+
+    private function DisableTimers(): void
+    {
+        $this->SetTimerInterval('DeactivateSleepMode', 0);
     }
 
     private function UnregisterMessages(): void
@@ -380,25 +499,26 @@ class Rollladensteuerung extends IPSModule
     {
         // Unregister first
         $this->UnregisterMessages();
-
         // Sunset
         $id = $this->ReadPropertyInteger('Sunset');
         if ($id != 0 && @IPS_ObjectExists($id)) {
             $this->RegisterMessage($id, VM_UPDATE);
         }
-
         // Sunrise
         $id = $this->ReadPropertyInteger('Sunrise');
         if ($id != 0 && @IPS_ObjectExists($id)) {
             $this->RegisterMessage($id, VM_UPDATE);
         }
-
         // Weekly schedule
         $id = $this->ReadPropertyInteger('WeeklySchedule');
         if ($id != 0 && @IPS_ObjectExists($id)) {
             $this->RegisterMessage($id, EM_UPDATE);
         }
-
+        // Blind level process
+        $id = $this->ReadPropertyInteger('ActuatorStateProcess');
+        if ($id != 0 && IPS_ObjectExists($id)) {
+            $this->RegisterMessage($id, VM_UPDATE);
+        }
         // Door and window sensors
         $doorWindowSensors = $this->GetDoorWindowSensors();
         if (!empty($doorWindowSensors)) {
@@ -408,11 +528,212 @@ class Rollladensteuerung extends IPSModule
                 }
             }
         }
+    }
 
-        // Blind level process
-        $id = $this->ReadPropertyInteger('BlindLevelProcess');
-        if ($id != 0 && IPS_ObjectExists($id)) {
-            $this->RegisterMessage($id, VM_UPDATE);
+    private function ValidateConfiguration(): void
+    {
+        $state = 102;
+        $deviceType = $this->ReadPropertyInteger('DeviceType');
+        // Blind actuator
+        $id = $this->ReadPropertyInteger('ActuatorInstance');
+        if ($id != 0) {
+            if (!@IPS_ObjectExists($id)) {
+                $this->LogMessage('Konfiguration: Instanz Rollladenaktor ID ungültig!', KL_ERROR);
+                $state = 200;
+            } else {
+                $instance = IPS_GetInstance($id);
+                $moduleID = $instance['ModuleInfo']['ModuleID'];
+                if ($moduleID !== self::HOMEMATIC_DEVICE_GUID) {
+                    $this->LogMessage('Konfiguration: Instanz Rollladenaktor GUID ungültig!', KL_ERROR);
+                    $state = 200;
+                } else {
+                    // Check channel
+                    $config = json_decode(IPS_GetConfiguration($id));
+                    $address = strstr($config->Address, ':', false);
+                    switch ($deviceType) {
+                        // HM
+                        case 0:
+                            if ($address != ':1') {
+                                $this->LogMessage('Konfiguration: Instanz Rollladenaktor Kanal ungültig!', KL_ERROR);
+                                $state = 200;
+                            }
+                            break;
+
+                        // HmIP
+                        case 1:
+                        case 2:
+                            if ($address != ':3') {
+                                $this->LogMessage('Konfiguration: Instanz Rollladenaktor Kanal ungültig!', KL_ERROR);
+                                $state = 200;
+                            }
+                            break;
+
+                    }
+                }
+            }
         }
+        // Actuator state level
+        $id = $this->ReadPropertyInteger('ActuatorStateLevel');
+        if ($id != 0) {
+            if (!@IPS_ObjectExists($id)) {
+                $this->LogMessage('Konfiguration: Variable Rollladenposition ID ungültig!', KL_ERROR);
+                $state = 200;
+            } else {
+                $parent = IPS_GetParent($id);
+                if ($parent == 0) {
+                    $this->LogMessage('Konfiguration: Variable Rollladenposition, keine übergeordnete ID gefunden!', KL_ERROR);
+                    $state = 200;
+                } else {
+                    $instance = IPS_GetInstance($parent);
+                    $moduleID = $instance['ModuleInfo']['ModuleID'];
+                    if ($moduleID !== self::HOMEMATIC_DEVICE_GUID) {
+                        $this->LogMessage('Konfiguration: Variable Rollladenposition GUID ungültig!', KL_ERROR);
+                        $state = 200;
+                    } else {
+                        // Check channel
+                        $config = json_decode(IPS_GetConfiguration($parent));
+                        $address = strstr($config->Address, ':', false);
+                        switch ($deviceType) {
+                            // HM
+                            case 0:
+                                if ($address != ':1') {
+                                    $this->LogMessage('Konfiguration: Variable Rollladenposition Kanal ungültig!', KL_ERROR);
+                                    $state = 200;
+                                }
+                                break;
+
+                            // HmIP
+                            case 1:
+                            case 2:
+                                if ($address != ':3') {
+                                    $this->LogMessage('Konfiguration: Variable Rollladenposition Kanal ungültig!', KL_ERROR);
+                                    $state = 200;
+                                }
+                                break;
+
+                        }
+                    }
+                }
+                $ident = IPS_GetObject($id)['ObjectIdent'];
+                if ($ident != 'LEVEL') {
+                    $this->LogMessage('Konfiguration: Variable Rollladenposition IDENT ungültig!', KL_ERROR);
+                    $state = 200;
+                }
+            }
+        }
+        // Actuator state process
+        $id = $this->ReadPropertyInteger('ActuatorStateProcess');
+        if ($id != 0) {
+            if (!@IPS_ObjectExists($id)) {
+                $this->LogMessage('Konfiguration: Variable Aktivitätszustand ID ungültig!', KL_ERROR);
+                $state = 200;
+            } else {
+                $parent = IPS_GetParent($id);
+                if ($parent == 0) {
+                    $this->LogMessage('Konfiguration: Variable Aktivitätszustand, keine übergeordnete ID gefunden!', KL_ERROR);
+                    $state = 200;
+                } else {
+                    $instance = IPS_GetInstance($parent);
+                    $moduleID = $instance['ModuleInfo']['ModuleID'];
+                    if ($moduleID !== self::HOMEMATIC_DEVICE_GUID) {
+                        $this->LogMessage('Konfiguration: Variable Aktivitätszustand GUID ungültig!', KL_ERROR);
+                        $state = 200;
+                    } else {
+                        // Check channel
+                        $config = json_decode(IPS_GetConfiguration($parent));
+                        $address = strstr($config->Address, ':', false);
+                        switch ($deviceType) {
+                            // HM
+                            case 0:
+                                if ($address != ':1') {
+                                    $this->LogMessage('Konfiguration: Variable Aktivitätszustand Kanal ungültig!', KL_ERROR);
+                                    $state = 200;
+                                }
+                                break;
+
+                            // HmIP
+                            case 1:
+                            case 2:
+                                if ($address != ':3') {
+                                    $this->LogMessage('Konfiguration: Variable Aktivitätszustand Kanal ungültig!', KL_ERROR);
+                                    $state = 200;
+                                }
+                                break;
+
+                        }
+                    }
+                }
+                $ident = IPS_GetObject($id)['ObjectIdent'];
+                switch ($deviceType) {
+                    // HM
+                    case 1:
+                        if ($ident != 'WORKING') {
+                            $this->LogMessage('Konfiguration: Variable Aktivitätszustand IDENT ungültig!', KL_ERROR);
+                            $state = 200;
+                        }
+                        break;
+
+                    // HmIP
+                    case 2:
+                    case 3:
+                        if ($ident != 'PROCESS') {
+                            $this->LogMessage('Konfiguration: Variable Aktivitätszustand IDENT ungültig!', KL_ERROR);
+                            $state = 200;
+                        }
+                        break;
+                }
+            }
+        }
+        // Actuator control level
+        $id = $this->ReadPropertyInteger('ActuatorControlLevel');
+        if ($id != 0) {
+            if (!@IPS_ObjectExists($id)) {
+                $this->LogMessage('Konfiguration: Variable Rollladensteuerung ID ungültig!', KL_ERROR);
+                $state = 200;
+            } else {
+                $parent = IPS_GetParent($id);
+                if ($parent == 0) {
+                    $this->LogMessage('Konfiguration: Variable Rollladensteuerung, keine übergeordnete ID gefunden!', KL_ERROR);
+                    $state = 200;
+                } else {
+                    $instance = IPS_GetInstance($parent);
+                    $moduleID = $instance['ModuleInfo']['ModuleID'];
+                    if ($moduleID !== self::HOMEMATIC_DEVICE_GUID) {
+                        $this->LogMessage('Konfiguration: Variable Rollladensteuerung GUID ungültig!', KL_ERROR);
+                        $state = 200;
+                    } else {
+                        // Check channel
+                        $config = json_decode(IPS_GetConfiguration($parent));
+                        $address = strstr($config->Address, ':', false);
+                        switch ($deviceType) {
+                            // HM
+                            case 0:
+                                if ($address != ':1') {
+                                    $this->LogMessage('Konfiguration: Variable Rollladensteuerung Kanal ungültig!', KL_ERROR);
+                                    $state = 200;
+                                }
+                                break;
+
+                                // HmIP
+                            case 1:
+                            case 2:
+                            if ($address != ':4') {
+                                $this->LogMessage('Konfiguration: Variable Rollladensteuerung Kanal ungültig!', KL_ERROR);
+                                $state = 200;
+                            }
+                            break;
+
+                        }
+                    }
+                }
+                $ident = IPS_GetObject($id)['ObjectIdent'];
+                if ($ident != 'LEVEL') {
+                    $this->LogMessage('Konfiguration: Variable Rollladensteuerung IDENT ungültig!', KL_ERROR);
+                    $state = 200;
+                }
+            }
+        }
+        // Set state
+        $this->SetStatus($state);
     }
 }

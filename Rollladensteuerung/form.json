@@ -66,13 +66,28 @@
         },
         {
           "type": "CheckBox",
-          "name": "EnableDoorWindowState",
-          "caption": "Tür- / Fensterstatus"
+          "name": "EnableSunset",
+          "caption": "Sonnenuntergang"
+        },
+        {
+          "type": "CheckBox",
+          "name": "EnableSunrise",
+          "caption": "Sonnenaufgang"
         },
         {
           "type": "CheckBox",
           "name": "EnableBlindSlider",
           "caption": "Rolladensteuerung"
+        },
+        {
+          "type": "CheckBox",
+          "name": "EnableSleepMode",
+          "caption": "Ruhe-Modus"
+        },
+        {
+          "type": "CheckBox",
+          "name": "EnableDoorWindowState",
+          "caption": "Tür- / Fensterstatus"
         }
       ]
     },
@@ -109,11 +124,20 @@
         },
         {
           "type": "Label",
+          "caption": "\nBitte wählen Sie die Instanz für den Rolladenaktor (HM: Kanal 1, HmIP: Kanal 3) aus:"
+        },
+        {
+          "type": "SelectInstance",
+          "name": "ActuatorInstance",
+          "caption": "Rollladenaktor"
+        },
+        {
+          "type": "Label",
           "caption": "\nBitte wählen Sie die Variable für die Rollladenposition (HM: Kanal 1 LEVEL, HmIP: Kanal 3 LEVEL) aus:"
         },
         {
           "type": "SelectVariable",
-          "name": "BlindLevel",
+          "name": "ActuatorStateLevel",
           "caption": "Rollladenposition"
         },
         {
@@ -122,7 +146,7 @@
         },
         {
           "type": "SelectVariable",
-          "name": "BlindLevelProcess",
+          "name": "ActuatorStateProcess",
           "caption": "Aktivitätszustand"
         },
         {
@@ -131,7 +155,7 @@
         },
         {
           "type": "SelectVariable",
-          "name": "BlindActuator",
+          "name": "ActuatorControlLevel",
           "caption": "Steuerung"
         },
         {
@@ -140,7 +164,7 @@
         },
         {
           "type": "Select",
-          "name": "BlindActuatorProperty",
+          "name": "ActuatorProperty",
           "caption": "Logik",
           "options": [
             {
@@ -161,22 +185,32 @@
       "items": [
         {
           "type": "Label",
-          "caption": "Bitte geben Sie die Rollladenposition in % für den geschlossenen Zustand an:"
+          "caption": "Bitte geben Sie die Rollladenposition in % für den Schließungsmodus an:"
         },
         {
           "type": "NumberSpinner",
           "name": "BlindPositionClosed",
-          "caption": "Position",
+          "caption": "Schließungsmodus",
           "suffix": "%"
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % für den geöffneten Zustand an:"
+          "caption": "\nBitte geben Sie die Rollladenposition in % für den Öffnungsmodus an:"
         },
         {
           "type": "NumberSpinner",
           "name": "BlindPositionOpened",
-          "caption": "Position",
+          "caption": "Öffnungsmodus",
+          "suffix": "%"
+        },
+        {
+          "type": "Label",
+          "caption": "\nBitte geben Sie die Rollladenposition in % für den Beschattungsmodus an:"
+        },
+        {
+          "type": "NumberSpinner",
+          "name": "BlindPositionShading",
+          "caption": "Beschattungsmodus",
           "suffix": "%"
         },
         {
@@ -197,6 +231,22 @@
           "name": "BlindPositionDifference",
           "caption": "Differenzwert",
           "suffix": "%"
+        }
+      ]
+    },
+    {
+      "type": "ExpansionPanel",
+      "caption": "Modusdauer",
+      "items": [
+        {
+          "type": "Label",
+          "caption": "Bitte geben Sie die Dauer in Stunden für den Ruhe-Modus an:"
+        },
+        {
+          "type": "NumberSpinner",
+          "name": "SleepDuration",
+          "caption": "Ruhe-Modus",
+          "suffix": "h"
         }
       ]
     },
@@ -304,7 +354,7 @@
         },
         {
           "type": "CheckBox",
-          "name": "UseLockoutProtection",
+          "name": "LockoutProtection",
           "caption": "Aussperrschutz verwenden"
         },
         {
@@ -316,6 +366,80 @@
           "name": "LockoutPosition",
           "caption": "Rollladenposition",
           "suffix": "%"
+        }
+      ]
+    },
+    {
+      "type": "ExpansionPanel",
+      "caption": "Notfallsteuerung",
+      "items": [
+        {
+          "type": "Label",
+          "caption": "Bitte wählen Sie die Variablen der Notfallkontakte (HM: Kanal 1 STATE, HmIP: Kanal 1 STATE) aus:"
+        },
+        {
+          "type": "List",
+          "name": "EmergencySensors",
+          "caption": "Notfallkontakte",
+          "rowCount": 3,
+          "add": true,
+          "delete": true,
+          "sort": {
+            "column": "ID",
+            "direction": "ascending"
+          },
+          "columns": [
+            {
+              "name": "UseSensor",
+              "caption": "Aktiviert",
+              "width": "100px",
+              "add": true,
+              "edit": {
+                "type": "CheckBox"
+              }
+            },
+            {
+              "name": "ID",
+              "caption": "Variable",
+              "width": "450px",
+              "add": 0,
+              "edit": {
+                "type": "SelectVariable"
+              }
+            },
+            {
+              "name": "Action",
+              "caption": "Aktion",
+              "width": "200px",
+              "add": 99,
+              "edit": {
+                "type": "Select",
+                "options": [
+                  {
+                    "caption": "Bitte auswählen",
+                    "value": 99
+                  },
+                  {
+                    "caption": "Rollladen runterfahren",
+                    "value": 0
+                  },
+                  {
+                    "caption": "Rollladen hochfahren",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            {
+              "name": "DisableAutomaticMode",
+              "caption": "Automatik ausschalten",
+              "width": "200px",
+              "add": true,
+              "edit": {
+                "type": "CheckBox"
+              }
+            }
+          ]
         }
       ]
     }
@@ -345,17 +469,28 @@
     },
     {
       "type": "ExpansionPanel",
+      "caption": "Rollladenaktor",
+      "items": [
+        {
+          "type": "Button",
+          "caption": "Variablen automatisch ermitteln",
+          "onClick": "RS_DetermineBlindActuatorVariables($id);"
+        }
+      ]
+    },
+    {
+      "type": "ExpansionPanel",
       "caption": "Rollladen",
       "items": [
         {
           "type": "Button",
           "caption": "Rollladen runterfahren",
-          "onClick": "RS_ToggleBlind($id, false, false);"
+          "onClick": "RS_SetBlindLevel($id, 0, false);"
         },
         {
           "type": "Button",
           "caption": "Rollladen hochfahren",
-          "onClick": "RS_ToggleBlind($id, true, false);"
+          "onClick": "RS_SetBlindLevel($id, 1, false);"
         }
       ]
     },
