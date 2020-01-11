@@ -552,7 +552,7 @@ class Rollladensteuerung extends IPSModule
                     $address = strstr($config->Address, ':', false);
                     switch ($deviceType) {
                         // HM
-                        case 0:
+                        case 1:
                             if ($address != ':1') {
                                 $this->LogMessage('Konfiguration: Instanz Rollladenaktor Kanal ungültig!', KL_ERROR);
                                 $state = 200;
@@ -560,8 +560,8 @@ class Rollladensteuerung extends IPSModule
                             break;
 
                         // HmIP
-                        case 1:
                         case 2:
+                        case 3:
                             if ($address != ':3') {
                                 $this->LogMessage('Konfiguration: Instanz Rollladenaktor Kanal ungültig!', KL_ERROR);
                                 $state = 200;
@@ -595,7 +595,7 @@ class Rollladensteuerung extends IPSModule
                         $address = strstr($config->Address, ':', false);
                         switch ($deviceType) {
                             // HM
-                            case 0:
+                            case 1:
                                 if ($address != ':1') {
                                     $this->LogMessage('Konfiguration: Variable Rollladenposition Kanal ungültig!', KL_ERROR);
                                     $state = 200;
@@ -603,8 +603,8 @@ class Rollladensteuerung extends IPSModule
                                 break;
 
                             // HmIP
-                            case 1:
                             case 2:
+                            case 3:
                                 if ($address != ':3') {
                                     $this->LogMessage('Konfiguration: Variable Rollladenposition Kanal ungültig!', KL_ERROR);
                                     $state = 200;
@@ -644,7 +644,7 @@ class Rollladensteuerung extends IPSModule
                         $address = strstr($config->Address, ':', false);
                         switch ($deviceType) {
                             // HM
-                            case 0:
+                            case 1:
                                 if ($address != ':1') {
                                     $this->LogMessage('Konfiguration: Variable Aktivitätszustand Kanal ungültig!', KL_ERROR);
                                     $state = 200;
@@ -652,8 +652,8 @@ class Rollladensteuerung extends IPSModule
                                 break;
 
                             // HmIP
-                            case 1:
                             case 2:
+                            case 3:
                                 if ($address != ':3') {
                                     $this->LogMessage('Konfiguration: Variable Aktivitätszustand Kanal ungültig!', KL_ERROR);
                                     $state = 200;
@@ -707,21 +707,21 @@ class Rollladensteuerung extends IPSModule
                         $address = strstr($config->Address, ':', false);
                         switch ($deviceType) {
                             // HM
-                            case 0:
+                            case 1:
                                 if ($address != ':1') {
                                     $this->LogMessage('Konfiguration: Variable Rollladensteuerung Kanal ungültig!', KL_ERROR);
                                     $state = 200;
                                 }
                                 break;
 
-                                // HmIP
-                            case 1:
+                            // HmIP
                             case 2:
-                            if ($address != ':4') {
-                                $this->LogMessage('Konfiguration: Variable Rollladensteuerung Kanal ungültig!', KL_ERROR);
-                                $state = 200;
-                            }
-                            break;
+                            case 3:
+                                if ($address != ':4') {
+                                    $this->LogMessage('Konfiguration: Variable Rollladensteuerung Kanal ungültig!', KL_ERROR);
+                                    $state = 200;
+                                }
+                                break;
 
                         }
                     }
