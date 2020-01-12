@@ -146,7 +146,7 @@ class Rollladensteuerung extends IPSModule
                 $id = $this->ReadPropertyInteger('ActuatorStateLevel');
                 if ($id != 0 && @IPS_ObjectExists($id)) {
                     if ($SenderID == $id) {
-                        if ($Data[0] == 0 && $Data[1]) {
+                        if ($Data[1]) {
                             $this->SendDebug(__FUNCTION__, 'BlindSlider aktualisieren', 0);
                             $this->UpdateBlindSlider();
                         }
