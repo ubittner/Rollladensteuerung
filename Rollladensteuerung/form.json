@@ -271,10 +271,6 @@
           "type": "SelectVariable",
           "name": "Sunset",
           "caption": "Sonnenuntergang"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte geben Sie die Ausführungsverzögerung in Sekunden (0 = deaktiviert) für den Wochenplan an:"
         }
       ]
     },
