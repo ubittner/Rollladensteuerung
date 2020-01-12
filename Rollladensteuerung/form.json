@@ -411,21 +411,21 @@
               "name": "Action",
               "caption": "Aktion",
               "width": "200px",
-              "add": 99,
+              "add": 0,
               "edit": {
                 "type": "Select",
                 "options": [
                   {
                     "caption": "Bitte auswählen",
-                    "value": 99
-                  },
-                  {
-                    "caption": "Rollladen runterfahren",
                     "value": 0
                   },
                   {
-                    "caption": "Rollladen hochfahren",
+                    "caption": "Rollladen runterfahren",
                     "value": 1
+                  },
+                  {
+                    "caption": "Rollladen hochfahren",
+                    "value": 2
                   }
                 ]
               }

@@ -18,7 +18,13 @@ trait RS_emergencySensors
         if (!empty($ids)) {
             foreach ($ids as $id) {
                 if ($id->ID == $SenderID && $id->UseSensor) {
-                    $this->SetBlindLevel($id->Action, false);
+                    // Open
+                    $level = 1;
+                    // Close
+                    if ($id->ActionID == 1) {
+                        $level = 0;
+                    }
+                    $this->SetBlindLevel($level, false);
                 }
             }
         }
