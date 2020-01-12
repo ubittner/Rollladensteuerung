@@ -517,7 +517,12 @@ class Rollladensteuerung extends IPSModule
         if ($id != 0 && @IPS_ObjectExists($id)) {
             $this->RegisterMessage($id, EM_UPDATE);
         }
-        // Blind level process
+        // Actuator state level
+        $id = $this->ReadPropertyInteger('ActuatorStateLevel');
+        if ($id != 0 && IPS_ObjectExists($id)) {
+            $this->RegisterMessage($id, VM_UPDATE);
+        }
+        // Actuator state process
         $id = $this->ReadPropertyInteger('ActuatorStateProcess');
         if ($id != 0 && IPS_ObjectExists($id)) {
             $this->RegisterMessage($id, VM_UPDATE);
