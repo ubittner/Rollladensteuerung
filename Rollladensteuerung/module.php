@@ -33,6 +33,7 @@ include_once __DIR__ . '/helper/autoload.php';
 class Rollladensteuerung extends IPSModule
 {
     // Helper
+    use RS_astroMode;
     use RS_blindActuator;
     use RS_doorWindowSensors;
     use RS_emergencySensors;
@@ -119,17 +120,6 @@ class Rollladensteuerung extends IPSModule
             // $Data[1] = difference to last value
             // $Data[2] = last value
             case VM_UPDATE:
-                // Sunset
-                $id = $this->ReadPropertyInteger('Sunset');
-                if ($id != 0 && @IPS_ObjectExists($id)) {
-                    if ($SenderID == $id) {
-                        if ($Data[1]) {
-                            $timeStamp = date('d.m.Y, H:i:s');
-                            $this->LogMessage('Variable Sonnenuntergang hat sich geändert! ' . $timeStamp, 10201);
-                            $this->SetBlindLevel(0, true);
-                        }
-                    }
-                }
                 // Sunrise
                 $id = $this->ReadPropertyInteger('Sunrise');
                 if ($id != 0 && @IPS_ObjectExists($id)) {
@@ -137,7 +127,18 @@ class Rollladensteuerung extends IPSModule
                         if ($Data[1]) {
                             $timeStamp = date('d.m.Y, H:i:s');
                             $this->LogMessage('Variable Sonnenaufgang hat sich geändert! ' . $timeStamp, 10201);
-                            $this->SetBlindLevel(1, true);
+                            $this->TriggerSunrise();
+                        }
+                    }
+                }
+                // Sunset
+                $id = $this->ReadPropertyInteger('Sunset');
+                if ($id != 0 && @IPS_ObjectExists($id)) {
+                    if ($SenderID == $id) {
+                        if ($Data[1]) {
+                            $timeStamp = date('d.m.Y, H:i:s');
+                            $this->LogMessage('Variable Sonnenuntergang hat sich geändert! ' . $timeStamp, 10201);
+                            $this->TriggerSunset();
                         }
                     }
                 }
@@ -280,12 +281,14 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyInteger('SleepDuration', 12);
 
         // Astro
-        $this->RegisterPropertyInteger('Sunset', 0);
         $this->RegisterPropertyInteger('Sunrise', 0);
+        $this->RegisterPropertyInteger('Sunset', 0);
 
         // Weekly schedule
         $this->RegisterPropertyInteger('WeeklySchedule', 0);
         $this->RegisterPropertyBoolean('AdjustBlindLevel', false);
+
+        // Execution delay
         $this->RegisterPropertyInteger('ExecutionDelay', 0);
 
         // Door and window sensors
@@ -388,24 +391,6 @@ class Rollladensteuerung extends IPSModule
                 IPS_SetHidden($linkID, true);
             }
         }
-        // Sunset
-        $targetID = $this->ReadPropertyInteger('Sunset');
-        $linkID = @IPS_GetLinkIDByName('Sonnenuntergang', $this->InstanceID);
-        if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
-            // Check for existing link
-            if ($linkID === false) {
-                $linkID = IPS_CreateLink();
-            }
-            IPS_SetParent($linkID, $this->InstanceID);
-            IPS_SetPosition($linkID, 1);
-            IPS_SetName($linkID, 'Sonnenuntergang');
-            IPS_SetIcon($linkID, 'Calendar');
-            IPS_SetLinkTargetID($linkID, $targetID);
-        } else {
-            if ($linkID !== false) {
-                IPS_SetHidden($linkID, true);
-            }
-        }
         // Sunrise
         $targetID = $this->ReadPropertyInteger('Sunrise');
         $linkID = @IPS_GetLinkIDByName('Sonnenaufgang', $this->InstanceID);
@@ -417,7 +402,25 @@ class Rollladensteuerung extends IPSModule
             IPS_SetParent($linkID, $this->InstanceID);
             IPS_SetPosition($linkID, 1);
             IPS_SetName($linkID, 'Sonnenaufgang');
-            IPS_SetIcon($linkID, 'Calendar');
+            IPS_SetIcon($linkID, 'Sun');
+            IPS_SetLinkTargetID($linkID, $targetID);
+        } else {
+            if ($linkID !== false) {
+                IPS_SetHidden($linkID, true);
+            }
+        }
+        // Sunset
+        $targetID = $this->ReadPropertyInteger('Sunset');
+        $linkID = @IPS_GetLinkIDByName('Sonnenuntergang', $this->InstanceID);
+        if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
+            // Check for existing link
+            if ($linkID === false) {
+                $linkID = IPS_CreateLink();
+            }
+            IPS_SetParent($linkID, $this->InstanceID);
+            IPS_SetPosition($linkID, 1);
+            IPS_SetName($linkID, 'Sonnenuntergang');
+            IPS_SetIcon($linkID, 'Moon');
             IPS_SetLinkTargetID($linkID, $targetID);
         } else {
             if ($linkID !== false) {
@@ -441,21 +444,21 @@ class Rollladensteuerung extends IPSModule
             IPS_SetHidden($id, $hide);
         }
 
-        // Sunset
-        $id = @IPS_GetLinkIDByName('Sonnenuntergang', $this->InstanceID);
-        if ($id !== false) {
-            $hide = true;
-            if ($this->ReadPropertyBoolean('EnableSunset') && $this->GetValue('AutomaticMode')) {
-                $hide = false;
-            }
-            IPS_SetHidden($id, $hide);
-        }
-
         // Sunrise
         $id = @IPS_GetLinkIDByName('Sonnenaufgang', $this->InstanceID);
         if ($id !== false) {
             $hide = true;
             if ($this->ReadPropertyBoolean('EnableSunrise') && $this->GetValue('AutomaticMode')) {
+                $hide = false;
+            }
+            IPS_SetHidden($id, $hide);
+        }
+
+        // Sunset
+        $id = @IPS_GetLinkIDByName('Sonnenuntergang', $this->InstanceID);
+        if ($id !== false) {
+            $hide = true;
+            if ($this->ReadPropertyBoolean('EnableSunset') && $this->GetValue('AutomaticMode')) {
                 $hide = false;
             }
             IPS_SetHidden($id, $hide);

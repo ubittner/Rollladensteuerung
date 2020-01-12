@@ -139,7 +139,7 @@ trait RS_weeklySchedule
                         }
                     }
                     // Set blind level if sleep mode is disabled
-                    if ($this->GetValue('SleepMode')) {
+                    if (!$this->GetValue('SleepMode')) {
                         $this->SetBlindLevel($level, false);
                     }
                 }

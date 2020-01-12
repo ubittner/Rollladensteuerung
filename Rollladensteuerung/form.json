@@ -66,13 +66,13 @@
         },
         {
           "type": "CheckBox",
-          "name": "EnableSunset",
-          "caption": "Sonnenuntergang"
+          "name": "EnableSunrise",
+          "caption": "Sonnenaufgang"
         },
         {
           "type": "CheckBox",
-          "name": "EnableSunrise",
-          "caption": "Sonnenaufgang"
+          "name": "EnableSunset",
+          "caption": "Sonnenuntergang"
         },
         {
           "type": "CheckBox",
@@ -236,7 +236,7 @@
     },
     {
       "type": "ExpansionPanel",
-      "caption": "Modusdauer",
+      "caption": "Ruhemodus",
       "items": [
         {
           "type": "Label",
@@ -252,8 +252,17 @@
     },
     {
       "type": "ExpansionPanel",
-      "caption": "Astrofunktion",
+      "caption": "Astromodus",
       "items": [
+        {
+          "type": "Label",
+          "caption": "Bitte wählen Sie die Variable für den Sonnenaufgang (Rollladen hochfahren) aus:"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "Sunrise",
+          "caption": "Sonnenaufgang"
+        },
         {
           "type": "Label",
           "caption": "Bitte wählen Sie die Variable für den Sonnenuntergang (Rollladen runterfahren) aus:"
@@ -265,12 +274,7 @@
         },
         {
           "type": "Label",
-          "caption": "Bitte wählen Sie die Variable für den Sonnenaufgang (Rollladen hochfahren) aus:"
-        },
-        {
-          "type": "SelectVariable",
-          "name": "Sunrise",
-          "caption": "Sonnenaufgang"
+          "caption": "\nBitte geben Sie die Ausführungsverzögerung in Sekunden (0 = deaktiviert) für den Wochenplan an:"
         }
       ]
     },
@@ -295,10 +299,16 @@
           "type": "CheckBox",
           "name": "AdjustBlindLevel",
           "caption": "Rollladenposition anpassen"
-        },
+        }
+      ]
+    },
+    {
+      "type": "ExpansionPanel",
+      "caption": "Ausführungsverzögerung",
+      "items": [
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie die Ausführungsverzögerung in Sekunden (0 = deaktiviert) für den Wochenplan an:"
+          "caption": "Bitte geben Sie die Ausführungsverzögerung in Sekunden (0 = deaktiviert) für den Astromodus / Wochenplan an:"
         },
         {
           "type": "NumberSpinner",
