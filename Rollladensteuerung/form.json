@@ -61,11 +61,6 @@
         },
         {
           "type": "CheckBox",
-          "name": "EnableWeeklySchedule",
-          "caption": "Wochenplan"
-        },
-        {
-          "type": "CheckBox",
           "name": "EnableSunrise",
           "caption": "Sonnenaufgang"
         },
@@ -73,6 +68,11 @@
           "type": "CheckBox",
           "name": "EnableSunset",
           "caption": "Sonnenuntergang"
+        },
+        {
+          "type": "CheckBox",
+          "name": "EnableWeeklySchedule",
+          "caption": "Wochenplan"
         },
         {
           "type": "CheckBox",
