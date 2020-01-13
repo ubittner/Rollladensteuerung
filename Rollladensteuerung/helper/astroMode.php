@@ -20,7 +20,21 @@ trait RS_astroMode
         }
         // Open blind if atomatic mode is enabled and sleep mode is disabled
         if ($this->GetValue('AutomaticMode') && !$this->GetValue('SleepMode')) {
-            $this->SetBlindLevel(1, true);
+            switch ($this->ReadPropertyInteger('SunriseAction')) {
+                // Close
+                case 1:
+                    $level = 0;
+                    break;
+
+                // Open
+                case 2:
+                    $level = 1;
+                    break;
+
+                default:
+                    $level = 1;
+            }
+            $this->SetBlindLevel($level, true);
         }
     }
 
@@ -39,7 +53,21 @@ trait RS_astroMode
         }
         // Close blind if automatic mode is enabled and sleep mode is disabled
         if ($this->GetValue('AutomaticMode') && !$this->GetValue('SleepMode')) {
-            $this->SetBlindLevel(0, true);
+            switch ($this->ReadPropertyInteger('SunriseAction')) {
+                // Close
+                case 1:
+                    $level = 0;
+                    break;
+
+                // Open
+                case 2:
+                    $level = 1;
+                    break;
+
+                default:
+                    $level = 0;
+            }
+            $this->SetBlindLevel($level, true);
         }
     }
 }

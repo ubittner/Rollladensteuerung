@@ -282,7 +282,9 @@ class Rollladensteuerung extends IPSModule
 
         // Astro
         $this->RegisterPropertyInteger('Sunrise', 0);
+        $this->RegisterPropertyInteger('SunriseAction', 2);
         $this->RegisterPropertyInteger('Sunset', 0);
+        $this->RegisterPropertyInteger('SunsetAction', 1);
 
         // Weekly schedule
         $this->RegisterPropertyInteger('WeeklySchedule', 0);

@@ -265,12 +265,58 @@
         },
         {
           "type": "Label",
-          "caption": "Bitte wählen Sie die Variable für den Sonnenuntergang aus:"
+          "caption": "\nBitte wählen Sie die Aktion bei Sonnenaufgang aus:"
+        },
+        {
+          "type": "Select",
+          "name": "SunriseAction",
+          "caption": "Aktion",
+          "options": [
+            {
+              "caption": "Bitte auswählen",
+              "value": 0
+            },
+            {
+              "caption": "Rollladen runterfahren",
+              "value": 1
+            },
+            {
+              "caption": "Rolladen hochfahren",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "type": "Label",
+          "caption": "\nBitte wählen Sie die Variable für den Sonnenuntergang aus:"
         },
         {
           "type": "SelectVariable",
           "name": "Sunset",
           "caption": "Sonnenuntergang"
+        },
+        {
+          "type": "Label",
+          "caption": "\nBitte wählen Sie die Aktion bei Sonnenuntergang aus:"
+        },
+        {
+          "type": "Select",
+          "name": "SunsetAction",
+          "caption": "Aktion",
+          "options": [
+            {
+              "caption": "Bitte auswählen",
+              "value": 0
+            },
+            {
+              "caption": "Rollladen runterfahren",
+              "value": 1
+            },
+            {
+              "caption": "Rolladen hochfahren",
+              "value": 2
+            }
+          ]
         }
       ]
     },
