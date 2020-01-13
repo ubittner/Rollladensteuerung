@@ -291,7 +291,7 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyBoolean('AdjustBlindLevel', false);
 
         // Execution delay
-        $this->RegisterPropertyInteger('ExecutionDelay', 0);
+        $this->RegisterPropertyInteger('ExecutionDelay', 3);
 
         // Door and window sensors
         $this->RegisterPropertyString('DoorWindowSensors', '[]');
