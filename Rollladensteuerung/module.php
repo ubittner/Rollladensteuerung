@@ -373,24 +373,6 @@ class Rollladensteuerung extends IPSModule
 
     private function CreateLinks(): void
     {
-        // Weekly schedule
-        $targetID = $this->ReadPropertyInteger('WeeklySchedule');
-        $linkID = @IPS_GetLinkIDByName('Wochenplan', $this->InstanceID);
-        if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
-            // Check for existing link
-            if ($linkID === false) {
-                $linkID = IPS_CreateLink();
-            }
-            IPS_SetParent($linkID, $this->InstanceID);
-            IPS_SetPosition($linkID, 1);
-            IPS_SetName($linkID, 'Wochenplan');
-            IPS_SetIcon($linkID, 'Calendar');
-            IPS_SetLinkTargetID($linkID, $targetID);
-        } else {
-            if ($linkID !== false) {
-                IPS_SetHidden($linkID, true);
-            }
-        }
         // Sunrise
         $targetID = $this->ReadPropertyInteger('Sunrise');
         $linkID = @IPS_GetLinkIDByName('Sonnenaufgang', $this->InstanceID);
@@ -409,6 +391,7 @@ class Rollladensteuerung extends IPSModule
                 IPS_SetHidden($linkID, true);
             }
         }
+
         // Sunset
         $targetID = $this->ReadPropertyInteger('Sunset');
         $linkID = @IPS_GetLinkIDByName('Sonnenuntergang', $this->InstanceID);
@@ -421,6 +404,24 @@ class Rollladensteuerung extends IPSModule
             IPS_SetPosition($linkID, 1);
             IPS_SetName($linkID, 'Sonnenuntergang');
             IPS_SetIcon($linkID, 'Moon');
+            IPS_SetLinkTargetID($linkID, $targetID);
+        } else {
+            if ($linkID !== false) {
+                IPS_SetHidden($linkID, true);
+            }
+        }
+        // Weekly schedule
+        $targetID = $this->ReadPropertyInteger('WeeklySchedule');
+        $linkID = @IPS_GetLinkIDByName('Wochenplan', $this->InstanceID);
+        if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
+            // Check for existing link
+            if ($linkID === false) {
+                $linkID = IPS_CreateLink();
+            }
+            IPS_SetParent($linkID, $this->InstanceID);
+            IPS_SetPosition($linkID, 1);
+            IPS_SetName($linkID, 'Wochenplan');
+            IPS_SetIcon($linkID, 'Calendar');
             IPS_SetLinkTargetID($linkID, $targetID);
         } else {
             if ($linkID !== false) {
@@ -448,8 +449,11 @@ class Rollladensteuerung extends IPSModule
         $id = @IPS_GetLinkIDByName('Sonnenaufgang', $this->InstanceID);
         if ($id !== false) {
             $hide = true;
-            if ($this->ReadPropertyBoolean('EnableSunrise') && $this->GetValue('AutomaticMode')) {
-                $hide = false;
+            $targetID = $this->ReadPropertyInteger('Sunrise');
+            if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
+                if ($this->ReadPropertyBoolean('EnableSunrise') && $this->GetValue('AutomaticMode')) {
+                    $hide = false;
+                }
             }
             IPS_SetHidden($id, $hide);
         }
@@ -458,8 +462,11 @@ class Rollladensteuerung extends IPSModule
         $id = @IPS_GetLinkIDByName('Sonnenuntergang', $this->InstanceID);
         if ($id !== false) {
             $hide = true;
-            if ($this->ReadPropertyBoolean('EnableSunset') && $this->GetValue('AutomaticMode')) {
-                $hide = false;
+            $targetID = $this->ReadPropertyInteger('Sunset');
+            if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
+                if ($this->ReadPropertyBoolean('EnableSunset') && $this->GetValue('AutomaticMode')) {
+                    $hide = false;
+                }
             }
             IPS_SetHidden($id, $hide);
         }

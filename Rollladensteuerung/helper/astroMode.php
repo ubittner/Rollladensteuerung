@@ -18,8 +18,8 @@ trait RS_astroMode
             $delay = rand($min, $max);
             IPS_Sleep($delay);
         }
-        // Open blind if sleep mode is disabled
-        if (!$this->GetValue('SleepMode')) {
+        // Open blind if atomatic mode is enabled and sleep mode is disabled
+        if ($this->GetValue('AutomaticMode') && !$this->GetValue('SleepMode')) {
             $this->SetBlindLevel(1, true);
         }
     }
@@ -37,8 +37,8 @@ trait RS_astroMode
             $delay = rand($min, $max);
             IPS_Sleep($delay);
         }
-        // Close blind if sleep mode is disabled
-        if (!$this->GetValue('SleepMode')) {
+        // Close blind if automatic mode is enabled and sleep mode is disabled
+        if ($this->GetValue('AutomaticMode') && !$this->GetValue('SleepMode')) {
             $this->SetBlindLevel(0, true);
         }
     }

@@ -256,7 +256,7 @@
       "items": [
         {
           "type": "Label",
-          "caption": "Bitte wählen Sie die Variable für den Sonnenaufgang (Rollladen hochfahren) aus:"
+          "caption": "Bitte wählen Sie die Variable für den Sonnenaufgang aus:"
         },
         {
           "type": "SelectVariable",
@@ -265,7 +265,7 @@
         },
         {
           "type": "Label",
-          "caption": "Bitte wählen Sie die Variable für den Sonnenuntergang (Rollladen runterfahren) aus:"
+          "caption": "Bitte wählen Sie die Variable für den Sonnenuntergang aus:"
         },
         {
           "type": "SelectVariable",
