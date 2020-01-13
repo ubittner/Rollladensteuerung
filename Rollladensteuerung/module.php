@@ -435,16 +435,6 @@ class Rollladensteuerung extends IPSModule
         // Automatic mode
         IPS_SetHidden($this->GetIDForIdent('AutomaticMode'), !$this->ReadPropertyBoolean('EnableAutomaticMode'));
 
-        // Weekly schedule
-        $id = @IPS_GetLinkIDByName('Wochenplan', $this->InstanceID);
-        if ($id !== false) {
-            $hide = true;
-            if ($this->ReadPropertyBoolean('EnableWeeklySchedule') && $this->GetValue('AutomaticMode')) {
-                $hide = false;
-            }
-            IPS_SetHidden($id, $hide);
-        }
-
         // Sunrise
         $id = @IPS_GetLinkIDByName('Sonnenaufgang', $this->InstanceID);
         if ($id !== false) {
@@ -465,6 +455,18 @@ class Rollladensteuerung extends IPSModule
             $targetID = $this->ReadPropertyInteger('Sunset');
             if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
                 if ($this->ReadPropertyBoolean('EnableSunset') && $this->GetValue('AutomaticMode')) {
+                    $hide = false;
+                }
+            }
+            IPS_SetHidden($id, $hide);
+        }
+
+        // Weekly schedule
+        $id = @IPS_GetLinkIDByName('Wochenplan', $this->InstanceID);
+        if ($id !== false) {
+            $hide = true;
+            if ($this->ValidateEventPlan()) {
+                if ($this->ReadPropertyBoolean('EnableWeeklySchedule') && $this->GetValue('AutomaticMode')) {
                     $hide = false;
                 }
             }
