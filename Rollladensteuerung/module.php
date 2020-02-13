@@ -12,8 +12,9 @@
  * @license     CC BY-NC-SA 4.0
  *              https://creativecommons.org/licenses/by-nc-sa/4.0/
  *
- * @version     1.00-6
- * @date        2020-01-06, 18:00, 1578330000
+ * @version     1.00-7
+ * @date        2020-02-11, 18:00, 1581440400
+ * @review      2020-02-11, 18:00
  *
  * @see         https://github.com/ubittner/Rollladensteuerung
  *
@@ -158,6 +159,8 @@ class Rollladensteuerung extends IPSModule
                     if (array_search($SenderID, array_column($doorWindowSensors, 'ID')) !== false) {
                         if ($Data[1]) {
                             $this->CheckDoorWindowSensors();
+                            $state = (bool) $Data[0];
+                            $this->OpenBlindByDoorWindowSensor($state);
                         }
                     }
                 }
@@ -189,44 +192,42 @@ class Rollladensteuerung extends IPSModule
         $this->ApplyChanges();
     }
 
-    public function ShowRegisteredMessages(): void
+    public function GetConfigurationForm()
     {
-        $kernelMessages = [];
-        $eventMessages = [];
-        $variableMessages = [];
-        foreach ($this->GetMessageList() as $id => $registeredMessage) {
-            foreach ($registeredMessage as $messageType) {
-                if ($messageType == IPS_KERNELSTARTED) {
-                    $kernelMessages[] = ['id' => $id];
-                }
-                if ($messageType == EM_UPDATE) {
-                    $eventMessages[] = ['id' => $id, 'name' => IPS_GetName($id)];
-                }
-                if ($messageType == VM_UPDATE) {
-                    $parent = IPS_GetParent($id);
-                    $parentName = '';
-                    if ($parent != 0) {
-                        $parentName = IPS_GetName($parent);
-                    }
-                    $variableMessages[] = ['id' => $id, 'name' => IPS_GetName($id), 'parentName' => $parentName];
-                }
+        $formdata = json_decode(file_get_contents(__DIR__ . '/form.json'));
+        // Registered messages
+        $registeredVariables = $this->GetMessageList();
+        foreach ($registeredVariables as $senderID => $messageID) {
+            $senderName = IPS_GetName($senderID);
+            $parentName = $senderName;
+            $parentID = IPS_GetParent($senderID);
+            if (is_int($parentID) && $parentID != 0 && @IPS_ObjectExists($parentID)) {
+                $parentName = IPS_GetName($parentID);
             }
+            switch ($messageID) {
+                case [10001]:
+                    $messageDescription = 'IPS_KERNELSTARTED';
+                    break;
+
+                case [10603]:
+                    $messageDescription = 'VM_UPDATE';
+                    break;
+
+                case [10803]:
+                    $messageDescription = 'EM_UPDATE';
+                    break;
+
+                default:
+                    $messageDescription = 'keine Bezeichnung';
+            }
+            $formdata->elements[10]->items[0]->values[] = [
+                'ParentName'                                            => $parentName,
+                'SenderID'                                              => $senderID,
+                'SenderName'                                            => $senderName,
+                'MessageID'                                             => $messageID,
+                'MessageDescription'                                    => $messageDescription];
         }
-        echo "IPS_KERNELSTARTED:\n\n";
-        foreach ($kernelMessages as $kernelMessage) {
-            echo $kernelMessage['id'] . "\n\n";
-        }
-        echo "\n\nEM_UPDATE:\n\n";
-        foreach ($eventMessages as $eventMessage) {
-            echo $eventMessage['id'] . "\n";
-            echo $eventMessage['name'] . "\n\n";
-        }
-        echo "\n\nVM_UPDATE:\n\n";
-        foreach ($variableMessages as $variableMessage) {
-            echo $variableMessage['id'] . "\n";
-            echo $variableMessage['name'] . "\n";
-            echo $variableMessage['parentName'] . "\n\n";
-        }
+        return json_encode($formdata);
     }
 
     //#################### Request action
@@ -261,6 +262,7 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyBoolean('EnableBlindSlider', true);
         $this->RegisterPropertyBoolean('EnableSleepMode', true);
         $this->RegisterPropertyBoolean('EnableDoorWindowState', true);
+        $this->RegisterPropertyBoolean('EnableSleepModeTimer', true);
 
         // Blind actuator
         $this->RegisterPropertyInteger('DeviceType', 0);
@@ -270,10 +272,7 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyInteger('ActuatorControlLevel', 0);
         $this->RegisterPropertyInteger('ActuatorProperty', 0);
 
-        // Blind positions
-        $this->RegisterPropertyInteger('BlindPositionClosed', 0);
-        $this->RegisterPropertyInteger('BlindPositionOpened', 100);
-        $this->RegisterPropertyInteger('BlindPositionShading', 50);
+        // Check blind position
         $this->RegisterPropertyBoolean('UseCheckBlindPosition', false);
         $this->RegisterPropertyInteger('BlindPositionDifference', 3);
 
@@ -282,12 +281,15 @@ class Rollladensteuerung extends IPSModule
 
         // Astro
         $this->RegisterPropertyInteger('Sunrise', 0);
-        $this->RegisterPropertyInteger('SunriseAction', 2);
+        $this->RegisterPropertyInteger('SunriseAction', 50);
         $this->RegisterPropertyInteger('Sunset', 0);
-        $this->RegisterPropertyInteger('SunsetAction', 1);
+        $this->RegisterPropertyInteger('SunsetAction', 50);
 
         // Weekly schedule
         $this->RegisterPropertyInteger('WeeklySchedule', 0);
+        $this->RegisterPropertyInteger('BlindPositionClosed', 0);
+        $this->RegisterPropertyInteger('BlindPositionOpened', 100);
+        $this->RegisterPropertyInteger('BlindPositionShading', 50);
         $this->RegisterPropertyBoolean('AdjustBlindLevel', false);
 
         // Execution delay
@@ -297,6 +299,8 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyString('DoorWindowSensors', '[]');
         $this->RegisterPropertyBoolean('LockoutProtection', false);
         $this->RegisterPropertyInteger('LockoutPosition', 60);
+        $this->RegisterPropertyBoolean('OpenBlind', false);
+        $this->RegisterPropertyInteger('OpenBlindPosition', 60);
 
         // Emergency sensors
         $this->RegisterPropertyString('EmergencySensors', '[]');
@@ -371,6 +375,11 @@ class Rollladensteuerung extends IPSModule
         // Door and window state
         $profile = 'RS.' . $this->InstanceID . '.DoorWindowState';
         $this->RegisterVariableBoolean('DoorWindowState', 'Tür- / Fensterstatus', $profile, 6);
+
+        // Sleep mode timer info
+        $this->RegisterVariableString('SleepModeTimer', 'Ruhe-Modus Timer', '', 7);
+        $id = $this->GetIDForIdent('SleepModeTimer');
+        IPS_SetIcon($id, 'Clock');
     }
 
     private function CreateLinks(): void
@@ -483,6 +492,9 @@ class Rollladensteuerung extends IPSModule
 
         // Door and window state
         IPS_SetHidden($this->GetIDForIdent('DoorWindowState'), !$this->ReadPropertyBoolean('EnableDoorWindowState'));
+
+        // Sleep mode timer info
+        IPS_SetHidden($this->GetIDForIdent('SleepModeTimer'), !$this->ReadPropertyBoolean('EnableSleepModeTimer'));
     }
 
     private function RegisterTimers(): void
@@ -493,6 +505,7 @@ class Rollladensteuerung extends IPSModule
     private function DisableTimers(): void
     {
         $this->SetTimerInterval('DeactivateSleepMode', 0);
+        $this->SetValue('SleepModeTimer', '-');
     }
 
     private function UnregisterMessages(): void

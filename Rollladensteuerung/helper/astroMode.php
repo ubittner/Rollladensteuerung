@@ -10,6 +10,7 @@ trait RS_astroMode
      */
     private function TriggerSunrise(): void
     {
+        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
         $executionDelay = $this->ReadPropertyInteger('ExecutionDelay');
         if ($executionDelay > 0) {
             // Delay
@@ -20,20 +21,7 @@ trait RS_astroMode
         }
         // Open blind if atomatic mode is enabled and sleep mode is disabled
         if ($this->GetValue('AutomaticMode') && !$this->GetValue('SleepMode')) {
-            switch ($this->ReadPropertyInteger('SunriseAction')) {
-                // Close
-                case 1:
-                    $level = 0;
-                    break;
-
-                // Open
-                case 2:
-                    $level = 1;
-                    break;
-
-                default:
-                    $level = 1;
-            }
+            $level = $this->ReadPropertyInteger('SunriseAction') / 100;
             $this->SetBlindLevel($level, true);
         }
     }
@@ -43,6 +31,7 @@ trait RS_astroMode
      */
     private function TriggerSunset(): void
     {
+        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
         $executionDelay = $this->ReadPropertyInteger('ExecutionDelay');
         if ($executionDelay > 0) {
             // Delay
@@ -53,20 +42,8 @@ trait RS_astroMode
         }
         // Close blind if automatic mode is enabled and sleep mode is disabled
         if ($this->GetValue('AutomaticMode') && !$this->GetValue('SleepMode')) {
-            switch ($this->ReadPropertyInteger('SunriseAction')) {
-                // Close
-                case 1:
-                    $level = 0;
-                    break;
-
-                // Open
-                case 2:
-                    $level = 1;
-                    break;
-
-                default:
-                    $level = 0;
-            }
+            $level = $this->ReadPropertyInteger('SunsetAction') / 100;
+            $this->SetBlindLevel($level, true);
             $this->SetBlindLevel($level, true);
         }
     }

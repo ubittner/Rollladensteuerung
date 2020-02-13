@@ -14,17 +14,18 @@ trait RS_emergencySensors
      */
     private function TriggerEmergencySensor(int $SenderID): void
     {
+        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
         $ids = json_decode($this->ReadPropertyString('EmergencySensors'));
         if (!empty($ids)) {
             foreach ($ids as $id) {
                 if ($id->ID == $SenderID && $id->UseSensor) {
-                    // Open
-                    $level = 1;
-                    // Close
-                    if ($id->ActionID == 1) {
-                        $level = 0;
-                    }
+                    // Blind position
+                    $level = $id->BlindPosition / 100;
                     $this->SetBlindLevel($level, false);
+                    // Automatic mode
+                    if ($id->DisableAutomaticMode) {
+                        $this->ToggleAutomaticMode(false);
+                    }
                 }
             }
         }

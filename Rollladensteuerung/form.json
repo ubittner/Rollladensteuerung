@@ -26,11 +26,11 @@
         },
         {
           "type": "Label",
-          "caption": "Version:\t\t\t1.00-6"
+          "caption": "Version:\t\t\t1.00-7"
         },
         {
           "type": "Label",
-          "caption": "Datum:\t\t\t06. Januar 2020"
+          "caption": "Datum:\t\t\t11. Februar 2020"
         },
         {
           "type": "Label",
@@ -43,6 +43,10 @@
         {
           "type": "Label",
           "caption": "Präfix:\t\t\tRS"
+        },
+        {
+          "type": "Label",
+          "caption": "Logik:\t\t\t0% = geschlossen, 100% = geöffnet"
         }
       ]
     },
@@ -88,6 +92,11 @@
           "type": "CheckBox",
           "name": "EnableDoorWindowState",
           "caption": "Tür- / Fensterstatus"
+        },
+        {
+          "type": "CheckBox",
+          "name": "EnableSleepModeTimer",
+          "caption": "Ruhe-Modus Timer"
         }
       ]
     },
@@ -97,7 +106,7 @@
       "items": [
         {
           "type": "Label",
-          "caption": "Bitte wählen Sie den Gerätetypen aus:"
+          "caption": "Bitte wählen Sie den Gerätetypen des Rollladenaktors aus:"
         },
         {
           "type": "Select",
@@ -109,15 +118,15 @@
               "value": 0
             },
             {
-              "caption": "HM-LC-Bl1-FM",
+              "caption": "1 - HM-LC-Bl1-FM",
               "value": 1
             },
             {
-              "caption": "HmIP-BROLL",
+              "caption": "2 - HmIP-BROLL",
               "value": 2
             },
             {
-              "caption": "HmIP-FROLL",
+              "caption": "3 - HmIP-FROLL",
               "value": 3
             }
           ]
@@ -168,12 +177,16 @@
           "caption": "Logik",
           "options": [
             {
-              "caption": "0% = geschlossen / 100% = geöffnet",
+              "caption": "Bitte auswählen",
               "value": 0
             },
             {
-              "caption": "0% = geöffnet / 100% = geschlossen",
+              "caption": "1 - Rollladen geschlossen bei 0%",
               "value": 1
+            },
+            {
+              "caption": "2 - Rollladen geschlossen bei 100%",
+              "value": 2
             }
           ]
         }
@@ -181,41 +194,11 @@
     },
     {
       "type": "ExpansionPanel",
-      "caption": "Rollladenpositionen",
+      "caption": "Positionsprüfung",
       "items": [
         {
           "type": "Label",
-          "caption": "Bitte geben Sie die Rollladenposition in % für den Schließungsmodus an:"
-        },
-        {
-          "type": "NumberSpinner",
-          "name": "BlindPositionClosed",
-          "caption": "Schließungsmodus",
-          "suffix": "%"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % für den Öffnungsmodus an:"
-        },
-        {
-          "type": "NumberSpinner",
-          "name": "BlindPositionOpened",
-          "caption": "Öffnungsmodus",
-          "suffix": "%"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % für den Beschattungsmodus an:"
-        },
-        {
-          "type": "NumberSpinner",
-          "name": "BlindPositionShading",
-          "caption": "Beschattungsmodus",
-          "suffix": "%"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte wählen Sie aus, ob eine Positionsprüfung verwendet werden soll:"
+          "caption": "Bitte wählen Sie aus, ob eine Positionsprüfung verwendet werden soll:"
         },
         {
           "type": "CheckBox",
@@ -265,26 +248,13 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte wählen Sie die Aktion bei Sonnenaufgang aus:"
+          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenaufgang an:"
         },
         {
-          "type": "Select",
+          "type": "NumberSpinner",
           "name": "SunriseAction",
-          "caption": "Aktion",
-          "options": [
-            {
-              "caption": "Bitte auswählen",
-              "value": 0
-            },
-            {
-              "caption": "Rollladen runterfahren",
-              "value": 1
-            },
-            {
-              "caption": "Rolladen hochfahren",
-              "value": 2
-            }
-          ]
+          "caption": "Rollladenposition bei Sonnenaufgang",
+          "suffix": "%"
         },
         {
           "type": "Label",
@@ -297,26 +267,13 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte wählen Sie die Aktion bei Sonnenuntergang aus:"
+          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenuntergang an:"
         },
         {
-          "type": "Select",
+          "type": "NumberSpinner",
           "name": "SunsetAction",
-          "caption": "Aktion",
-          "options": [
-            {
-              "caption": "Bitte auswählen",
-              "value": 0
-            },
-            {
-              "caption": "Rollladen runterfahren",
-              "value": 1
-            },
-            {
-              "caption": "Rolladen hochfahren",
-              "value": 2
-            }
-          ]
+          "caption": "Rollladenposition bei Sonnenuntergang",
+          "suffix": "%"
         }
       ]
     },
@@ -335,6 +292,36 @@
         },
         {
           "type": "Label",
+          "caption": "\nBitte geben Sie die Rollladenposition in % für den Schließungsmodus an:"
+        },
+        {
+          "type": "NumberSpinner",
+          "name": "BlindPositionClosed",
+          "caption": "Schließungsmodus",
+          "suffix": "%"
+        },
+        {
+          "type": "Label",
+          "caption": "\nBitte geben Sie die Rollladenposition in % für den Öffnungsmodus an:"
+        },
+        {
+          "type": "NumberSpinner",
+          "name": "BlindPositionOpened",
+          "caption": "Öffnungsmodus",
+          "suffix": "%"
+        },
+        {
+          "type": "Label",
+          "caption": "\nBitte geben Sie die Rollladenposition in % für den Beschattungsmodus an:"
+        },
+        {
+          "type": "NumberSpinner",
+          "name": "BlindPositionShading",
+          "caption": "Beschattungsmodus",
+          "suffix": "%"
+        },
+        {
+          "type": "Label",
           "caption": "\nBitte wählen Sie aus, ob bei der Aktivierung der Automatik die Rollladenposition direkt angepasst werden soll:"
         },
         {
@@ -350,7 +337,7 @@
       "items": [
         {
           "type": "Label",
-          "caption": "Bitte geben Sie die Ausführungsverzögerung in Sekunden (0 = deaktiviert) für den Astromodus / Wochenplan an:"
+          "caption": "Bitte geben Sie die Ausführungsverzögerung in Sekunden (0 = keine Ausführungsverzögerung) an:"
         },
         {
           "type": "NumberSpinner",
@@ -411,11 +398,30 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % (100% = immer) für den Aussperrschutz an:"
+          "caption": "\nBitte geben Sie die Rollladenposition in % für den Aussperrschutz an:"
         },
         {
           "type": "NumberSpinner",
           "name": "LockoutPosition",
+          "caption": "Rollladenposition",
+          "suffix": "%"
+        },
+        {
+          "type": "Label",
+          "caption": "\nBitte wählen Sie aus, ob eine Öffnungsfunktion verwendet werden soll:"
+        },
+        {
+          "type": "CheckBox",
+          "name": "OpenBlind",
+          "caption": "Öffnungsfunktion verwenden"
+        },
+        {
+          "type": "Label",
+          "caption": "\nBitte geben Sie die Rollladenposition in % für die Öffnungsfunktion an:"
+        },
+        {
+          "type": "NumberSpinner",
+          "name": "OpenBlindPosition",
           "caption": "Rollladenposition",
           "suffix": "%"
         }
@@ -460,26 +466,12 @@
               }
             },
             {
-              "name": "Action",
-              "caption": "Aktion",
+              "name": "BlindPosition",
+              "caption": "Rollladenposition in %",
               "width": "200px",
               "add": 0,
               "edit": {
-                "type": "Select",
-                "options": [
-                  {
-                    "caption": "Bitte auswählen",
-                    "value": 0
-                  },
-                  {
-                    "caption": "Rollladen runterfahren",
-                    "value": 1
-                  },
-                  {
-                    "caption": "Rollladen hochfahren",
-                    "value": 2
-                  }
-                ]
+                "type": "NumberSpinner"
               }
             },
             {
@@ -494,20 +486,52 @@
           ]
         }
       ]
-    }
-  ],
-  "actions": [
+    },
     {
       "type": "ExpansionPanel",
       "caption": "Registrierte Nachrichten",
       "items": [
         {
-          "type": "Button",
-          "caption": "Registrierte Nachrichten anzeigen",
-          "onClick": "RS_ShowRegisteredMessages($id);"
+          "type": "List",
+          "name": "RegisteredMessages",
+          "caption": "Registrierte Nachrichten",
+          "rowCount": 10,
+          "sort": {
+            "column": "MessageDescription",
+            "direction": "ascending"
+          },
+          "columns": [
+            {
+              "caption": "Bezeichnung",
+              "name": "ParentName",
+              "width": "350px"
+            },
+            {
+              "caption": "Sender ID",
+              "name": "SenderID",
+              "width": "150px"
+            },
+            {
+              "caption": "Sender Name",
+              "name": "SenderName",
+              "width": "250px"
+            },
+            {
+              "caption": "Nachrichten ID",
+              "name": "MessageID",
+              "width": "150px"
+            },
+            {
+              "caption": "Nachrichten Bezeichnung",
+              "name": "MessageDescription",
+              "width": "250px"
+            }
+          ]
         }
       ]
-    },
+    }
+  ],
+  "actions": [
     {
       "type": "ExpansionPanel",
       "caption": "Wochenplan",

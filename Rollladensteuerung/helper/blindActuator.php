@@ -10,6 +10,7 @@ trait RS_blindActuator
      */
     public function DetermineBlindActuatorVariables(): void
     {
+        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
         $id = $this->ReadPropertyInteger('ActuatorInstance');
         if ($id == 0 || !@IPS_ObjectExists($id)) {
             return;
@@ -92,6 +93,7 @@ trait RS_blindActuator
      */
     public function SetBlindSlider(float $Level): void
     {
+        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
         $check = $this->CheckLogic($Level);
         $this->SendDebug(__FUNCTION__, 'Resultat Logikprüfung: ' . $check, 0);
         if ($check) {
@@ -111,15 +113,21 @@ trait RS_blindActuator
      */
     public function ToggleSleepMode(bool $State): void
     {
+        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
         if ($State) {
             if ($this->GetValue('AutomaticMode')) {
                 $this->SetValue('SleepMode', $State);
+                // Duration from hours to seconds
+                $duration = $this->ReadPropertyInteger('SleepDuration') * 60 * 60;
                 // Set timer interval
-                $this->SetTimerInterval('DeactivateSleepMode', $this->ReadPropertyInteger('SleepDuration') * 60 * 60 * 1000);
+                $this->SetTimerInterval('DeactivateSleepMode', $duration * 1000);
+                $timestamp = time() + $duration;
+                $this->SetValue('SleepModeTimer', date('d.m.Y, H:i:s', ($timestamp)));
             }
         } else {
             $this->SetValue('SleepMode', $State);
             $this->SetTimerInterval('DeactivateSleepMode', 0);
+            $this->SetValue('SleepModeTimer', '-');
             $this->TriggerAction(false);
         }
     }
@@ -138,6 +146,7 @@ trait RS_blindActuator
      */
     public function SetBlindLevel(float $Level, bool $CheckLogic): bool
     {
+        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
         $result = false;
         if ($CheckLogic) {
             if (!$this->CheckLogic($Level)) {
@@ -153,7 +162,7 @@ trait RS_blindActuator
             }
         }
         // Check property first
-        if ($this->ReadPropertyInteger('ActuatorProperty') == 1) {
+        if ($this->ReadPropertyInteger('ActuatorProperty') == 2) {
             // We have to change the value from 1 to 0 and vise versa
             $Level = (float) abs($Level - 1);
             $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $Level, 0);
@@ -190,6 +199,7 @@ trait RS_blindActuator
      */
     private function AdjustBlindLevel(): void
     {
+        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
         if ($this->GetValue('AutomaticMode') && $this->ReadPropertyBoolean('AdjustBlindLevel')) {
             $this->TriggerAction(false);
         }
@@ -200,12 +210,12 @@ trait RS_blindActuator
      */
     private function UpdateBlindSlider(): void
     {
+        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
         $id = $this->ReadPropertyInteger('ActuatorStateLevel');
         if ($id != 0 && @IPS_ObjectExists($id)) {
             $level = GetValue($id);
-            $property = $this->ReadPropertyInteger('ActuatorProperty');
             // Check if we have a different actuator logic (0% = opened, 100% = closed) comparing to the module logic (0% = closed, 100% = opened)
-            if ($property == 1) {
+            if ($this->ReadPropertyInteger('ActuatorProperty') == 2) {
                 $level = (float) abs($level - 1);
             }
             $this->SendDebug(__FUNCTION__, 'Aktualisierung wird durchgeführt, neuer Wert: ' . $level * 100 . '%.', 0);
@@ -223,6 +233,7 @@ trait RS_blindActuator
      */
     private function CheckLogic(float $Level): bool
     {
+        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
         $Level = $Level * 100;
         $setLevel = true;
         // Check lockout protection
@@ -236,7 +247,7 @@ trait RS_blindActuator
             if ($id != 0 && @IPS_ObjectExists($id)) {
                 $blindLevel = GetValue($id) * 100;
                 // Check if we have a different actuator logic (0% = opened, 100% = closed) comparing to the module logic (0% = closed, 100% = opened)
-                if ($this->ReadPropertyInteger('ActuatorProperty') == 1) {
+                if ($this->ReadPropertyInteger('ActuatorProperty') == 2) {
                     $blindLevel = (float) abs($blindLevel - 1) * 100;
                 }
                 $this->SendDebug(__FUNCTION__, 'Aktuelle Position: ' . $blindLevel . '%', 0);
@@ -252,7 +263,7 @@ trait RS_blindActuator
                 }
             }
         }
-        $this->SendDebug(__FUNCTION__, 'Resultat Logikprüfung: ' . $setLevel, 0);
+        $this->SendDebug(__FUNCTION__, 'Resultat Logikprüfung: ' . json_encode($setLevel), 0);
         return $setLevel;
     }
 }

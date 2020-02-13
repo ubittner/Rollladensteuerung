@@ -12,6 +12,7 @@ trait RS_weeklySchedule
      */
     public function ToggleAutomaticMode(bool $State): void
     {
+        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
         $this->SetValue('AutomaticMode', $State);
         $this->AdjustBlindLevel();
         // Weekly schedule visibility
@@ -48,6 +49,7 @@ trait RS_weeklySchedule
      */
     public function ShowActualAction(): void
     {
+        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
         if (!$this->ValidateEventPlan()) {
             echo 'Ein Wochenplan ist nicht vorhanden oder der Wochenplan ist inaktiv!';
             return;
@@ -75,6 +77,7 @@ trait RS_weeklySchedule
      */
     private function ValidateEventPlan(): bool
     {
+        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
         $result = false;
         $id = $this->ReadPropertyInteger('WeeklySchedule');
         if ($id != 0 && @IPS_ObjectExists($id)) {
@@ -95,6 +98,7 @@ trait RS_weeklySchedule
      */
     private function TriggerAction(bool $CheckExecutionDelay): void
     {
+        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
         // Check event plan
         if (!$this->ValidateEventPlan()) {
             return;
@@ -155,6 +159,7 @@ trait RS_weeklySchedule
      */
     private function DetermineAction(): int
     {
+        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
         $actionID = 0;
         if ($this->ValidateEventPlan()) {
             $timestamp = time();
