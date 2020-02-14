@@ -9,8 +9,8 @@ Ein Gemeinschaftsprojekt von Normen Thiel und Ulrich Bittner
 [![Version](https://img.shields.io/badge/Module_Build-7-blue.svg)]()
 [![Version](https://img.shields.io/badge/Code-PHP-blue.svg)]()
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-[![Check Style](https://github.com/ubittner/Rollladensteuerung/workflows/Check%20Style/badge.svg)](https://github.com/ubittner/Rollladensteuerung/actions)  
-[![Run Tests](https://github.com/ubittner/Rollladensteuerung/workflows/Run%20Tests/badge.svg)](https://github.com/ubittner/Rollladensteuerung/actions)
+[![Check Style](https://github.com/ubittner/Rollladensteuerung/workflows/Check%20Style/badge.svg)](https://github.com/ubittner/Rollladensteuerung/actions)
+[![Run Tests](https://github.com/ubittner/Rollladensteuerung/workflows/Run%20Tests/badge.svg)](https://github.com/ubittner/Rollladensteuerung/actions)  
 
 Folgende Module beinhaltet das Repository `Rollladensteuerung`:  
 
