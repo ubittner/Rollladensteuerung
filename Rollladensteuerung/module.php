@@ -187,11 +187,6 @@ class Rollladensteuerung extends IPSModule
         }
     }
 
-    protected function KernelReady(): void
-    {
-        $this->ApplyChanges();
-    }
-
     public function GetConfigurationForm()
     {
         $formdata = json_decode(file_get_contents(__DIR__ . '/form.json'));
@@ -248,6 +243,11 @@ class Rollladensteuerung extends IPSModule
                 break;
 
         }
+    }
+
+    protected function KernelReady(): void
+    {
+        $this->ApplyChanges();
     }
 
     //##################### Private
