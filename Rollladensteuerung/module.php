@@ -169,7 +169,10 @@ class Rollladensteuerung extends IPSModule
                 if (!empty($id)) {
                     if (array_search($SenderID, array_column($id, 'ID')) !== false) {
                         if ($Data[1]) {
-                            $this->TriggerEmergencySensor($SenderID);
+                            $state = (bool) $Data[0];
+                            if ($state) {
+                                $this->TriggerEmergencySensor($SenderID);
+                            }
                         }
                     }
                 }
