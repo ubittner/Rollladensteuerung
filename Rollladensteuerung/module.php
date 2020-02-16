@@ -112,6 +112,7 @@ class Rollladensteuerung extends IPSModule
     public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
     {
         $this->SendDebug('MessageSink', 'Message from SenderID ' . $SenderID . ' with Message ' . $Message . "\r\n Data: " . print_r($Data, true), 0);
+        $timeStamp = date('d.m.Y, H:i:s');
         switch ($Message) {
             case IPS_KERNELSTARTED:
                 $this->KernelReady();
@@ -126,9 +127,8 @@ class Rollladensteuerung extends IPSModule
                 if ($id != 0 && @IPS_ObjectExists($id)) {
                     if ($SenderID == $id) {
                         if ($Data[1]) {
-                            $timeStamp = date('d.m.Y, H:i:s');
-                            $this->LogMessage('Variable Sonnenaufgang hat sich geändert! ' . $timeStamp, 10201);
-                            $this->TriggerSunrise();
+                            $this->SendDebug(__FUNCTION__, 'Variable Sonnenaufgang hat sich geändert! ' . $timeStamp, 0);
+                            $this->TriggerAstroMode(0);
                         }
                     }
                 }
@@ -137,9 +137,27 @@ class Rollladensteuerung extends IPSModule
                 if ($id != 0 && @IPS_ObjectExists($id)) {
                     if ($SenderID == $id) {
                         if ($Data[1]) {
-                            $timeStamp = date('d.m.Y, H:i:s');
-                            $this->LogMessage('Variable Sonnenuntergang hat sich geändert! ' . $timeStamp, 10201);
-                            $this->TriggerSunset();
+                            $this->SendDebug(__FUNCTION__, 'Variable Sonnenuntergang hat sich geändert! ' . $timeStamp, 0);
+                            $this->TriggerAstroMode(1);
+                        }
+                    }
+                }
+                // Day and night
+                $id = $this->ReadPropertyInteger('DayNight');
+                if ($id != 0 && @IPS_ObjectExists($id)) {
+                    if ($SenderID == $id) {
+                        if ($Data[1]) {
+                            // Day
+                            $this->SendDebug(__FUNCTION__, 'Tag / Nacht Wert: ' . json_encode($Data[0]), 0);
+                            if ($Data[0]) {
+                                $this->SendDebug(__FUNCTION__, 'Variable Tag / Nacht hat sich geändert, es ist Tag! ' . $timeStamp, 0);
+                                $this->TriggerAstroMode(2);
+                            }
+                            // Night
+                            if (!$Data[0]) {
+                                $this->SendDebug(__FUNCTION__, 'Variable Tag / Nacht hat sich geändert, es ist Nacht! ' . $timeStamp, 0);
+                                $this->TriggerAstroMode(3);
+                            }
                         }
                     }
                 }
@@ -284,8 +302,9 @@ class Rollladensteuerung extends IPSModule
 
         // Astro
         $this->RegisterPropertyInteger('Sunrise', 0);
-        $this->RegisterPropertyInteger('SunriseAction', 50);
         $this->RegisterPropertyInteger('Sunset', 0);
+        $this->RegisterPropertyInteger('DayNight', 0);
+        $this->RegisterPropertyInteger('SunriseAction', 50);
         $this->RegisterPropertyInteger('SunsetAction', 50);
 
         // Weekly schedule
@@ -536,6 +555,11 @@ class Rollladensteuerung extends IPSModule
         }
         // Sunrise
         $id = $this->ReadPropertyInteger('Sunrise');
+        if ($id != 0 && @IPS_ObjectExists($id)) {
+            $this->RegisterMessage($id, VM_UPDATE);
+        }
+        // Sunrise
+        $id = $this->ReadPropertyInteger('DayNight');
         if ($id != 0 && @IPS_ObjectExists($id)) {
             $this->RegisterMessage($id, VM_UPDATE);
         }

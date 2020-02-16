@@ -90,6 +90,7 @@ trait RS_blindActuator
      * Sets the blind slider.
      *
      * @param float $Level
+     * @throws Exception
      */
     public function SetBlindSlider(float $Level): void
     {
@@ -143,6 +144,7 @@ trait RS_blindActuator
      * @return bool
      * false    = an error occured
      * true     = ok
+     * @throws Exception
      */
     public function SetBlindLevel(float $Level, bool $CheckLogic): bool
     {
@@ -183,7 +185,7 @@ trait RS_blindActuator
                 $result = HM_WriteValueBoolean($parentID, 'STOP', true);
                 if (!$result) {
                     $this->LogMessage(__FUNCTION__ . ' Die Rollladenfahrt konnte nicht gestoppt werden.', KL_ERROR);
-                    $this->SendDebug(__FUNCTION__, 'Die Rollladenfahr konnte nicht gestoppt werden.', 0);
+                    $this->SendDebug(__FUNCTION__, 'Die Rollladenfahrt konnte nicht gestoppt werden.', 0);
                 } else {
                     $this->SendDebug(__FUNCTION__, 'Die Rollladenfahrt wurde gestoppt.', 0);
                 }
@@ -230,6 +232,7 @@ trait RS_blindActuator
      * @return bool
      * false    = new blind level is not ok
      * true     = new blind level is ok
+     * @throws Exception
      */
     private function CheckLogic(float $Level): bool
     {

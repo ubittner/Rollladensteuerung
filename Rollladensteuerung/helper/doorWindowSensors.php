@@ -37,6 +37,8 @@ trait RS_doorWindowSensors
      * @return bool
      * false    = closed
      * true     = opened
+     *
+     * @throws Exception
      */
     private function CheckDoorWindowSensors(): bool
     {

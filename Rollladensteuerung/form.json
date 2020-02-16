@@ -248,16 +248,6 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenaufgang an:"
-        },
-        {
-          "type": "NumberSpinner",
-          "name": "SunriseAction",
-          "caption": "Rollladenposition bei Sonnenaufgang",
-          "suffix": "%"
-        },
-        {
-          "type": "Label",
           "caption": "\nBitte wählen Sie die Variable für den Sonnenuntergang aus:"
         },
         {
@@ -267,12 +257,31 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenuntergang an:"
+          "caption": "\nBitte wählen Sie die Variable für Tag / Nacht aus:"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "DayNight",
+          "caption": "Tag / Nacht"
+        },
+        {
+          "type": "Label",
+          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenaufgang / Tag an:"
+        },
+        {
+          "type": "NumberSpinner",
+          "name": "SunriseAction",
+          "caption": "Rollladenposition bei Sonnenaufgang / Tag",
+          "suffix": "%"
+        },
+        {
+          "type": "Label",
+          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenuntergang / Nacht an:"
         },
         {
           "type": "NumberSpinner",
           "name": "SunsetAction",
-          "caption": "Rollladenposition bei Sonnenuntergang",
+          "caption": "Rollladenposition bei Sonnenuntergang / Nacht",
           "suffix": "%"
         }
       ]
