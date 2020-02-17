@@ -271,7 +271,7 @@
         {
           "type": "NumberSpinner",
           "name": "SunriseAction",
-          "caption": "Rollladenposition bei Sonnenaufgang oder Tag",
+          "caption": "Sonnenaufgang oder Tag",
           "suffix": "%"
         },
         {
@@ -281,7 +281,7 @@
         {
           "type": "NumberSpinner",
           "name": "SunsetAction",
-          "caption": "Rollladenposition bei Sonnenuntergang oder Nacht",
+          "caption": "Sonnenuntergang oder Nacht",
           "suffix": "%"
         }
       ]
