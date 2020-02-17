@@ -506,7 +506,7 @@
           "caption": "Registrierte Nachrichten",
           "rowCount": 10,
           "sort": {
-            "column": "MessageDescription",
+            "column": "ParentName",
             "direction": "ascending"
           },
           "columns": [
