@@ -266,22 +266,22 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenaufgang / Tag an:"
+          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenaufgang oder Tag an:"
         },
         {
           "type": "NumberSpinner",
           "name": "SunriseAction",
-          "caption": "Rollladenposition bei Sonnenaufgang / Tag",
+          "caption": "Rollladenposition bei Sonnenaufgang oder Tag",
           "suffix": "%"
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenuntergang / Nacht an:"
+          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenuntergang oder Nacht an:"
         },
         {
           "type": "NumberSpinner",
           "name": "SunsetAction",
-          "caption": "Rollladenposition bei Sonnenuntergang / Nacht",
+          "caption": "Rollladenposition bei Sonnenuntergang oder Nacht",
           "suffix": "%"
         }
       ]
