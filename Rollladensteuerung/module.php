@@ -361,7 +361,7 @@ class Rollladensteuerung extends IPSModule
         IPS_SetVariableProfileAssociation($profile, 1, 'Geöffnet', 'Window', 0x0000FF);
 
         // Day and night detection
-        $profile = 'HKTS.' . $this->InstanceID . '.DayNightDetection';
+        $profile = 'RS.' . $this->InstanceID . '.DayNightDetection';
         if (!IPS_VariableProfileExists($profile)) {
             IPS_CreateVariableProfile($profile, 0);
         }
@@ -403,7 +403,7 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterVariableBoolean('DoorWindowState', 'Tür- / Fensterstatus', $profile, 6);
 
         // Day and night detection
-        $profile = 'HKTS.' . $this->InstanceID . '.DayNightDetection';
+        $profile = 'RS.' . $this->InstanceID . '.DayNightDetection';
         $this->RegisterVariableBoolean('DayNightDetection', 'Tag- / Nachterkennung', $profile, 7);
 
         // Sleep mode timer info
