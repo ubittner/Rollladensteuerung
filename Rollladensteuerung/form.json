@@ -95,6 +95,11 @@
         },
         {
           "type": "CheckBox",
+          "name": "EnableDayNightDetection",
+          "caption": "Tag- / Nachterkennung"
+        },
+        {
+          "type": "CheckBox",
           "name": "EnableSleepModeTimer",
           "caption": "Ruhe-Modus Timer"
         }
@@ -257,7 +262,7 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte wählen Sie die Variable für 'Ist es Nacht' - Erkennung aus:"
+          "caption": "\nBitte wählen Sie die Variable für die 'Ist es Nacht' - Erkennung aus:"
         },
         {
           "type": "SelectVariable",
@@ -266,22 +271,22 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenaufgang oder Tag an:"
+          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenaufgang oder 'Es ist Tag' an:"
         },
         {
           "type": "NumberSpinner",
           "name": "SunriseAction",
-          "caption": "Sonnenaufgang oder Tag",
+          "caption": "Sonnenaufgang oder 'Es ist Tag'",
           "suffix": "%"
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenuntergang oder Nacht an:"
+          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenuntergang oder 'Es ist Nacht' an:"
         },
         {
           "type": "NumberSpinner",
           "name": "SunsetAction",
-          "caption": "Sonnenuntergang oder Nacht",
+          "caption": "Sonnenuntergang oder 'Es ist Nacht'",
           "suffix": "%"
         }
       ]

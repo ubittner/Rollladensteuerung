@@ -90,14 +90,8 @@ class Rollladensteuerung extends IPSModule
         // Register messages
         $this->RegisterMessages();
 
-        // Check door and window sensors
-        $this->CheckDoorWindowSensors();
-
-        // Update blind slider
-        $this->UpdateBlindSlider();
-
-        // Adjust blind level
-        $this->AdjustBlindLevel();
+        // Check condition
+        $this->CheckActualCondition();
     }
 
     public function Destroy()
@@ -149,6 +143,7 @@ class Rollladensteuerung extends IPSModule
                         if ($Data[1]) {
                             // Night
                             $this->SendDebug(__FUNCTION__, 'Ist es Nacht: ' . json_encode($Data[0]), 0);
+                            $this->SetValue('DayNightDetection', $Data[0]);
                             if ($Data[0]) {
                                 $this->SendDebug(__FUNCTION__, 'Es ist Nacht. ' . $timeStamp, 0);
                                 $this->TriggerAstroMode(3);
@@ -283,6 +278,7 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyBoolean('EnableBlindSlider', true);
         $this->RegisterPropertyBoolean('EnableSleepMode', true);
         $this->RegisterPropertyBoolean('EnableDoorWindowState', true);
+        $this->RegisterPropertyBoolean('EnableDayNightDetection', true);
         $this->RegisterPropertyBoolean('EnableSleepModeTimer', true);
 
         // Blind actuator
@@ -363,11 +359,19 @@ class Rollladensteuerung extends IPSModule
         }
         IPS_SetVariableProfileAssociation($profile, 0, 'Geschlossen', 'Window', 0x00FF00);
         IPS_SetVariableProfileAssociation($profile, 1, 'Geöffnet', 'Window', 0x0000FF);
+
+        // Day and night detection
+        $profile = 'HKTS.' . $this->InstanceID . '.DayNightDetection';
+        if (!IPS_VariableProfileExists($profile)) {
+            IPS_CreateVariableProfile($profile, 0);
+        }
+        IPS_SetVariableProfileAssociation($profile, 0, 'Es ist Tag', 'Sun', 0xFFFF00);
+        IPS_SetVariableProfileAssociation($profile, 1, 'Es ist Nacht', 'Moon', 0x0000FF);
     }
 
     private function DeleteProfiles(): void
     {
-        $profiles = ['BlindSlider.Reversed', 'SleepMode', 'DoorWindowState'];
+        $profiles = ['AutomaticMode', 'BlindSlider.Reversed', 'SleepMode', 'DoorWindowState', 'DayNightDetection'];
         foreach ($profiles as $profile) {
             $profileName = 'RS.' . $this->InstanceID . '.' . $profile;
             if (@IPS_VariableProfileExists($profileName)) {
@@ -398,8 +402,12 @@ class Rollladensteuerung extends IPSModule
         $profile = 'RS.' . $this->InstanceID . '.DoorWindowState';
         $this->RegisterVariableBoolean('DoorWindowState', 'Tür- / Fensterstatus', $profile, 6);
 
+        // Day and night detection
+        $profile = 'HKTS.' . $this->InstanceID . '.DayNightDetection';
+        $this->RegisterVariableBoolean('DayNightDetection', 'Tag- / Nachterkennung', $profile, 7);
+
         // Sleep mode timer info
-        $this->RegisterVariableString('SleepModeTimer', 'Ruhe-Modus Timer', '', 7);
+        $this->RegisterVariableString('SleepModeTimer', 'Ruhe-Modus Timer', '', 8);
         $id = $this->GetIDForIdent('SleepModeTimer');
         IPS_SetIcon($id, 'Clock');
     }
@@ -514,6 +522,16 @@ class Rollladensteuerung extends IPSModule
 
         // Door and window state
         IPS_SetHidden($this->GetIDForIdent('DoorWindowState'), !$this->ReadPropertyBoolean('EnableDoorWindowState'));
+
+        // Day and night detection
+        $id = $this->GetIDForIdent('DayNightDetection');
+        $nightDetection = $this->ReadPropertyInteger('NightDetection');
+        $use = false;
+        if ($nightDetection != 0 && IPS_ObjectExists($nightDetection)) {
+            $use = $this->ReadPropertyBoolean('EnableDayNightDetection');
+        }
+        IPS_SetHidden($id, !$use);
+
 
         // Sleep mode timer info
         IPS_SetHidden($this->GetIDForIdent('SleepModeTimer'), !$this->ReadPropertyBoolean('EnableSleepModeTimer'));
@@ -794,5 +812,35 @@ class Rollladensteuerung extends IPSModule
         }
         // Set state
         $this->SetStatus($state);
+    }
+
+    private function CheckActualCondition(): void
+    {
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt. (' . microtime(true) . ')', 0);
+        // Check door and window sensors
+        $this->CheckDoorWindowSensors();
+        // Update blind slider
+        $this->UpdateBlindSlider();
+        // Check automatic mode
+        if (!$this->GetValue('AutomaticMode')) {
+            return;
+        }
+        // Check night detection
+        $id = $this->ReadPropertyInteger('NightDetection');
+        if ($id != 0 && IPS_ObjectExists($id)) {
+            $state = GetValueBoolean($id);
+            $this->SetValue('DayNightDetection', $state);
+            if ($state) {
+                // Night
+                $mode = 3;
+            } else {
+                // Day
+                $mode = 2;
+            }
+            $this->TriggerAstroMode($mode);
+            return;
+        }
+        // Adjust blind level
+        $this->AdjustBlindLevel();
     }
 }

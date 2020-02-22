@@ -42,7 +42,7 @@ trait RS_doorWindowSensors
      */
     private function CheckDoorWindowSensors(): bool
     {
-        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt. (' . microtime(true) . ')', 0);
         $state = false;
         $sensors = $this->GetDoorWindowSensors();
         if (!empty($sensors)) {
@@ -65,7 +65,7 @@ trait RS_doorWindowSensors
      */
     private function OpenBlindByDoorWindowSensor(bool $State): void
     {
-        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird mit dem Parameter $State = ' . json_encode($State) . ' ausgeführt. (' . microtime(true) . ')', 0);
         // Only if automatic mode is turned on, opening mode is activated and door or window is opened
         if ($this->ReadPropertyBoolean('OpenBlind') && $State && $this->GetValue('AutomaticMode')) {
             $actualPosition = $this->GetValue('BlindSlider') * 100;
@@ -74,7 +74,7 @@ trait RS_doorWindowSensors
             $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $actualPosition, 0);
             if ($actualPosition < $openPosition) {
                 $level = $openPosition / 100;
-                $this->SendDebug(__FUNCTION__, 'Position wird angefahren. Wert: ' . $level, 0);
+                $this->SendDebug(__FUNCTION__, 'Der Rollladen wird auf ' . $level . '% gefahren.', 0);
                 $this->SetBlindLevel($level, false);
             }
         }

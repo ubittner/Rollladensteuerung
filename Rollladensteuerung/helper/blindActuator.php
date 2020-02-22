@@ -10,7 +10,7 @@ trait RS_blindActuator
      */
     public function DetermineBlindActuatorVariables(): void
     {
-        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt. (' . microtime(true) . ')', 0);
         $id = $this->ReadPropertyInteger('ActuatorInstance');
         if ($id == 0 || !@IPS_ObjectExists($id)) {
             return;
@@ -94,9 +94,9 @@ trait RS_blindActuator
      */
     public function SetBlindSlider(float $Level): void
     {
-        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird mit dem Parameter $Level = ' . $Level . ' ausgeführt. (' . microtime(true) . ')', 0);
         $check = $this->CheckLogic($Level);
-        $this->SendDebug(__FUNCTION__, 'Resultat Logikprüfung: ' . $check, 0);
+        $this->SendDebug(__FUNCTION__, 'Das Resultat der Logikprüfung ist: ' . json_encode($check), 0);
         if ($check) {
             $this->SetValue('BlindSlider', $Level);
             $this->SetBlindLevel($Level, false);
@@ -114,7 +114,7 @@ trait RS_blindActuator
      */
     public function ToggleSleepMode(bool $State): void
     {
-        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird mit dem Parameter $State = ' . json_encode($State) . ' ausgeführt. (' . microtime(true) . ')', 0);
         if ($State) {
             if ($this->GetValue('AutomaticMode')) {
                 $this->SetValue('SleepMode', $State);
@@ -148,7 +148,7 @@ trait RS_blindActuator
      */
     public function SetBlindLevel(float $Level, bool $CheckLogic): bool
     {
-        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird mit den Parametern $Level = ' . $Level . ' und $CheckLogic = ' . json_encode($CheckLogic) . ' ausgeführt. (' . microtime(true) . ')', 0);
         $result = false;
         if ($CheckLogic) {
             if (!$this->CheckLogic($Level)) {
@@ -167,7 +167,7 @@ trait RS_blindActuator
         if ($this->ReadPropertyInteger('ActuatorProperty') == 2) {
             // We have to change the value from 1 to 0 and vise versa
             $Level = (float) abs($Level - 1);
-            $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $Level, 0);
+            $this->SendDebug(__FUNCTION__, 'Der neue Positionswert ist: ' . $Level . '.', 0);
         }
         $id = $this->ReadPropertyInteger('ActuatorControlLevel');
         if ($id != 0 && @IPS_ObjectExists($id)) {
@@ -201,7 +201,7 @@ trait RS_blindActuator
      */
     private function AdjustBlindLevel(): void
     {
-        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt. (' . microtime(true) . ')', 0);
         if ($this->GetValue('AutomaticMode') && $this->ReadPropertyBoolean('AdjustBlindLevel')) {
             $this->TriggerAction(false);
         }
@@ -212,7 +212,7 @@ trait RS_blindActuator
      */
     private function UpdateBlindSlider(): void
     {
-        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt. (' . microtime(true) . ')', 0);
         $id = $this->ReadPropertyInteger('ActuatorStateLevel');
         if ($id != 0 && @IPS_ObjectExists($id)) {
             $level = GetValue($id);
@@ -220,7 +220,7 @@ trait RS_blindActuator
             if ($this->ReadPropertyInteger('ActuatorProperty') == 2) {
                 $level = (float) abs($level - 1);
             }
-            $this->SendDebug(__FUNCTION__, 'Aktualisierung wird durchgeführt, neuer Wert: ' . $level * 100 . '%.', 0);
+            $this->SendDebug(__FUNCTION__, 'Die Aktualisierung wird durchgeführt, neuer Wert: ' . $level * 100 . '%.', 0);
             $this->SetValue('BlindSlider', $level);
         }
     }
@@ -236,7 +236,7 @@ trait RS_blindActuator
      */
     private function CheckLogic(float $Level): bool
     {
-        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird mit dem Parameter $Level = ' . $Level . ' ausgeführt. (' . microtime(true) . ')', 0);
         $Level = $Level * 100;
         $setLevel = true;
         // Check lockout protection
@@ -253,12 +253,12 @@ trait RS_blindActuator
                 if ($this->ReadPropertyInteger('ActuatorProperty') == 2) {
                     $blindLevel = (float) abs($blindLevel - 1) * 100;
                 }
-                $this->SendDebug(__FUNCTION__, 'Aktuelle Position: ' . $blindLevel . '%', 0);
-                $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $Level . '%', 0);
+                $this->SendDebug(__FUNCTION__, 'Aktuelle Position: ' . $blindLevel . '%.', 0);
+                $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $Level . '%.', 0);
                 $difference = $this->ReadPropertyInteger('BlindPositionDifference');
                 if ($difference > 0) {
                     $actualDifference = abs($blindLevel - $Level);
-                    $this->SendDebug(__FUNCTION__, 'Positionsunterschied: ' . $actualDifference . '%', 0);
+                    $this->SendDebug(__FUNCTION__, 'Positionsunterschied: ' . $actualDifference . '%.', 0);
                     if ($actualDifference <= $difference) {
                         $this->SendDebug(__FUNCTION__, 'Der Positionsunterschied ist zu gering.', 0);
                         $setLevel = false;
@@ -266,7 +266,7 @@ trait RS_blindActuator
                 }
             }
         }
-        $this->SendDebug(__FUNCTION__, 'Resultat Logikprüfung: ' . json_encode($setLevel), 0);
+        $this->SendDebug(__FUNCTION__, 'Das Resultat der Logikprüfung ist: ' . json_encode($setLevel), 0);
         return $setLevel;
     }
 }
