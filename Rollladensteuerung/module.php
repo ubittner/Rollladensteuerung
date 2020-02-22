@@ -532,7 +532,6 @@ class Rollladensteuerung extends IPSModule
         }
         IPS_SetHidden($id, !$use);
 
-
         // Sleep mode timer info
         IPS_SetHidden($this->GetIDForIdent('SleepModeTimer'), !$this->ReadPropertyBoolean('EnableSleepModeTimer'));
     }
