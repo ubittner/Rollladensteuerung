@@ -97,10 +97,13 @@ trait RS_weeklySchedule
 
             }
             if (isset($level) && isset($direction)) {
-                if ($this->CheckLogic($level, $direction)) {
-                    $this->SetValue('SetpointPosition', $level * 100);
-                    $result = $this->SetBlindLevel($level, true);
+                $level = $this->CheckPosition($level, $direction);
+                if ($level == -1) {
+                    // Abort, level is not valid
+                    return $result;
                 }
+                $this->SetValue('SetpointPosition', $level * 100);
+                $result = $this->SetBlindLevel($level, true);
             }
         }
         return $result;

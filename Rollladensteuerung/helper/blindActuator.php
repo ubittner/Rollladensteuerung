@@ -171,44 +171,6 @@ trait RS_blindActuator
     //#################### Logic
 
     /**
-     * Checks the logic.
-     *
-     * @param float $Level
-     *
-     * @param int $MovingDirection
-     * 0        = move blind down
-     * 1        = move blind up
-     *
-     * @return bool
-     * false    = don't move blind
-     * true     = move blind
-     */
-    private function CheckLogic(float $Level, int $MovingDirection): bool
-    {
-        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
-        $this->SendDebug(__FUNCTION__, 'Parameter $Level = ' . $Level, 0);
-        $directionName = 'Rolladen runterfahren';
-        if ($MovingDirection == 1) {
-            $directionName = 'Rollladen rauffahren';
-        }
-        $this->SendDebug(__FUNCTION__, 'Parameter $MovingDirection = ' . $MovingDirection . ' = ' . $directionName, 0);
-        $result = true;
-        // Check position for minimum difference
-        if (!$this->CheckPositionForMinimumDifference($Level)) {
-            return false;
-        }
-        // Check open doors and windows
-        if (!$this->CheckOpenDoorsAndWindows($Level, $MovingDirection)) {
-            return false;
-        }
-        // Check position
-        if (!$this->CheckPosition($Level, $MovingDirection)) {
-            return false;
-        }
-        return $result;
-    }
-
-    /**
      * Gets the actual blind position.
      *
      * @return int
@@ -233,73 +195,7 @@ trait RS_blindActuator
     }
 
     /**
-     * Checks the blind position for a minimum difference.
-     *
-     * @param float $Level
-     *
-     * @return bool
-     * false    = dont't move blind
-     * true     = move blind
-     */
-    private function CheckPositionForMinimumDifference(float $Level): bool
-    {
-        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
-        $this->SendDebug(__FUNCTION__, 'Parameter $Level = ' . $Level, 0);
-        $result = true;
-        if ($this->ReadPropertyBoolean('CheckMinimumBlindPositionDifference')) {
-            $actualPosition = $this->GetActualPosition();
-            $newPosition = $Level * 100;
-            $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $newPosition . '%.', 0);
-            $minimumDifference = $this->ReadPropertyInteger('BlindPositionDifference');
-            if ($minimumDifference > 0) {
-                $actualDifference = abs($actualPosition - $newPosition);
-                $this->SendDebug(__FUNCTION__, 'Positionsunterschied: ' . $actualDifference . '%.', 0);
-                if ($actualDifference <= $minimumDifference) {
-                    $this->SendDebug(__FUNCTION__, 'Abbruch, Positionsunterschied ist zu gering!', 0);
-                    $result = false;
-                }
-            }
-        }
-        return $result;
-    }
-
-    /**
-     * Checks open doors and windows.
-     *
-     * @param float $Level
-     *
-     * @param int $MovingDirection
-     * 0        = move blind down
-     * 1        = move blind up
-     *
-     * @return bool
-     * false    = don't move blind
-     * true     = move blind
-     */
-    private function CheckOpenDoorsAndWindows(float $Level, int $MovingDirection): bool
-    {
-        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
-        $this->SendDebug(__FUNCTION__, 'Parameter $Level = ' . $Level, 0);
-        $this->SendDebug(__FUNCTION__, 'Parameter $MovingDirection = ' . $MovingDirection, 0);
-        $result = true;
-        // Down
-        if ($MovingDirection == 0) {
-            // Check open doors and windows
-            if ($this->GetValue('DoorWindowState')) {
-                if ($this->ReadPropertyBoolean('LockoutProtection')) {
-                    // ToDo: Must be reviewed
-                    if (($Level * 100) <= $this->ReadPropertyInteger('LockoutPosition')) {
-                        $this->SendDebug(__FUNCTION__, 'Abbruch, eine Tür oder ein Fenster ist offen!', 0);
-                        $result = false;
-                    }
-                }
-            }
-        }
-        return $result;
-    }
-
-    /**
-     * Checks the position.
+     * Checks the position logic.
      *
      * @param float $Level
      *
@@ -307,24 +203,56 @@ trait RS_blindActuator
      * 0    = move blind down
      * 1    = move blind up
      *
-     * @return bool
-     * false    = don't move blind
-     * true     = move blind
+     * @return float
+     * Retruns the level value.
      */
-    private function CheckPosition(float $Level, int $MovingDirection): bool
+    private function CheckPosition(float $Level, int $MovingDirection): float
     {
         $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $this->SendDebug(__FUNCTION__, 'Parameter $Level = ' . $Level, 0);
         $this->SendDebug(__FUNCTION__, 'Parameter $MovingDirection = ' . $MovingDirection, 0);
-        $result = true;
+        $newLevel = (float) -1;
         $actualPosition = $this->GetActualPosition();
         $newPosition = $Level * 100;
+        // Check minimum blind position difference
+        if ($this->ReadPropertyBoolean('CheckMinimumBlindPositionDifference')) {
+            $this->SendDebug(__FUNCTION__, 'Mindest-Positionsunterschied wird geprüft', 0);
+            $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $newPosition . '%.', 0);
+            $minimumDifference = $this->ReadPropertyInteger('BlindPositionDifference');
+            if ($minimumDifference > 0) {
+                $actualDifference = abs($actualPosition - $newPosition);
+                $this->SendDebug(__FUNCTION__, 'Positionsunterschied: ' . $actualDifference . '%.', 0);
+                if ($actualDifference <= $minimumDifference) {
+                    $this->SendDebug(__FUNCTION__, 'Abbruch, Positionsunterschied ist zu gering!', 0);
+                    // Abort
+                    return $newLevel;
+                }
+            }
+        }
         // Down
         if ($MovingDirection == 0) {
+            // Check open doors and windows
+            if ($this->GetValue('DoorWindowState')) {
+                if ($this->ReadPropertyBoolean('LockoutProtection')) {
+                    $lockoutPosition = $this->ReadPropertyInteger('LockoutPosition');
+                    if ($newPosition < $lockoutPosition) {
+                        // Abort
+                        $this->SendDebug(__FUNCTION__, 'Abbruch Tür-/Fensterprüfung, Aussperrschutzposition überschritten!', 0);
+                        return $newLevel;
+                    }
+                    if ($newPosition >= $lockoutPosition) {
+                        if ($actualPosition < $newPosition) {
+                            // Abort
+                            $this->SendDebug(__FUNCTION__, 'Abbruch Tür-/Fensterprüfung, Aktuelle Position ausserhalb Aussperrschutzposition!', 0);
+                            return $newLevel;
+                        }
+                    }
+                }
+            }
             // Only move blind down, if new position is lower then the actual position
             if ($newPosition >= $actualPosition) {
                 $this->SendDebug(__FUNCTION__, 'Abbruch Rollladen runterfahren, Aktuelle Rollladenposition ist niedriger!', 0);
-                $result = false;
+                return $newLevel;
             }
         }
         // Up
@@ -332,9 +260,9 @@ trait RS_blindActuator
             // Only move blind up, if new position is higher then the actual position
             if ($newPosition <= $actualPosition) {
                 $this->SendDebug(__FUNCTION__, 'Abbruch Rollladen rauffahren, Aktuelle Rollladenposition ist höher!', 0);
-                $result = false;
+                return $newLevel;
             }
         }
-        return $result;
+        return $Level;
     }
 }

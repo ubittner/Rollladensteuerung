@@ -19,6 +19,7 @@ trait RS_twilightDetection
     private function TriggerTwilightDetection(bool $State): bool
     {
         $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $result = false;
         $this->SetValue('TwilightState', $State);
         $stateName = 'Tag';
         $level = $this->ReadPropertyInteger('TwilightPositionDay') / 100;
@@ -29,13 +30,15 @@ trait RS_twilightDetection
             $direction = 0;
         }
         $this->SendDebug(__FUNCTION__, 'Parameter $State = ' . $State . ' = ' . $stateName, 0);
-        $result = false;
         // Set blind level if automatic mode is enabled and sleep mode is disabled
         if ($this->CheckModes(__FUNCTION__)) {
-            if ($this->CheckLogic($level, $direction)) {
-                $this->SetValue('SetpointPosition', $level * 100);
-                $result = $this->SetBlindLevel($level, true);
+            $level = $this->CheckPosition($level, $direction);
+            if ($level == -1) {
+                // Abort, level is not valid
+                return $result;
             }
+            $this->SetValue('SetpointPosition', $level * 100);
+            $result = $this->SetBlindLevel($level, true);
         }
         return $result;
     }

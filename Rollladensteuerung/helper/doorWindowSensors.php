@@ -90,11 +90,7 @@ trait RS_doorWindowSensors
             // Closed
             if (!$State && !$doorWindowState) {
                 if ($this->ReadPropertyBoolean('CloseBlind')) {
-                    $actualPosition = $this->GetActualPosition();
-                    $newPosition = $this->GetValue('SetpointPosition');
-                    if ($actualPosition < $newPosition) {
-                        $result = $this->SetBlindLevel($newPosition / 100, false);
-                    }
+                    $result = $this->SetBlindLevel($this->GetValue('SetpointPosition') / 100, false);
                 }
             }
         }
