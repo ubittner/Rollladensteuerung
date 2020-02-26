@@ -177,7 +177,8 @@ class Rollladensteuerung extends IPSModule
                     if (array_search($SenderID, array_column($doorWindowSensors, 'ID')) !== false) {
                         if ($Data[1]) {
                             $this->CheckDoorWindowSensors();
-                            $this->TriggerActionByDoorWindowSensor($Data[0]);
+                            $state = (bool) $Data[0];
+                            $this->TriggerActionByDoorWindowSensor($state);
                         }
                     }
                 }
@@ -186,7 +187,8 @@ class Rollladensteuerung extends IPSModule
                 if (!empty($id)) {
                     if (array_search($SenderID, array_column($id, 'ID')) !== false) {
                         if ($Data[1]) {
-                            if ($Data[0]) {
+                            $state = (bool) $Data[0];
+                            if ($state) {
                                 $this->TriggerEmergencySensor($SenderID);
                             }
                         }
