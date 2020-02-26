@@ -26,11 +26,11 @@
         },
         {
           "type": "Label",
-          "caption": "Version:\t\t\t1.00-7"
+          "caption": "Version:\t\t\t1.00-8"
         },
         {
           "type": "Label",
-          "caption": "Datum:\t\t\t11. Februar 2020"
+          "caption": "Datum:\t\t\t25. Februar 2020"
         },
         {
           "type": "Label",
@@ -80,6 +80,11 @@
         },
         {
           "type": "CheckBox",
+          "name": "EnableSetpointPosition",
+          "caption": "Soll-Position"
+        },
+        {
+          "type": "CheckBox",
           "name": "EnableBlindSlider",
           "caption": "Rolladensteuerung"
         },
@@ -95,8 +100,8 @@
         },
         {
           "type": "CheckBox",
-          "name": "EnableDayNightDetection",
-          "caption": "Tag- / Nachterkennung"
+          "name": "EnableTwilightDetectionState",
+          "caption": "Dämmerungsstatus"
         },
         {
           "type": "CheckBox",
@@ -199,25 +204,50 @@
     },
     {
       "type": "ExpansionPanel",
+      "caption": "Ausführungsverzögerung",
+      "items": [
+        {
+          "type": "Label",
+          "caption": "Bitte geben Sie die Ausführungsverzögerung in Sekunden (0 = keine Ausführungsverzögerung) an:"
+        },
+        {
+          "type": "NumberSpinner",
+          "name": "ExecutionDelay",
+          "caption": "Verzögerung",
+          "suffix": "s"
+        }
+      ]
+    },
+    {
+      "type": "ExpansionPanel",
       "caption": "Positionsprüfung",
       "items": [
         {
           "type": "Label",
-          "caption": "Bitte wählen Sie aus, ob eine Positionsprüfung verwendet werden soll:"
+          "caption": "Bitte wählen Sie aus, ob bei der Aktivierung der Automatik die Rollladenposition direkt angepasst werden soll:"
         },
         {
           "type": "CheckBox",
-          "name": "UseCheckBlindPosition",
-          "caption": "Positionsprüfung verwenden"
+          "name": "AdjustBlindLevel",
+          "caption": "Position anpassen"
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie den Differenzwert in % an:"
+          "caption": "\nBitte wählen Sie aus, ob der Positionsunterschied einer Mindestvorgabe entspricht:"
+        },
+        {
+          "type": "CheckBox",
+          "name": "CheckMinimumBlindPositionDifference",
+          "caption": "Mindestvorgabe prüfen"
+        },
+        {
+          "type": "Label",
+          "caption": "\nBitte geben Sie den Positionsunterschied in % für die Mindestvorgabe an:"
         },
         {
           "type": "NumberSpinner",
           "name": "BlindPositionDifference",
-          "caption": "Differenzwert",
+          "caption": "Positionsunterschied",
           "suffix": "%"
         }
       ]
@@ -233,14 +263,14 @@
         {
           "type": "NumberSpinner",
           "name": "SleepDuration",
-          "caption": "Ruhe-Modus",
+          "caption": "Dauer",
           "suffix": "h"
         }
       ]
     },
     {
       "type": "ExpansionPanel",
-      "caption": "Astromodus",
+      "caption": "Sonnenaufgang / -untergang",
       "items": [
         {
           "type": "Label",
@@ -253,6 +283,16 @@
         },
         {
           "type": "Label",
+          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenaufgang an:"
+        },
+        {
+          "type": "NumberSpinner",
+          "name": "SunrisePosition",
+          "caption": "Position Sonnenaufgang",
+          "suffix": "%"
+        },
+        {
+          "type": "Label",
           "caption": "\nBitte wählen Sie die Variable für den Sonnenuntergang aus:"
         },
         {
@@ -262,31 +302,12 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte wählen Sie die Variable für die 'Ist es Nacht' - Erkennung aus:"
-        },
-        {
-          "type": "SelectVariable",
-          "name": "NightDetection",
-          "caption": "'Ist es Nacht' - Erkennung"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenaufgang oder 'Es ist Tag' an:"
+          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenuntergang an:"
         },
         {
           "type": "NumberSpinner",
-          "name": "SunriseAction",
-          "caption": "Sonnenaufgang oder 'Es ist Tag'",
-          "suffix": "%"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenuntergang oder 'Es ist Nacht' an:"
-        },
-        {
-          "type": "NumberSpinner",
-          "name": "SunsetAction",
-          "caption": "Sonnenuntergang oder 'Es ist Nacht'",
+          "name": "SunsetPosition",
+          "caption": "Position Sonnenuntergang",
           "suffix": "%"
         }
       ]
@@ -311,7 +332,7 @@
         {
           "type": "NumberSpinner",
           "name": "BlindPositionClosed",
-          "caption": "Schließungsmodus",
+          "caption": "Position Schließungsmodus",
           "suffix": "%"
         },
         {
@@ -321,7 +342,7 @@
         {
           "type": "NumberSpinner",
           "name": "BlindPositionOpened",
-          "caption": "Öffnungsmodus",
+          "caption": "Position Öffnungsmodus",
           "suffix": "%"
         },
         {
@@ -331,33 +352,43 @@
         {
           "type": "NumberSpinner",
           "name": "BlindPositionShading",
-          "caption": "Beschattungsmodus",
+          "caption": "Position Beschattungsmodus",
           "suffix": "%"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte wählen Sie aus, ob bei der Aktivierung der Automatik die Rollladenposition direkt angepasst werden soll:"
-        },
-        {
-          "type": "CheckBox",
-          "name": "AdjustBlindLevel",
-          "caption": "Rollladenposition anpassen"
         }
       ]
     },
     {
       "type": "ExpansionPanel",
-      "caption": "Ausführungsverzögerung",
+      "caption": "Dämmerungsprüfung",
       "items": [
         {
           "type": "Label",
-          "caption": "Bitte geben Sie die Ausführungsverzögerung in Sekunden (0 = keine Ausführungsverzögerung) an:"
+          "caption": "\nBitte wählen Sie die Variable für die Dämmerungsprüfung aus:"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "TwilightDetection",
+          "caption": "Dämmerungsprüfung"
+        },
+        {
+          "type": "Label",
+          "caption": "\nBitte geben Sie die Rollladenposition in % für 'Es ist Tag' an:"
         },
         {
           "type": "NumberSpinner",
-          "name": "ExecutionDelay",
-          "caption": "Ausführungsverzögerung",
-          "suffix": "s"
+          "name": "TwilightPositionDay",
+          "caption": "Position 'Es ist Tag'",
+          "suffix": "%"
+        },
+        {
+          "type": "Label",
+          "caption": "\nBitte geben Sie die Rollladenposition in % für 'Es ist Nacht' an:"
+        },
+        {
+          "type": "NumberSpinner",
+          "name": "TwilightPositionNight",
+          "caption": "Position 'Es ist Nacht'",
+          "suffix": "%"
         }
       ]
     },
@@ -438,6 +469,15 @@
           "name": "OpenBlindPosition",
           "caption": "Rollladenposition",
           "suffix": "%"
+        },
+        {
+          "type": "Label",
+          "caption": "\nBitte wählen Sie aus, ob eine Schließfunktion verwendet werden soll:"
+        },
+        {
+          "type": "CheckBox",
+          "name": "CloseBlind",
+          "caption": "Schließfunktion verwenden"
         }
       ]
     },

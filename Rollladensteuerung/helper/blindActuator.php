@@ -6,11 +6,11 @@ declare(strict_types=1);
 trait RS_blindActuator
 {
     /**
-     * Determines the necessary variables of the thermostat.
+     * Determines the necessary variables of the blind actuator.
      */
     public function DetermineBlindActuatorVariables(): void
     {
-        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt. (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $id = $this->ReadPropertyInteger('ActuatorInstance');
         if ($id == 0 || !@IPS_ObjectExists($id)) {
             return;
@@ -87,107 +87,68 @@ trait RS_blindActuator
     }
 
     /**
-     * Sets the blind slider.
-     *
-     * @param float $Level
-     * @throws Exception
-     */
-    public function SetBlindSlider(float $Level): void
-    {
-        $this->SendDebug(__FUNCTION__, 'Die Methode wird mit dem Parameter $Level = ' . $Level . ' ausgeführt. (' . microtime(true) . ')', 0);
-        $check = $this->CheckLogic($Level);
-        $this->SendDebug(__FUNCTION__, 'Das Resultat der Logikprüfung ist: ' . json_encode($check), 0);
-        if ($check) {
-            $this->SetValue('BlindSlider', $Level);
-            $this->SetBlindLevel($Level, false);
-        } else {
-            $this->UpdateBlindSlider();
-        }
-    }
-
-    /**
-     * Toggles the sleep mode.
-     *
-     * @param bool $State
-     * false    = sleep mode off
-     * true     = sleep mode on
-     */
-    public function ToggleSleepMode(bool $State): void
-    {
-        $this->SendDebug(__FUNCTION__, 'Die Methode wird mit dem Parameter $State = ' . json_encode($State) . ' ausgeführt. (' . microtime(true) . ')', 0);
-        if ($State) {
-            if ($this->GetValue('AutomaticMode')) {
-                $this->SetValue('SleepMode', $State);
-                // Duration from hours to seconds
-                $duration = $this->ReadPropertyInteger('SleepDuration') * 60 * 60;
-                // Set timer interval
-                $this->SetTimerInterval('DeactivateSleepMode', $duration * 1000);
-                $timestamp = time() + $duration;
-                $this->SetValue('SleepModeTimer', date('d.m.Y, H:i:s', ($timestamp)));
-            }
-        } else {
-            $this->SetValue('SleepMode', $State);
-            $this->SetTimerInterval('DeactivateSleepMode', 0);
-            $this->SetValue('SleepModeTimer', '-');
-            $this->TriggerAction(false);
-        }
-    }
-
-    /**
      * Sets the blind level.
      *
      * @param float $Level
-     * @param bool $CheckLogic
-     * false    = don't check logic, set blind level immediately
-     * true     = check logic
+     *
+     * @param bool $UseDelay
+     * false    = no delay, move blind immediately
+     * true     = move blind after delay
      *
      * @return bool
-     * false    = an error occured
+     * false    = an error occurred
      * true     = ok
-     * @throws Exception
      */
-    public function SetBlindLevel(float $Level, bool $CheckLogic): bool
+    public function SetBlindLevel(float $Level, bool $UseDelay): bool
     {
-        $this->SendDebug(__FUNCTION__, 'Die Methode wird mit den Parametern $Level = ' . $Level . ' und $CheckLogic = ' . json_encode($CheckLogic) . ' ausgeführt. (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Parameter $Level = ' . $Level, 0);
         $result = false;
-        if ($CheckLogic) {
-            if (!$this->CheckLogic($Level)) {
-                return $result;
-            }
-        }
         // Check process, if still running then stop blind
         $setLevel = true;
         $id = $this->ReadPropertyInteger('ActuatorStateProcess');
         if ($id != 0 && @IPS_ObjectExists($id)) {
             if (GetValue($id) == 1) {
+                $this->SendDebug(__FUNCTION__, 'Rollladenfahrt noch nicht abgeschlossen!', 0);
                 $setLevel = false;
             }
         }
         // Check property first
         if ($this->ReadPropertyInteger('ActuatorProperty') == 2) {
+            $this->SendDebug(__FUNCTION__, 'Logik = 2 = geschlossen bei 100%', 0);
             // We have to change the value from 1 to 0 and vise versa
             $Level = (float) abs($Level - 1);
-            $this->SendDebug(__FUNCTION__, 'Der neue Positionswert ist: ' . $Level . '.', 0);
+            $this->SendDebug(__FUNCTION__, 'Neuer Wert: ' . $Level . '.', 0);
         }
         $id = $this->ReadPropertyInteger('ActuatorControlLevel');
         if ($id != 0 && @IPS_ObjectExists($id)) {
             if ($setLevel) {
                 $this->SetValue('BlindSlider', $Level);
+                if ($UseDelay) {
+                    $executionDelay = $this->ReadPropertyInteger('ExecutionDelay');
+                    if ($executionDelay > 0) {
+                        // Delay
+                        $min = self::MINIMUM_DELAY_MILLISECONDS;
+                        $max = $executionDelay * 1000;
+                        $delay = rand($min, $max);
+                        IPS_Sleep($delay);
+                    }
+                }
                 $result = @RequestAction($id, $Level);
                 if (!$result) {
-                    $this->LogMessage(__FUNCTION__ . ' Die Rollladenposition ' . $Level * 100 . '% konnte nicht angesteuert werden.', KL_ERROR);
-                    $this->SendDebug(__FUNCTION__, 'Die Rollladenposition ' . $Level * 100 . '% konnte nicht angesteuert werden.', 0);
+                    $this->LogMessage(__FUNCTION__ . ' Fehler, Rollladenposition ' . $Level * 100 . '% konnte nicht angefahren werden!', KL_ERROR);
+                    $this->SendDebug(__FUNCTION__, 'Fehler, Rollladenposition ' . $Level * 100 . '% konnte nicht angefahren werden!', 0);
                 } else {
-                    $this->SendDebug(__FUNCTION__, 'Die Rollladenposition ' . $Level * 100 . '% wird angesteuert.', 0);
+                    $this->SendDebug(__FUNCTION__, 'Rollladenposition ' . $Level * 100 . '% wird angefahren', 0);
                 }
             } else {
                 $parentID = IPS_GetParent($id);
                 $result = HM_WriteValueBoolean($parentID, 'STOP', true);
                 if (!$result) {
-                    $this->LogMessage(__FUNCTION__ . ' Die Rollladenfahrt konnte nicht gestoppt werden.', KL_ERROR);
-                    $this->SendDebug(__FUNCTION__, 'Die Rollladenfahrt konnte nicht gestoppt werden.', 0);
+                    $this->LogMessage(__FUNCTION__ . ' Fehler, Rollladenfahrt konnte nicht gestoppt werden!', KL_ERROR);
+                    $this->SendDebug(__FUNCTION__, 'Fehler, Rollladenfahrt konnte nicht gestoppt werden!', 0);
                 } else {
-                    $this->SendDebug(__FUNCTION__, 'Die Rollladenfahrt wurde gestoppt.', 0);
+                    $this->SendDebug(__FUNCTION__, 'Rollladenfahrt wurde gestoppt', 0);
                 }
             }
         }
@@ -197,76 +158,182 @@ trait RS_blindActuator
     //#################### Private
 
     /**
-     * Checks the automatic mode whether the current action should be executed.
-     */
-    private function AdjustBlindLevel(): void
-    {
-        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt. (' . microtime(true) . ')', 0);
-        if ($this->GetValue('AutomaticMode') && $this->ReadPropertyBoolean('AdjustBlindLevel')) {
-            $this->TriggerAction(false);
-        }
-    }
-
-    /**
      * Updates the blind slider.
      */
     private function UpdateBlindSlider(): void
     {
-        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt. (' . microtime(true) . ')', 0);
-        $id = $this->ReadPropertyInteger('ActuatorStateLevel');
-        if ($id != 0 && @IPS_ObjectExists($id)) {
-            $level = GetValue($id);
-            // Check if we have a different actuator logic (0% = opened, 100% = closed) comparing to the module logic (0% = closed, 100% = opened)
-            if ($this->ReadPropertyInteger('ActuatorProperty') == 2) {
-                $level = (float) abs($level - 1);
-            }
-            $this->SendDebug(__FUNCTION__, 'Die Aktualisierung wird durchgeführt, neuer Wert: ' . $level * 100 . '%.', 0);
-            $this->SetValue('BlindSlider', $level);
+        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $actualPosition = $this->GetActualPosition();
+        $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $actualPosition . '%.', 0);
+        $this->SetValue('BlindSlider', $actualPosition / 100);
+    }
+
+    //#################### Logic
+
+    /**
+     * Checks the logic.
+     *
+     * @param float $Level
+     *
+     * @param int $MovingDirection
+     * 0        = move blind down
+     * 1        = move blind up
+     *
+     * @return bool
+     * false    = don't move blind
+     * true     = move blind
+     */
+    private function CheckLogic(float $Level, int $MovingDirection): bool
+    {
+        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Parameter $Level = ' . $Level, 0);
+        $directionName = 'Rolladen runterfahren';
+        if ($MovingDirection == 1) {
+            $directionName = 'Rollladen rauffahren';
         }
+        $this->SendDebug(__FUNCTION__, 'Parameter $MovingDirection = ' . $MovingDirection . ' = ' . $directionName, 0);
+        $result = true;
+        // Check position for minimum difference
+        if (!$this->CheckPositionForMinimumDifference($Level)) {
+            return false;
+        }
+        // Check open doors and windows
+        if (!$this->CheckOpenDoorsAndWindows($Level, $MovingDirection)) {
+            return false;
+        }
+        // Check position
+        if (!$this->CheckPosition($Level, $MovingDirection)) {
+            return false;
+        }
+        return $result;
     }
 
     /**
-     * Checks the logic for a new blind level.
+     * Gets the actual blind position.
+     *
+     * @return int
+     */
+    private function GetActualPosition(): int
+    {
+        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $actualPosition = 0;
+        $id = $this->ReadPropertyInteger('ActuatorStateLevel');
+        if ($id != 0 && @IPS_ObjectExists($id)) {
+            $actualLevel = (float) GetValue($id);
+            // Check if we have a different actuator logic (0% = opened, 100% = closed) comparing to the module logic (0% = closed, 100% = opened)
+            if ($this->ReadPropertyInteger('ActuatorProperty') == 2) {
+                $this->SendDebug(__FUNCTION__, 'Logik = 2 = geschlossen bei 100%', 0);
+                // We have to change the value from 1 to 0 and vise versa
+                $actualLevel = (float) abs($actualLevel - 1);
+            }
+            $actualPosition = $actualLevel * 100;
+            $this->SendDebug(__FUNCTION__, 'Aktuelle Position: ' . $actualPosition . '%.', 0);
+        }
+        return (int) $actualPosition;
+    }
+
+    /**
+     * Checks the blind position for a minimum difference.
      *
      * @param float $Level
+     *
      * @return bool
-     * false    = new blind level is not ok
-     * true     = new blind level is ok
-     * @throws Exception
+     * false    = dont't move blind
+     * true     = move blind
      */
-    private function CheckLogic(float $Level): bool
+    private function CheckPositionForMinimumDifference(float $Level): bool
     {
-        $this->SendDebug(__FUNCTION__, 'Die Methode wird mit dem Parameter $Level = ' . $Level . ' ausgeführt. (' . microtime(true) . ')', 0);
-        $Level = $Level * 100;
-        $setLevel = true;
-        // Check lockout protection
-        if ($this->ReadPropertyBoolean('LockoutProtection') && $this->GetValue('DoorWindowState') && ($Level <= $this->ReadPropertyInteger('LockoutPosition'))) {
-            $setLevel = false;
-            $this->SendDebug(__FUNCTION__, 'Abbruch, eine Tür oder ein Fenster ist offen.', 0);
-        }
-        // Check blind level position difference
-        if ($this->ReadPropertyBoolean('UseCheckBlindPosition')) {
-            $id = $this->ReadPropertyInteger('ActuatorStateLevel');
-            if ($id != 0 && @IPS_ObjectExists($id)) {
-                $blindLevel = GetValue($id) * 100;
-                // Check if we have a different actuator logic (0% = opened, 100% = closed) comparing to the module logic (0% = closed, 100% = opened)
-                if ($this->ReadPropertyInteger('ActuatorProperty') == 2) {
-                    $blindLevel = (float) abs($blindLevel - 1) * 100;
+        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Parameter $Level = ' . $Level, 0);
+        $result = true;
+        if ($this->ReadPropertyBoolean('CheckMinimumBlindPositionDifference')) {
+            $actualPosition = $this->GetActualPosition();
+            $newPosition = $Level * 100;
+            $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $newPosition . '%.', 0);
+            $minimumDifference = $this->ReadPropertyInteger('BlindPositionDifference');
+            if ($minimumDifference > 0) {
+                $actualDifference = abs($actualPosition - $newPosition);
+                $this->SendDebug(__FUNCTION__, 'Positionsunterschied: ' . $actualDifference . '%.', 0);
+                if ($actualDifference <= $minimumDifference) {
+                    $this->SendDebug(__FUNCTION__, 'Abbruch, Positionsunterschied ist zu gering!', 0);
+                    $result = false;
                 }
-                $this->SendDebug(__FUNCTION__, 'Aktuelle Position: ' . $blindLevel . '%.', 0);
-                $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $Level . '%.', 0);
-                $difference = $this->ReadPropertyInteger('BlindPositionDifference');
-                if ($difference > 0) {
-                    $actualDifference = abs($blindLevel - $Level);
-                    $this->SendDebug(__FUNCTION__, 'Positionsunterschied: ' . $actualDifference . '%.', 0);
-                    if ($actualDifference <= $difference) {
-                        $this->SendDebug(__FUNCTION__, 'Der Positionsunterschied ist zu gering.', 0);
-                        $setLevel = false;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Checks open doors and windows.
+     *
+     * @param float $Level
+     *
+     * @param int $MovingDirection
+     * 0        = move blind down
+     * 1        = move blind up
+     *
+     * @return bool
+     * false    = don't move blind
+     * true     = move blind
+     */
+    private function CheckOpenDoorsAndWindows(float $Level, int $MovingDirection): bool
+    {
+        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Parameter $Level = ' . $Level, 0);
+        $this->SendDebug(__FUNCTION__, 'Parameter $MovingDirection = ' . $MovingDirection, 0);
+        $result = true;
+        // Down
+        if ($MovingDirection == 0) {
+            // Check open doors and windows
+            if ($this->GetValue('DoorWindowState')) {
+                if ($this->ReadPropertyBoolean('LockoutProtection')) {
+                    if (($Level * 100) <= $this->ReadPropertyInteger('LockoutPosition')) {
+                        $this->SendDebug(__FUNCTION__, 'Abbruch, eine Tür oder ein Fenster ist offen!', 0);
+                        $result = false;
                     }
                 }
             }
         }
-        $this->SendDebug(__FUNCTION__, 'Das Resultat der Logikprüfung ist: ' . json_encode($setLevel), 0);
-        return $setLevel;
+        return $result;
+    }
+
+    /**
+     * Checks the position.
+     *
+     * @param float $Level
+     *
+     * @param int $MovingDirection
+     * 0    = move blind down
+     * 1    = move blind up
+     *
+     * @return bool
+     * false    = don't move blind
+     * true     = move blind
+     */
+    private function CheckPosition(float $Level, int $MovingDirection): bool
+    {
+        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Parameter $Level = ' . $Level, 0);
+        $this->SendDebug(__FUNCTION__, 'Parameter $MovingDirection = ' . $MovingDirection, 0);
+        $result = true;
+        $actualPosition = $this->GetActualPosition();
+        $newPosition = $Level * 100;
+        // Down
+        if ($MovingDirection == 0) {
+            // Only move blind down, if new position is lower then the actual position
+            if ($newPosition >= $actualPosition) {
+                $this->SendDebug(__FUNCTION__, 'Abbruch Rollladen runterfahren, Aktuelle Rollladenposition ist niedriger!', 0);
+                $result = false;
+            }
+        }
+        // Up
+        if ($MovingDirection == 1) {
+            // Only move blind up, if new position is higher then the actual position
+            if ($newPosition <= $actualPosition) {
+                $this->SendDebug(__FUNCTION__, 'Abbruch Rollladen rauffahren, Aktuelle Rollladenposition ist höher!', 0);
+                $result = false;
+            }
+        }
+        return $result;
     }
 }

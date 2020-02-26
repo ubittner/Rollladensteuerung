@@ -21,7 +21,7 @@ trait RS_emergencySensors
                 if ($id->ID == $SenderID && $id->UseSensor) {
                     // Blind position
                     $level = $id->BlindPosition / 100;
-                    $this->SetBlindLevel($level, false);
+                    $this->SetBlindLevel($level, true);
                     // Automatic mode
                     if ($id->DisableAutomaticMode) {
                         $this->ToggleAutomaticMode(false);

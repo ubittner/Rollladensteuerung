@@ -6,50 +6,11 @@ declare(strict_types=1);
 trait RS_weeklySchedule
 {
     /**
-     * Toggles the automatic mode.
-     *
-     * @param bool $State
-     */
-    public function ToggleAutomaticMode(bool $State): void
-    {
-        $this->SendDebug(__FUNCTION__, 'Die Methode wird mit dem Parameter $State = ' . json_encode($State) . ' ausgeführt. (' . microtime(true) . ')', 0);
-        $this->SetValue('AutomaticMode', $State);
-        $this->AdjustBlindLevel();
-        // Weekly schedule visibility
-        $id = @IPS_GetLinkIDByName('Wochenplan', $this->InstanceID);
-        if ($id !== false) {
-            $hide = true;
-            if ($this->ReadPropertyBoolean('EnableWeeklySchedule') && $State) {
-                $hide = false;
-            }
-            IPS_SetHidden($id, $hide);
-        }
-        // Sunset visibility
-        $id = @IPS_GetLinkIDByName('Sonnenuntergang', $this->InstanceID);
-        if ($id !== false) {
-            $hide = true;
-            if ($this->ReadPropertyBoolean('EnableSunset') && $State) {
-                $hide = false;
-            }
-            IPS_SetHidden($id, $hide);
-        }
-        // Sunrise visibility
-        $id = @IPS_GetLinkIDByName('Sonnenaufgang', $this->InstanceID);
-        if ($id !== false) {
-            $hide = true;
-            if ($this->ReadPropertyBoolean('EnableSunrise') && $State) {
-                $hide = false;
-            }
-            IPS_SetHidden($id, $hide);
-        }
-    }
-
-    /**
      * Shows the actual action.
      */
     public function ShowActualAction(): void
     {
-        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt. (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
         if (!$this->ValidateEventPlan()) {
             echo 'Ein Wochenplan ist nicht vorhanden oder der Wochenplan ist inaktiv!';
             return;
@@ -77,7 +38,7 @@ trait RS_weeklySchedule
      */
     private function ValidateEventPlan(): bool
     {
-        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt. (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $result = false;
         $id = $this->ReadPropertyInteger('WeeklySchedule');
         if ($id != 0 && @IPS_ObjectExists($id)) {
@@ -92,19 +53,21 @@ trait RS_weeklySchedule
     /**
      * Triggers the action of the weekly schedule and sets the blind level.
      *
-     * @param bool $CheckExecutionDelay
-     * false    = don't check execution delay
-     * true     = check execution delay
+     * @return bool
+     * false    = an error occurred
+     * true     = true
      */
-    private function TriggerAction(bool $CheckExecutionDelay): void
+    private function TriggerActionByWeeklySchedule(): bool
     {
-        $this->SendDebug(__FUNCTION__, 'Die Methode wird mit dem Parameter $CheckExecutionDelay = ' . json_encode($CheckExecutionDelay) . ' ausgeführt. (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $result = false;
         // Check event plan
         if (!$this->ValidateEventPlan()) {
-            return;
+            $this->SendDebug(__FUNCTION__, 'Abbruch, Wochenplan nicht vorhanden oder nicht aktiv!', 0);
+            return $result;
         }
-        // Trigger action only in automatic mode
-        if ($this->GetValue('AutomaticMode')) {
+        // Trigger action if automatic mode is enabled and sleep mode is disabled
+        if ($this->CheckModes(__FUNCTION__)) {
             switch ($this->DetermineAction()) {
                 // No actual action found
                 case 0:
@@ -115,40 +78,32 @@ trait RS_weeklySchedule
                 case 1:
                     $this->SendDebug(__FUNCTION__, '1 = Schließungsmodus', 0);
                     $level = $this->ReadPropertyInteger('BlindPositionClosed') / 100;
+                    $direction = 0; // down
                     break;
 
                 // Open blind
                 case 2:
                     $this->SendDebug(__FUNCTION__, '2 = Öffnungsmodus', 0);
                     $level = $this->ReadPropertyInteger('BlindPositionOpened') / 100;
+                    $direction = 1; // up
                     break;
 
                 // Blind shading
                 case 3:
                     $this->SendDebug(__FUNCTION__, '3 = Beschattungsmodus', 0);
                     $level = $this->ReadPropertyInteger('BlindPositionShading') / 100;
+                    $direction = 0; // up
                     break;
 
             }
-            if (isset($level)) {
-                if ($this->CheckLogic($level)) {
-                    $executionDelay = $this->ReadPropertyInteger('ExecutionDelay');
-                    if ($CheckExecutionDelay) {
-                        if ($executionDelay > 0) {
-                            // Delay
-                            $min = self::MINIMUM_DELAY_MILLISECONDS;
-                            $max = $executionDelay * 1000;
-                            $delay = rand($min, $max);
-                            IPS_Sleep($delay);
-                        }
-                    }
-                    // Set blind level if sleep mode is disabled
-                    if (!$this->GetValue('SleepMode')) {
-                        $this->SetBlindLevel($level, false);
-                    }
+            if (isset($level) && isset($direction)) {
+                if ($this->CheckLogic($level, $direction)) {
+                    $this->SetValue('SetpointPosition', $level * 100);
+                    $result = $this->SetBlindLevel($level, true);
                 }
             }
         }
+        return $result;
     }
 
     /**
@@ -159,7 +114,7 @@ trait RS_weeklySchedule
      */
     private function DetermineAction(): int
     {
-        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt. (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $actionID = 0;
         if ($this->ValidateEventPlan()) {
             $timestamp = time();

@@ -15,7 +15,7 @@ trait RS_doorWindowSensors
      */
     private function GetDoorWindowSensors(): array
     {
-        $this->SendDebug(__FUNCTION__, 'wird ausgeführt: ' . microtime(true), 0);
+        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $sensors = [];
         $doorWindowSensors = json_decode($this->ReadPropertyString('DoorWindowSensors'));
         if (!empty($doorWindowSensors)) {
@@ -35,14 +35,12 @@ trait RS_doorWindowSensors
      * Checks the state of the activated door and window sensors.
      *
      * @return bool
-     * false    = closed
-     * true     = opened
-     *
-     * @throws Exception
+     * false    = all doors and windows are closed
+     * true     = at least one door or window is opened
      */
     private function CheckDoorWindowSensors(): bool
     {
-        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt. (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $state = false;
         $sensors = $this->GetDoorWindowSensors();
         if (!empty($sensors)) {
@@ -57,26 +55,49 @@ trait RS_doorWindowSensors
     }
 
     /**
-     * Opens the blind if the door or window is opened.
+     * Triggers an action by a door or window sensor.
      *
      * @param bool $State
      * false    = closed
      * true     = opened
+     *
+     * @return bool
+     * false    = an error occurred
+     * true     = ok
      */
-    private function OpenBlindByDoorWindowSensor(bool $State): void
+    private function TriggerActionByDoorWindowSensor(bool $State): bool
     {
-        $this->SendDebug(__FUNCTION__, 'Die Methode wird mit dem Parameter $State = ' . json_encode($State) . ' ausgeführt. (' . microtime(true) . ')', 0);
-        // Only if automatic mode is turned on, opening mode is activated and door or window is opened
-        if ($this->ReadPropertyBoolean('OpenBlind') && $State && $this->GetValue('AutomaticMode')) {
-            $actualPosition = $this->GetValue('BlindSlider') * 100;
-            $this->SendDebug(__FUNCTION__, 'Aktuelle Position: ' . $actualPosition, 0);
-            $openPosition = $this->ReadPropertyInteger('OpenBlindPosition');
-            $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $actualPosition, 0);
-            if ($actualPosition < $openPosition) {
-                $level = $openPosition / 100;
-                $this->SendDebug(__FUNCTION__, 'Der Rollladen wird auf ' . $level . '% gefahren.', 0);
-                $this->SetBlindLevel($level, false);
+        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $stateName = 'geschlossen';
+        if ($State) {
+            $stateName = 'geöffnet';
+        }
+        $this->SendDebug(__FUNCTION__, 'Parameter $State = ' . $State . ' = ' . $stateName, 0);
+        $result = false;
+        // Set blind level if automatic mode is enabled and sleep mode is disabled
+        if ($this->CheckModes(__FUNCTION__)) {
+            $doorWindowState = $this->GetValue('DoorWindowState');
+            // Opened
+            if ($State && $doorWindowState) {
+                if ($this->ReadPropertyBoolean('OpenBlind')) {
+                    $actualPosition = $this->GetActualPosition();
+                    $newPosition = $this->ReadPropertyInteger('OpenBlindPosition');
+                    if ($actualPosition < $newPosition) {
+                        $result = $this->SetBlindLevel($newPosition / 100, false);
+                    }
+                }
+            }
+            // Closed
+            if (!$State && !$doorWindowState) {
+                if ($this->ReadPropertyBoolean('CloseBlind')) {
+                    $actualPosition = $this->GetActualPosition();
+                    $newPosition = $this->GetValue('SetpointPosition');
+                    if ($actualPosition > $newPosition) {
+                        $result = $this->SetBlindLevel($newPosition / 100, false);
+                    }
+                }
             }
         }
+        return $result;
     }
 }
