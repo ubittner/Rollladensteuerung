@@ -602,9 +602,18 @@
       "caption": "Rollladenaktor",
       "items": [
         {
-          "type": "Button",
+          "type": "PopupButton",
           "caption": "Variablen automatisch ermitteln",
-          "onClick": "RS_DetermineBlindActuatorVariables($id);"
+          "popup": {
+            "caption": "Variablen wirklich automatisch ermitteln?",
+            "items": [
+              {
+                "type": "Button",
+                "caption": "Variablen ermitteln",
+                "onClick": "RS_DetermineBlindActuatorVariables($id);"
+              }
+            ]
+          }
         }
       ]
     },
