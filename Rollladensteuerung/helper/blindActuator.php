@@ -287,6 +287,7 @@ trait RS_blindActuator
             // Check open doors and windows
             if ($this->GetValue('DoorWindowState')) {
                 if ($this->ReadPropertyBoolean('LockoutProtection')) {
+                    // ToDo: Must be reviewed
                     if (($Level * 100) <= $this->ReadPropertyInteger('LockoutPosition')) {
                         $this->SendDebug(__FUNCTION__, 'Abbruch, eine Tür oder ein Fenster ist offen!', 0);
                         $result = false;

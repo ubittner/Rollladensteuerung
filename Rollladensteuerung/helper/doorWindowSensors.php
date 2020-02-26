@@ -72,7 +72,7 @@ trait RS_doorWindowSensors
         if ($State) {
             $stateName = 'geöffnet';
         }
-        $this->SendDebug(__FUNCTION__, 'Parameter $State = ' . $State . ' = ' . $stateName, 0);
+        $this->SendDebug(__FUNCTION__, 'Parameter $State = ' . json_encode($State) . ' = ' . $stateName, 0);
         $result = false;
         // Set blind level if automatic mode is enabled and sleep mode is disabled
         if ($this->CheckModes(__FUNCTION__)) {
@@ -92,7 +92,7 @@ trait RS_doorWindowSensors
                 if ($this->ReadPropertyBoolean('CloseBlind')) {
                     $actualPosition = $this->GetActualPosition();
                     $newPosition = $this->GetValue('SetpointPosition');
-                    if ($actualPosition > $newPosition) {
+                    if ($actualPosition < $newPosition) {
                         $result = $this->SetBlindLevel($newPosition / 100, false);
                     }
                 }
