@@ -163,9 +163,14 @@ trait RS_blindActuator
     private function UpdateBlindSlider(): void
     {
         $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
-        $actualPosition = $this->GetActualPosition();
-        $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $actualPosition . '%.', 0);
-        $this->SetValue('BlindSlider', $actualPosition / 100);
+        $id = $this->ReadPropertyInteger('ActuatorStateProcess');
+        if ($id != 0 && @IPS_ObjectExists($id)) {
+            if (GetValue($id) == 0) {
+                $actualPosition = $this->GetActualPosition();
+                $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $actualPosition . '%.', 0);
+                $this->SetValue('BlindSlider', $actualPosition / 100);
+            }
+        }
     }
 
     //#################### Logic
@@ -235,31 +240,37 @@ trait RS_blindActuator
             if ($this->GetValue('DoorWindowState')) {
                 if ($this->ReadPropertyBoolean('LockoutProtection')) {
                     $lockoutPosition = $this->ReadPropertyInteger('LockoutPosition');
+                    // New position is lower then the lockout position
                     if ($newPosition < $lockoutPosition) {
-                        // Abort
-                        $this->SendDebug(__FUNCTION__, 'Abbruch Tür-/Fensterprüfung, Aussperrschutzposition überschritten!', 0);
-                        return $newLevel;
+                        $this->SendDebug(__FUNCTION__, 'Tür-/Fensterprüfung: Neue Position überschreitet Aussperrschutzposition!', 0);
+                        // Limit new position to lockout position
+                        $Level = $lockoutPosition / 100;
+                        $this->SendDebug(__FUNCTION__, 'Neuer Wert: ' . $Level, 0);
+                        $newPosition = $lockoutPosition;
+                        $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $newPosition, 0);
                     }
+                    // New position is in the range up to the lockout position
                     if ($newPosition >= $lockoutPosition) {
+                        // Actual position is already lower then the new position
                         if ($actualPosition < $newPosition) {
-                            // Abort
-                            $this->SendDebug(__FUNCTION__, 'Abbruch Tür-/Fensterprüfung, Aktuelle Position ausserhalb Aussperrschutzposition!', 0);
+                            $this->SendDebug(__FUNCTION__, 'Tür-/Fensterprüfung: Abbruch, Aktuelle Position ist bereits niedriger als neue Position!', 0);
                             return $newLevel;
                         }
                     }
                 }
-            }
-            // Only move blind down, if new position is lower then the actual position
-            if ($newPosition >= $actualPosition) {
-                $this->SendDebug(__FUNCTION__, 'Abbruch Rollladen runterfahren, Aktuelle Rollladenposition ist niedriger!', 0);
-                return $newLevel;
+            } else {
+                // Only move blind down, if new position is lower then the actual position
+                if ($newPosition >= $actualPosition) {
+                    $this->SendDebug(__FUNCTION__, 'Rollladen runterfahren: Abbruch, Aktuelle Position ist bereits niedriger als neue Position!', 0);
+                    return $newLevel;
+                }
             }
         }
         // Up
         if ($MovingDirection == 1) {
             // Only move blind up, if new position is higher then the actual position
             if ($newPosition <= $actualPosition) {
-                $this->SendDebug(__FUNCTION__, 'Abbruch Rollladen rauffahren, Aktuelle Rollladenposition ist höher!', 0);
+                $this->SendDebug(__FUNCTION__, 'Rollladen rauffahren: Abbruch, Aktuelle Rollladenposition ist bereits höher als neue Position!', 0);
                 return $newLevel;
             }
         }
