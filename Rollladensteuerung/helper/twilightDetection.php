@@ -18,7 +18,7 @@ trait RS_twilightDetection
      */
     private function TriggerTwilightDetection(bool $State): bool
     {
-        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $result = false;
         $this->SetValue('TwilightState', $State);
         $stateName = 'Tag';

@@ -15,7 +15,7 @@ trait RS_doorWindowSensors
      */
     private function GetDoorWindowSensors(): array
     {
-        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $sensors = [];
         $doorWindowSensors = json_decode($this->ReadPropertyString('DoorWindowSensors'));
         if (!empty($doorWindowSensors)) {
@@ -40,7 +40,7 @@ trait RS_doorWindowSensors
      */
     private function CheckDoorWindowSensors(): bool
     {
-        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $state = false;
         $sensors = $this->GetDoorWindowSensors();
         if (!empty($sensors)) {
@@ -67,7 +67,7 @@ trait RS_doorWindowSensors
      */
     private function TriggerActionByDoorWindowSensor(bool $State): bool
     {
-        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $stateName = 'geschlossen';
         if ($State) {
             $stateName = 'geöffnet';

@@ -18,7 +18,7 @@ trait RS_sunriseSunset
      */
     private function TriggerSunriseSunset(int $Mode): bool
     {
-        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $result = false;
         $modeName = 'Sonnenaufgang';
         $level = $this->ReadPropertyInteger('SunrisePosition') / 100;

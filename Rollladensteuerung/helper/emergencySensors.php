@@ -14,7 +14,7 @@ trait RS_emergencySensors
      */
     private function TriggerEmergencySensor(int $SenderID): void
     {
-        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $ids = json_decode($this->ReadPropertyString('EmergencySensors'));
         if (!empty($ids)) {
             foreach ($ids as $id) {

@@ -233,16 +233,16 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte wählen Sie aus, ob der Positionsunterschied einer Mindestvorgabe entspricht:"
+          "caption": "\nBitte wählen Sie aus, ob der Mindest-Positionsunterschied geprüft werden soll:"
         },
         {
           "type": "CheckBox",
           "name": "CheckMinimumBlindPositionDifference",
-          "caption": "Mindestvorgabe prüfen"
+          "caption": "Mindest-Positionsunterschied prüfen"
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie den Positionsunterschied in % für die Mindestvorgabe an:"
+          "caption": "\nBitte geben Sie den Positionsunterschied in % an:"
         },
         {
           "type": "NumberSpinner",

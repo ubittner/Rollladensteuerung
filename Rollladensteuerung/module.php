@@ -127,7 +127,7 @@ class Rollladensteuerung extends IPSModule
                 if ($id != 0 && @IPS_ObjectExists($id)) {
                     if ($SenderID == $id) {
                         if ($Data[1]) {
-                            $this->SendDebug(__FUNCTION__, 'Variable Sonnenaufgang hat sich geändert! ' . $timeStamp, 0);
+                            $this->SendDebug(__FUNCTION__, 'Die Variable Sonnenaufgang hat sich geändert! ' . $timeStamp, 0);
                             $this->TriggerSunriseSunset(0);
                         }
                     }
@@ -137,7 +137,7 @@ class Rollladensteuerung extends IPSModule
                 if ($id != 0 && @IPS_ObjectExists($id)) {
                     if ($SenderID == $id) {
                         if ($Data[1]) {
-                            $this->SendDebug(__FUNCTION__, 'Variable Sonnenuntergang hat sich geändert! ' . $timeStamp, 0);
+                            $this->SendDebug(__FUNCTION__, 'Die Variable Sonnenuntergang hat sich geändert! ' . $timeStamp, 0);
                             $this->TriggerSunriseSunset(1);
                         }
                     }
@@ -166,7 +166,7 @@ class Rollladensteuerung extends IPSModule
                 if ($id != 0 && @IPS_ObjectExists($id)) {
                     if ($SenderID == $id) {
                         if ($Data[1]) {
-                            $this->SendDebug(__FUNCTION__, 'BlindSlider aktualisieren', 0);
+                            $this->SendDebug(__FUNCTION__, 'Die Rollladenposition hat sich geändert', 0);
                             $this->UpdateBlindSlider();
                         }
                     }
@@ -271,7 +271,7 @@ class Rollladensteuerung extends IPSModule
      */
     public function ToggleAutomaticMode(bool $State): void
     {
-        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $this->SendDebug(__FUNCTION__, 'Parameter $State = ' . json_encode($State), 0);
         $this->SetValue('AutomaticMode', $State);
         $this->CheckActualCondition();
@@ -311,7 +311,7 @@ class Rollladensteuerung extends IPSModule
      */
     public function SetBlindSlider(float $Level): void
     {
-        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $this->SendDebug(__FUNCTION__, 'Parameter $Level = ' . $Level, 0);
         $this->SetValue('BlindSlider', $Level);
         $this->SetBlindLevel($Level, false);
@@ -326,7 +326,7 @@ class Rollladensteuerung extends IPSModule
      */
     public function ToggleSleepMode(bool $State): void
     {
-        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $this->SendDebug(__FUNCTION__, 'Parameter $State = ' . json_encode($State), 0);
         if ($State) {
             if ($this->GetValue('AutomaticMode')) {
@@ -936,14 +936,7 @@ class Rollladensteuerung extends IPSModule
         $this->CheckDoorWindowSensors();
         // Update blind slider
         $this->UpdateBlindSlider();
-        // Check automatic mode
-        if (!$this->GetValue('AutomaticMode')) {
-            $this->SendDebug(__FUNCTION__, 'Abbruch, die Automatik ist ausgeschaltet', 0);
-            return;
-        }
-        // Check sleep mode
-        if ($this->GetValue('SleepMode')) {
-            $this->SendDebug(__FUNCTION__, 'Abbruch, der Ruhe-Modus ist eingeschaltet', 0);
+        if (!$this->CheckModes(__FUNCTION__)) {
             return;
         }
         if (!$this->ReadPropertyBoolean('AdjustBlindLevel')) {
@@ -998,12 +991,12 @@ class Rollladensteuerung extends IPSModule
         $result = true;
         // Check automatic mode
         if (!$this->GetValue('AutomaticMode')) {
-            $this->SendDebug($MethodName, 'Abbruch, Automatik ist ausgeschaltet!', 0);
+            $this->SendDebug($MethodName, 'Abbruch, Die Automatik ist ausgeschaltet!', 0);
             $result = false;
         }
         // Check sleep mode
         if ($this->GetValue('SleepMode')) {
-            $this->SendDebug($MethodName, 'Abbruch, Ruhe-Modus ist eingeschaltet!', 0);
+            $this->SendDebug($MethodName, 'Abbruch, Der Ruhe-Modus ist eingeschaltet!', 0);
             $result = false;
         }
         return $result;

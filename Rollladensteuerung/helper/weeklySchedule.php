@@ -10,7 +10,7 @@ trait RS_weeklySchedule
      */
     public function ShowActualAction(): void
     {
-        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         if (!$this->ValidateEventPlan()) {
             echo 'Ein Wochenplan ist nicht vorhanden oder der Wochenplan ist inaktiv!';
             return;
@@ -38,7 +38,7 @@ trait RS_weeklySchedule
      */
     private function ValidateEventPlan(): bool
     {
-        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $result = false;
         $id = $this->ReadPropertyInteger('WeeklySchedule');
         if ($id != 0 && @IPS_ObjectExists($id)) {
@@ -59,11 +59,11 @@ trait RS_weeklySchedule
      */
     private function TriggerActionByWeeklySchedule(): bool
     {
-        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $result = false;
         // Check event plan
         if (!$this->ValidateEventPlan()) {
-            $this->SendDebug(__FUNCTION__, 'Abbruch, Wochenplan nicht vorhanden oder nicht aktiv!', 0);
+            $this->SendDebug(__FUNCTION__, 'Abbruch, Der Wochenplan ist nicht vorhanden oder nicht aktiv!', 0);
             return $result;
         }
         // Trigger action if automatic mode is enabled and sleep mode is disabled
@@ -117,7 +117,7 @@ trait RS_weeklySchedule
      */
     private function DetermineAction(): int
     {
-        $this->SendDebug(__FUNCTION__, 'Methode wird ausgeführt (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $actionID = 0;
         if ($this->ValidateEventPlan()) {
             $timestamp = time();
