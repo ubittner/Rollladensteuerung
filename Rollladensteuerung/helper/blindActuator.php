@@ -58,7 +58,8 @@ trait RS_blindActuator
                 }
             }
         }
-        if ($deviceType != 0) {
+        // Homematic IP uses also Channel 4
+        if ($deviceType == 2 || $deviceType == 3) {
             // Actuator control level is on channel 4
             $config = json_decode(IPS_GetConfiguration($id));
             $address = strstr($config->Address, ':', true) . ':4';

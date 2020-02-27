@@ -142,8 +142,8 @@ class Rollladensteuerung extends IPSModule
                         }
                     }
                 }
-                // Twilight detection
-                $id = $this->ReadPropertyInteger('TwilightDetection');
+                // Twilight state
+                $id = $this->ReadPropertyInteger('TwilightState');
                 if ($id != 0 && @IPS_ObjectExists($id)) {
                     if ($SenderID == $id) {
                         if ($Data[1]) {
@@ -363,7 +363,7 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyBoolean('EnableBlindSlider', true);
         $this->RegisterPropertyBoolean('EnableSleepMode', true);
         $this->RegisterPropertyBoolean('EnableDoorWindowState', true);
-        $this->RegisterPropertyBoolean('EnableTwilightDetectionState', true);
+        $this->RegisterPropertyBoolean('EnableTwilightState', true);
         $this->RegisterPropertyBoolean('EnableSleepModeTimer', true);
 
         // Blind actuator
@@ -397,8 +397,8 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyInteger('BlindPositionOpened', 100);
         $this->RegisterPropertyInteger('BlindPositionShading', 50);
 
-        // Twilight detection
-        $this->RegisterPropertyInteger('TwilightDetection', 0);
+        // Twilight state
+        $this->RegisterPropertyInteger('TwilightState', 0);
         $this->RegisterPropertyInteger('TwilightPositionDay', 100);
         $this->RegisterPropertyInteger('TwilightPositionNight', 40);
 
@@ -629,12 +629,12 @@ class Rollladensteuerung extends IPSModule
         // Door and window state
         IPS_SetHidden($this->GetIDForIdent('DoorWindowState'), !$this->ReadPropertyBoolean('EnableDoorWindowState'));
 
-        // Day and night detection
+        // Twilight state
         $id = $this->GetIDForIdent('TwilightState');
-        $nightDetection = $this->ReadPropertyInteger('TwilightDetection');
+        $twilightState = $this->ReadPropertyInteger('TwilightState');
         $use = false;
-        if ($nightDetection != 0 && IPS_ObjectExists($nightDetection)) {
-            $use = $this->ReadPropertyBoolean('EnableTwilightDetectionState');
+        if ($twilightState != 0 && IPS_ObjectExists($twilightState)) {
+            $use = $this->ReadPropertyBoolean('EnableTwilightState');
         }
         IPS_SetHidden($id, !$use);
 
@@ -681,8 +681,8 @@ class Rollladensteuerung extends IPSModule
         if ($id != 0 && @IPS_ObjectExists($id)) {
             $this->RegisterMessage($id, VM_UPDATE);
         }
-        // Night detection
-        $id = $this->ReadPropertyInteger('TwilightDetection');
+        // Twilight state
+        $id = $this->ReadPropertyInteger('TwilightState');
         if ($id != 0 && @IPS_ObjectExists($id)) {
             $this->RegisterMessage($id, VM_UPDATE);
         }
@@ -932,19 +932,24 @@ class Rollladensteuerung extends IPSModule
          *      If we don't use twilight detection and weekly schedule, the blind level is set based on the sunrise or sunset position.
          */
         $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
-        // Check door and window sensors
-        $this->CheckDoorWindowSensors();
+        // Update and setpoint position
+        $level = $this->GetActualPosition();
+        $this->SetValue('SetpointPosition', $level);
         // Update blind slider
         $this->UpdateBlindSlider();
+        // Check door and window sensors
+        $this->CheckDoorWindowSensors();
+        // Update twilight state
+        $id = $this->ReadPropertyInteger('TwilightState');
+        if ($id != 0 && IPS_ObjectExists($id)) {
+            $this->SetValue('TwilightState', GetValueBoolean($id));
+        }
         if (!$this->CheckModes(__FUNCTION__)) {
             return;
         }
-        if (!$this->ReadPropertyBoolean('AdjustBlindLevel')) {
-            $level = $this->GetActualPosition();
-            $this->SetValue('SetpointPosition', $level);
-        } else {
-            // Twilight detection
-            $id = $this->ReadPropertyInteger('TwilightDetection');
+        if ($this->ReadPropertyBoolean('AdjustBlindLevel')) {
+            // Twilight state
+            $id = $this->ReadPropertyInteger('TwilightState');
             if ($id != 0 && IPS_ObjectExists($id)) {
                 $this->TriggerTwilightDetection(GetValueBoolean($id));
                 return;

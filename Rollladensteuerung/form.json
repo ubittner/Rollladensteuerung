@@ -100,7 +100,7 @@
         },
         {
           "type": "CheckBox",
-          "name": "EnableTwilightDetectionState",
+          "name": "EnableTwilightState",
           "caption": "Dämmerungsstatus"
         },
         {
@@ -175,7 +175,7 @@
         {
           "type": "SelectVariable",
           "name": "ActuatorControlLevel",
-          "caption": "Steuerung"
+          "caption": "Rollladensteuerung"
         },
         {
           "type": "Label",
@@ -213,7 +213,7 @@
         {
           "type": "NumberSpinner",
           "name": "ExecutionDelay",
-          "caption": "Verzögerung",
+          "caption": "Ausführungsverzögerung",
           "suffix": "s"
         }
       ]
@@ -229,7 +229,7 @@
         {
           "type": "CheckBox",
           "name": "AdjustBlindLevel",
-          "caption": "Position anpassen"
+          "caption": "Rollladenposition anpassen"
         },
         {
           "type": "Label",
@@ -288,7 +288,7 @@
         {
           "type": "NumberSpinner",
           "name": "SunrisePosition",
-          "caption": "Position Sonnenaufgang",
+          "caption": "Rollladenposition Sonnenaufgang",
           "suffix": "%"
         },
         {
@@ -307,7 +307,7 @@
         {
           "type": "NumberSpinner",
           "name": "SunsetPosition",
-          "caption": "Position Sonnenuntergang",
+          "caption": "Rollladenposition Sonnenuntergang",
           "suffix": "%"
         }
       ]
@@ -332,7 +332,7 @@
         {
           "type": "NumberSpinner",
           "name": "BlindPositionClosed",
-          "caption": "Position Schließungsmodus",
+          "caption": "Rollladenposition Schließungsmodus",
           "suffix": "%"
         },
         {
@@ -342,7 +342,7 @@
         {
           "type": "NumberSpinner",
           "name": "BlindPositionOpened",
-          "caption": "Position Öffnungsmodus",
+          "caption": "Rollladenposition Öffnungsmodus",
           "suffix": "%"
         },
         {
@@ -352,23 +352,23 @@
         {
           "type": "NumberSpinner",
           "name": "BlindPositionShading",
-          "caption": "Position Beschattungsmodus",
+          "caption": "Rollladenposition Beschattungsmodus",
           "suffix": "%"
         }
       ]
     },
     {
       "type": "ExpansionPanel",
-      "caption": "Dämmerungsprüfung",
+      "caption": "Dämmerungsstatus",
       "items": [
         {
           "type": "Label",
-          "caption": "\nBitte wählen Sie die Variable für die Dämmerungsprüfung aus:"
+          "caption": "\nBitte wählen Sie die Variable für den Dämmerungsstatus aus:"
         },
         {
           "type": "SelectVariable",
-          "name": "TwilightDetection",
-          "caption": "Dämmerungsprüfung"
+          "name": "TwilightState",
+          "caption": "Dämmerungsstatus"
         },
         {
           "type": "Label",
@@ -377,7 +377,7 @@
         {
           "type": "NumberSpinner",
           "name": "TwilightPositionDay",
-          "caption": "Position 'Es ist Tag'",
+          "caption": "Rollladenposition 'Es ist Tag'",
           "suffix": "%"
         },
         {
@@ -387,7 +387,7 @@
         {
           "type": "NumberSpinner",
           "name": "TwilightPositionNight",
-          "caption": "Position 'Es ist Nacht'",
+          "caption": "Rollladenposition 'Es ist Nacht'",
           "suffix": "%"
         }
       ]
@@ -448,7 +448,7 @@
         {
           "type": "NumberSpinner",
           "name": "LockoutPosition",
-          "caption": "Rollladenposition",
+          "caption": "Rollladenposition Aussperrschutz",
           "suffix": "%"
         },
         {
@@ -467,7 +467,7 @@
         {
           "type": "NumberSpinner",
           "name": "OpenBlindPosition",
-          "caption": "Rollladenposition",
+          "caption": "Rollladenposition Öffnungsfunktion",
           "suffix": "%"
         },
         {
