@@ -359,11 +359,11 @@
     },
     {
       "type": "ExpansionPanel",
-      "caption": "Dämmerungsstatus",
+      "caption": "Dämmerung",
       "items": [
         {
           "type": "Label",
-          "caption": "\nBitte wählen Sie die Variable für den Dämmerungsstatus aus:"
+          "caption": "\nBitte wählen Sie die Variable für den Dämmerungsstatus (DP: Dämmerungsstatus) aus:"
         },
         {
           "type": "SelectVariable",
