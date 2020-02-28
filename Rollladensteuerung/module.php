@@ -234,7 +234,7 @@ class Rollladensteuerung extends IPSModule
                 default:
                     $messageDescription = 'keine Bezeichnung';
             }
-            $formdata->elements[11]->items[0]->values[] = [
+            $formdata->elements[12]->items[0]->values[] = [
                 'ParentName'                                            => $parentName,
                 'SenderID'                                              => $senderID,
                 'SenderName'                                            => $senderName,
@@ -385,6 +385,9 @@ class Rollladensteuerung extends IPSModule
         // Sleep duration
         $this->RegisterPropertyInteger('SleepDuration', 12);
 
+        // Is day
+        $this->RegisterPropertyInteger('IsDay', 0);
+
         // Sunrise and sunset
         $this->RegisterPropertyInteger('Sunrise', 0);
         $this->RegisterPropertyInteger('SunrisePosition', 50);
@@ -399,7 +402,7 @@ class Rollladensteuerung extends IPSModule
 
         // Twilight state
         $this->RegisterPropertyInteger('TwilightState', 0);
-        $this->RegisterPropertyInteger('TwilightPositionDay', 100);
+        //$this->RegisterPropertyInteger('TwilightPositionDay', 100);
         $this->RegisterPropertyInteger('TwilightPositionNight', 40);
 
         // Door and window sensors
@@ -936,7 +939,7 @@ class Rollladensteuerung extends IPSModule
         $level = $this->GetActualPosition();
         $this->SetValue('SetpointPosition', $level);
         // Update blind slider
-        $this->UpdateBlindSlider();
+        $this->SetValue('BlindSlider', $level);
         // Check door and window sensors
         $this->CheckDoorWindowSensors();
         // Update twilight state

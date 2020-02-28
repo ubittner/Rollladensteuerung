@@ -359,26 +359,31 @@
     },
     {
       "type": "ExpansionPanel",
-      "caption": "Dämmerung",
+      "caption": "'Ist es Tag' - Erkennung",
       "items": [
         {
           "type": "Label",
-          "caption": "\nBitte wählen Sie die Variable für den Dämmerungsstatus (DP: Dämmerungsstatus) aus:"
+          "caption": "Bitte wählen Sie die Variable für 'Ist es Tag' aus:"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "IsDay",
+          "caption": "'Ist es Tag'"
+        }
+      ]
+    },
+    {
+      "type": "ExpansionPanel",
+      "caption": "Dämmerungsprüfung",
+      "items": [
+        {
+          "type": "Label",
+          "caption": "\nBitte wählen Sie die Variable für den Dämmerungsstatus aus:"
         },
         {
           "type": "SelectVariable",
           "name": "TwilightState",
           "caption": "Dämmerungsstatus"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % für 'Es ist Tag' an:"
-        },
-        {
-          "type": "NumberSpinner",
-          "name": "TwilightPositionDay",
-          "caption": "Rollladenposition 'Es ist Tag'",
-          "suffix": "%"
         },
         {
           "type": "Label",

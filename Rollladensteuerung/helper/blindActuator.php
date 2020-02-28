@@ -26,7 +26,7 @@ trait RS_blindActuator
                 $ident = IPS_GetObject($child)['ObjectIdent'];
                 switch ($deviceType) {
                     // HM
-                    case 0:
+                    case 1:
                         switch ($ident) {
                             case 'LEVEL':
                                 IPS_SetProperty($this->InstanceID, 'ActuatorStateLevel', $child);
@@ -41,8 +41,8 @@ trait RS_blindActuator
                         break;
 
                     // HmIP
-                    case 1:
                     case 2:
+                    case 3:
                         switch ($ident) {
                             case 'LEVEL':
                                 IPS_SetProperty($this->InstanceID, 'ActuatorStateLevel', $child);
