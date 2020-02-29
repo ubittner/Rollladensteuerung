@@ -41,7 +41,6 @@ trait RS_twilightDetection
                 // Abort, level is not valid
                 return $result;
             }
-            //$this->SetValue('SetpointPosition', $level * 100);
             $result = $this->SetBlindLevel($level, true);
         }
         return $result;
