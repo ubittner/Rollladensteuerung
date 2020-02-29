@@ -143,43 +143,7 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte wählen Sie die Instanz für den Rolladenaktor (HM: Kanal 1, HmIP: Kanal 3) aus:"
-        },
-        {
-          "type": "SelectInstance",
-          "name": "ActuatorInstance",
-          "caption": "Rollladenaktor"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte wählen Sie die Variable für die Rollladenposition (HM: Kanal 1 LEVEL, HmIP: Kanal 3 LEVEL) aus:"
-        },
-        {
-          "type": "SelectVariable",
-          "name": "ActuatorStateLevel",
-          "caption": "Rollladenposition"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte wählen Sie die Variable für den Aktivitätszustand (HM: Kanal 1 WORKING, HmIP: Kanal 3 PROCESS) aus:"
-        },
-        {
-          "type": "SelectVariable",
-          "name": "ActuatorStateProcess",
-          "caption": "Aktivitätszustand"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte wählen Sie die Variable für die Rollladensteuerung (HM: Kanal 1 LEVEL, HmIP: Kanal 4 LEVEL) aus:"
-        },
-        {
-          "type": "SelectVariable",
-          "name": "ActuatorControlLevel",
-          "caption": "Rollladensteuerung"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte wählen Sie die tatsächliche Logik des Rollladenaktors aus:"
+          "caption": "\n\nBitte wählen Sie die tatsächliche Logik des Rollladenaktors aus:"
         },
         {
           "type": "Select",
@@ -199,6 +163,42 @@
               "value": 2
             }
           ]
+        },
+        {
+          "type": "Label",
+          "caption": "\n\nBitte wählen Sie die Instanz für den Rolladenaktor (HM: Kanal 1, HmIP: Kanal 3) aus:"
+        },
+        {
+          "type": "SelectInstance",
+          "name": "ActuatorInstance",
+          "caption": "Rollladenaktor"
+        },
+        {
+          "type": "Label",
+          "caption": "\n\nBitte wählen Sie die Variable für die Rollladenposition (HM: Kanal 1 LEVEL, HmIP: Kanal 3 LEVEL) aus:"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "ActuatorStateLevel",
+          "caption": "Rollladenposition"
+        },
+        {
+          "type": "Label",
+          "caption": "\n\nBitte wählen Sie die Variable für den Aktivitätszustand (HM: Kanal 1 WORKING, HmIP: Kanal 3 PROCESS) aus:"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "ActuatorStateProcess",
+          "caption": "Aktivitätszustand"
+        },
+        {
+          "type": "Label",
+          "caption": "\n\nBitte wählen Sie die Variable für die Rollladensteuerung (HM: Kanal 1 LEVEL, HmIP: Kanal 4 LEVEL) aus:"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "ActuatorControlLevel",
+          "caption": "Rollladensteuerung"
         }
       ]
     },
@@ -233,22 +233,27 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte wählen Sie aus, ob der Mindest-Positionsunterschied geprüft werden soll:"
+          "caption": "\n\nBitte wählen Sie aus, ob der Mindest-Positionsunterschied geprüft werden soll:"
         },
         {
-          "type": "CheckBox",
-          "name": "CheckMinimumBlindPositionDifference",
-          "caption": "Mindest-Positionsunterschied prüfen"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte geben Sie den Positionsunterschied in % an:"
-        },
-        {
-          "type": "NumberSpinner",
-          "name": "BlindPositionDifference",
-          "caption": "Positionsunterschied",
-          "suffix": "%"
+          "type": "RowLayout",
+          "items": [
+            {
+              "type": "CheckBox",
+              "name": "CheckMinimumBlindPositionDifference",
+              "caption": "Mindest-Positionsunterschied prüfen"
+            },
+            {
+              "type": "Label",
+              "caption": " "
+            },
+            {
+              "type": "NumberSpinner",
+              "name": "BlindPositionDifference",
+              "caption": "Positionsunterschied",
+              "suffix": "%"
+            }
+          ]
         }
       ]
     },
@@ -274,41 +279,59 @@
       "items": [
         {
           "type": "Label",
-          "caption": "Bitte wählen Sie die Variable für den Sonnenaufgang aus:"
-        },
-        {
-          "type": "SelectVariable",
-          "name": "Sunrise",
           "caption": "Sonnenaufgang"
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenaufgang an:"
+          "caption": "Bitte wählen Sie die Variable für den Sonnenaufgang aus:"
         },
         {
-          "type": "NumberSpinner",
-          "name": "SunrisePosition",
-          "caption": "Rollladenposition Sonnenaufgang",
-          "suffix": "%"
+          "type": "RowLayout",
+          "items": [
+            {
+              "type": "SelectVariable",
+              "name": "Sunrise",
+              "caption": "Sonnenaufgang"
+            },
+            {
+              "type": "Label",
+              "caption": " "
+            },
+            {
+              "type": "NumberSpinner",
+              "name": "SunrisePosition",
+              "caption": "Rollladenposition",
+              "suffix": "%"
+            }
+          ]
         },
         {
           "type": "Label",
-          "caption": "\nBitte wählen Sie die Variable für den Sonnenuntergang aus:"
-        },
-        {
-          "type": "SelectVariable",
-          "name": "Sunset",
-          "caption": "Sonnenuntergang"
+          "caption": "\n\nSonnenuntergang"
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % bei Sonnenuntergang an:"
+          "caption": "Bitte wählen Sie die Variable für den Sonnenuntergang aus:"
         },
         {
-          "type": "NumberSpinner",
-          "name": "SunsetPosition",
-          "caption": "Rollladenposition Sonnenuntergang",
-          "suffix": "%"
+          "type": "RowLayout",
+          "items": [
+            {
+              "type": "SelectVariable",
+              "name": "Sunset",
+              "caption": "Sonnenuntergang"
+            },
+            {
+              "type": "Label",
+              "caption": " "
+            },
+            {
+              "type": "NumberSpinner",
+              "name": "SunsetPosition",
+              "caption": "Rollladenposition",
+              "suffix": "%"
+            }
+          ]
         }
       ]
     },
@@ -327,7 +350,7 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % für den Schließungsmodus an:"
+          "caption": "\n\nBitte geben Sie die Rollladenposition in % für den Schließungsmodus an:"
         },
         {
           "type": "NumberSpinner",
@@ -337,7 +360,7 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % für den Öffnungsmodus an:"
+          "caption": "\n\nBitte geben Sie die Rollladenposition in % für den Öffnungsmodus an:"
         },
         {
           "type": "NumberSpinner",
@@ -347,7 +370,7 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % für den Beschattungsmodus an:"
+          "caption": "\n\nBitte geben Sie die Rollladenposition in % für den Beschattungsmodus an:"
         },
         {
           "type": "NumberSpinner",
@@ -369,6 +392,62 @@
           "type": "SelectVariable",
           "name": "IsDay",
           "caption": "'Ist es Tag'"
+        },
+        {
+          "type": "Label",
+          "caption": "\n\n'Es ist Tag'"
+        },
+        {
+          "type": "Label",
+          "caption": "Bitte wählen Sie aus, ob die Rollladenposition angepasst werden soll:"
+        },
+        {
+          "type": "RowLayout",
+          "items": [
+            {
+              "type": "CheckBox",
+              "name": "IsDayAdjustPosition",
+              "caption": "Rollladenposition anpassen"
+            },
+            {
+              "type": "Label",
+              "caption": " "
+            },
+            {
+              "type": "NumberSpinner",
+              "name": "IsDayPosition",
+              "caption": "Rollladenposition",
+              "suffix": "%"
+            }
+          ]
+        },
+        {
+          "type": "Label",
+          "caption": "\n\n'Es ist Nacht'"
+        },
+        {
+          "type": "Label",
+          "caption": "Bitte wählen Sie aus, ob die Rollladenposition angepasst werden soll:"
+        },
+        {
+          "type": "RowLayout",
+          "items": [
+            {
+              "type": "CheckBox",
+              "name": "IsNightAdjustPosition",
+              "caption": "Rollladenposition anpassen"
+            },
+            {
+              "type": "Label",
+              "caption": " "
+            },
+            {
+              "type": "NumberSpinner",
+              "name": "IsNightPosition",
+              "caption": "Rollladenposition",
+              "suffix": "%"
+            }
+          ]
         }
       ]
     },
@@ -378,7 +457,7 @@
       "items": [
         {
           "type": "Label",
-          "caption": "\nBitte wählen Sie die Variable für den Dämmerungsstatus aus:"
+          "caption": "Bitte wählen Sie die Variable für den Dämmerungsstatus aus:"
         },
         {
           "type": "SelectVariable",
@@ -387,12 +466,48 @@
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % für 'Es ist Nacht' an:"
+          "caption": "\n\n'Es ist Tag'"
+        },
+        {
+          "type": "Label",
+          "caption": "Bitte wählen Sie aus, welche Rollladenposition verwendet werden soll:"
+        },
+        {
+          "type": "RowLayout",
+          "items": [
+            {
+              "type": "Label",
+              "caption": "Soll-Position verwenden"
+            },
+            {
+              "type": "CheckBox",
+              "name": "TwilightDefinedPosition",
+              "caption": "Definierte Position verwenden"
+            },
+            {
+              "type": "Label",
+              "caption": " "
+            },
+            {
+              "type": "NumberSpinner",
+              "name": "TwilightPositionDay",
+              "caption": "Rollladenposition",
+              "suffix": "%"
+            }
+          ]
+        },
+        {
+          "type": "Label",
+          "caption": "\n\n'Es ist Nacht'"
+        },
+        {
+          "type": "Label",
+          "caption": "Bitte geben Sie die Rollladenposition in % an:"
         },
         {
           "type": "NumberSpinner",
           "name": "TwilightPositionNight",
-          "caption": "Rollladenposition 'Es ist Nacht'",
+          "caption": "Rollladenposition",
           "suffix": "%"
         }
       ]
@@ -442,47 +557,85 @@
           "caption": "\nBitte wählen Sie aus, ob ein Aussperrschutz verwendet werden soll:"
         },
         {
-          "type": "CheckBox",
-          "name": "LockoutProtection",
-          "caption": "Aussperrschutz verwenden"
+          "type": "RowLayout",
+          "items": [
+            {
+              "type": "CheckBox",
+              "name": "LockoutProtection",
+              "caption": "Aussperrschutz verwenden"
+            },
+            {
+              "type": "Label",
+              "caption": " "
+            },
+            {
+              "type": "NumberSpinner",
+              "name": "LockoutPosition",
+              "caption": "Rollladenposition",
+              "suffix": "%"
+            }
+          ]
         },
         {
           "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % für den Aussperrschutz an:"
+          "caption": "\n\nBitte wählen Sie aus, ob eine Öffnungsfunktion verwendet werden soll:"
         },
         {
-          "type": "NumberSpinner",
-          "name": "LockoutPosition",
-          "caption": "Rollladenposition Aussperrschutz",
-          "suffix": "%"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte wählen Sie aus, ob eine Öffnungsfunktion verwendet werden soll:"
-        },
-        {
-          "type": "CheckBox",
-          "name": "OpenBlind",
-          "caption": "Öffnungsfunktion verwenden"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte geben Sie die Rollladenposition in % für die Öffnungsfunktion an:"
-        },
-        {
-          "type": "NumberSpinner",
-          "name": "OpenBlindPosition",
-          "caption": "Rollladenposition Öffnungsfunktion",
-          "suffix": "%"
+          "type": "RowLayout",
+          "items": [
+            {
+              "type": "CheckBox",
+              "name": "OpenBlind",
+              "caption": "Öffnungsfunktion verwenden"
+            },
+            {
+              "type": "Label",
+              "caption": " "
+            },
+            {
+              "type": "NumberSpinner",
+              "name": "OpenBlindPosition",
+              "caption": "Rollladenposition",
+              "suffix": "%"
+            }
+          ]
         },
         {
           "type": "Label",
-          "caption": "\nBitte wählen Sie aus, ob eine Schließfunktion verwendet werden soll:"
+          "caption": "\n\nBitte wählen Sie aus, ob eine Schließfunktion verwendet werden soll:"
         },
         {
-          "type": "CheckBox",
-          "name": "CloseBlind",
-          "caption": "Schließfunktion verwenden"
+          "type": "RowLayout",
+          "items": [
+            {
+              "type": "CheckBox",
+              "name": "CloseBlind",
+              "caption": "Schließfunktion verwenden"
+            },
+            {
+              "type": "Label",
+              "caption": " "
+            },
+            {
+              "type": "Label",
+              "caption": "Soll-Position verwenden"
+            },
+            {
+              "type": "CheckBox",
+              "name": "CloseBlindDefinedPosition",
+              "caption": "Definierte Position verwenden"
+            },
+            {
+              "type": "Label",
+              "caption": " "
+            },
+            {
+              "type": "NumberSpinner",
+              "name": "CloseBlindPosition",
+              "caption": "Rollladenposition",
+              "suffix": "%"
+            }
+          ]
         }
       ]
     },

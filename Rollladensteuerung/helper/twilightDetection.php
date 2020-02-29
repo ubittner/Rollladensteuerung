@@ -22,8 +22,11 @@ trait RS_twilightDetection
         $result = false;
         $this->SetValue('TwilightState', $State);
         $stateName = 'Tag';
-        //$level = $this->ReadPropertyInteger('TwilightPositionDay') / 100;
-        $level = $this->GetValue('SetpointPosition'); // ToDo: Check
+        if ($this->ReadPropertyBoolean('TwilightDefinedPosition')) {
+            $level = $this->ReadPropertyInteger('TwilightPositionDay') / 100;
+        } else {
+            $level = $this->GetValue('SetpointPosition');
+        }
         $direction = 1;
         if ($State) {
             $stateName = 'Nacht';

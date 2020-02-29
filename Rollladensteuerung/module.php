@@ -35,6 +35,7 @@ class Rollladensteuerung extends IPSModule
 {
     // Helper
     use RS_blindActuator;
+    use RS_dayDetection;
     use RS_doorWindowSensors;
     use RS_emergencySensors;
     use RS_sunriseSunset;
@@ -142,20 +143,38 @@ class Rollladensteuerung extends IPSModule
                         }
                     }
                 }
+                // Is day
+                $id = $this->ReadPropertyInteger('IsDay');
+                if ($id != 0 && @IPS_ObjectExists($id)) {
+                    if ($SenderID == $id) {
+                        if ($Data[1]) {
+                            $this->SendDebug(__FUNCTION__, "'Ist es Tag' - Erkennung: " . json_encode($Data[0]), 0);
+                            // Night
+                            if (!$Data[0]) {
+                                $this->SendDebug(__FUNCTION__, 'Es ist Nacht (' . $timeStamp . ')', 0);
+                            }
+                            // Day
+                            if ($Data[0]) {
+                                $this->SendDebug(__FUNCTION__, 'Es ist Tag (' . $timeStamp . ')', 0);
+                            }
+                            $this->TriggerIsDayDetection($Data[0]);
+                        }
+                    }
+                }
                 // Twilight state
                 $id = $this->ReadPropertyInteger('TwilightState');
                 if ($id != 0 && @IPS_ObjectExists($id)) {
                     if ($SenderID == $id) {
                         if ($Data[1]) {
-                            // Night
                             $this->SendDebug(__FUNCTION__, 'Dämmerungsstatus: ' . json_encode($Data[0]), 0);
                             $this->SetValue('TwilightState', $Data[0]);
-                            if ($Data[0]) {
-                                $this->SendDebug(__FUNCTION__, 'Es ist Nacht (' . $timeStamp . ')', 0);
-                            }
                             // Day
                             if (!$Data[0]) {
                                 $this->SendDebug(__FUNCTION__, 'Es ist Tag (' . $timeStamp . ')', 0);
+                            }
+                            // Night
+                            if ($Data[0]) {
+                                $this->SendDebug(__FUNCTION__, 'Es ist Nacht (' . $timeStamp . ')', 0);
                             }
                             $this->TriggerTwilightDetection($Data[0]);
                         }
@@ -385,9 +404,6 @@ class Rollladensteuerung extends IPSModule
         // Sleep duration
         $this->RegisterPropertyInteger('SleepDuration', 12);
 
-        // Is day
-        $this->RegisterPropertyInteger('IsDay', 0);
-
         // Sunrise and sunset
         $this->RegisterPropertyInteger('Sunrise', 0);
         $this->RegisterPropertyInteger('SunrisePosition', 50);
@@ -400,9 +416,17 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyInteger('BlindPositionOpened', 100);
         $this->RegisterPropertyInteger('BlindPositionShading', 50);
 
+        // Is day
+        $this->RegisterPropertyInteger('IsDay', 0);
+        $this->RegisterPropertyBoolean('IsDayAdjustPosition', false);
+        $this->RegisterPropertyInteger('IsDayPosition', 100);
+        $this->RegisterPropertyBoolean('IsNightAdjustPosition', false);
+        $this->RegisterPropertyInteger('IsNightPosition', 0);
+
         // Twilight state
         $this->RegisterPropertyInteger('TwilightState', 0);
-        //$this->RegisterPropertyInteger('TwilightPositionDay', 100);
+        $this->RegisterPropertyBoolean('TwilightDefinedPosition', false);
+        $this->RegisterPropertyInteger('TwilightPositionDay', 100);
         $this->RegisterPropertyInteger('TwilightPositionNight', 40);
 
         // Door and window sensors
@@ -412,6 +436,8 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyBoolean('OpenBlind', false);
         $this->RegisterPropertyInteger('OpenBlindPosition', 60);
         $this->RegisterPropertyBoolean('CloseBlind', false);
+        $this->RegisterPropertyBoolean('CloseBlindDefinedPosition', false);
+        $this->RegisterPropertyInteger('CloseBlindPosition', 0);
 
         // Emergency sensors
         $this->RegisterPropertyString('EmergencySensors', '[]');
@@ -674,26 +700,38 @@ class Rollladensteuerung extends IPSModule
     {
         // Unregister first
         $this->UnregisterMessages();
-        // Sunset
-        $id = $this->ReadPropertyInteger('Sunset');
-        if ($id != 0 && @IPS_ObjectExists($id)) {
-            $this->RegisterMessage($id, VM_UPDATE);
-        }
         // Sunrise
         $id = $this->ReadPropertyInteger('Sunrise');
         if ($id != 0 && @IPS_ObjectExists($id)) {
             $this->RegisterMessage($id, VM_UPDATE);
         }
-        // Twilight state
-        $id = $this->ReadPropertyInteger('TwilightState');
+
+        // Sunset
+        $id = $this->ReadPropertyInteger('Sunset');
         if ($id != 0 && @IPS_ObjectExists($id)) {
             $this->RegisterMessage($id, VM_UPDATE);
         }
+
         // Weekly schedule
         $id = $this->ReadPropertyInteger('WeeklySchedule');
         if ($id != 0 && @IPS_ObjectExists($id)) {
             $this->RegisterMessage($id, EM_UPDATE);
         }
+
+        // Is day
+        if ($this->ReadPropertyBoolean('IsDayAdjustPosition') || $this->ReadPropertyBoolean('IsNightAdjustPosition')) {
+            $id = $this->ReadPropertyInteger('IsDay');
+            if ($id != 0 && @IPS_ObjectExists($id)) {
+                $this->RegisterMessage($id, VM_UPDATE);
+            }
+        }
+
+        // Twilight state
+        $id = $this->ReadPropertyInteger('TwilightState');
+        if ($id != 0 && @IPS_ObjectExists($id)) {
+            $this->RegisterMessage($id, VM_UPDATE);
+        }
+
         // Actuator state level
         $id = $this->ReadPropertyInteger('ActuatorStateLevel');
         if ($id != 0 && IPS_ObjectExists($id)) {
