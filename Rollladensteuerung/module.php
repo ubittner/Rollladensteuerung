@@ -333,6 +333,7 @@ class Rollladensteuerung extends IPSModule
         $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $this->SendDebug(__FUNCTION__, 'Parameter $Level = ' . $Level, 0);
         $this->SetValue('BlindSlider', $Level);
+        $this->SetValue('SetpointPosition', $Level * 100);
         $this->SetBlindLevel($Level, false);
     }
 
