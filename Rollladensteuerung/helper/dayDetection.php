@@ -41,16 +41,16 @@ trait RS_dayDetection
         }
         $this->SendDebug(__FUNCTION__, 'Parameter $State = ' . $State . ' = ' . $stateName, 0);
         // Set blind level if automatic mode is enabled and sleep mode is disabled
-        //if (isset($level) && isset($direction)) {
-        if ($this->CheckModes(__FUNCTION__)) {
-            $level = $this->CheckPosition($level, $direction);
-            if ($level == -1) {
-                // Abort, level is not valid
-                return $result;
+        if ((isset($level)) && (isset($direction))) {
+            if ($this->CheckModes(__FUNCTION__)) {
+                $level = $this->CheckPosition($level, $direction);
+                if ($level == -1) {
+                    // Abort, level is not valid
+                    return $result;
+                }
+                $result = $this->SetBlindLevel($level, true);
             }
-            $result = $this->SetBlindLevel($level, true);
         }
-        //}
         return $result;
     }
 }
