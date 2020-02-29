@@ -20,6 +20,7 @@ trait RS_dayDetection
     {
         $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $result = false;
+        $stateName = 'Unbekannter Status';
         // Day
         if ($State) {
             if (!$this->ReadPropertyBoolean('IsDayAdjustPosition')) {
@@ -39,9 +40,7 @@ trait RS_dayDetection
             $direction = 0;
 
         }
-        if (isset($stateName)) {
-            $this->SendDebug(__FUNCTION__, 'Parameter $State = ' . $State . ' = ' . $stateName, 0);
-        }
+        $this->SendDebug(__FUNCTION__, 'Parameter $State = ' . $State . ' = ' . $stateName, 0);
         // Set blind level if automatic mode is enabled and sleep mode is disabled
         if (isset($level) && isset($direction)) {
             if ($this->CheckModes(__FUNCTION__)) {
