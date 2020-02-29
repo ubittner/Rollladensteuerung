@@ -6,11 +6,11 @@ declare(strict_types=1);
 trait RS_dayDetection
 {
     /**
-     * Sets the blind position by twilight detection.
+     * Sets the blind position by is day detection.
      *
      * @param bool $State
-     * false    = day
-     * true     = night
+     * false    = night
+     * true     = day
      *
      * @return bool
      * false    = an error occurred
@@ -28,8 +28,6 @@ trait RS_dayDetection
             $stateName = 'Es ist Tag';
             $level = $this->ReadPropertyInteger('IsDayPosition') / 100;
             $direction = 1;
-
-
         }
         // Night
         if (!$State) {
