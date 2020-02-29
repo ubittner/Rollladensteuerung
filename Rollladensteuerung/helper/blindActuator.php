@@ -259,12 +259,20 @@ trait RS_blindActuator
                         }
                     }
                 }
-            } else {
+            }
+            /*
+             else {
                 // Only move blind down, if new position is lower then the actual position
                 if ($newPosition >= $actualPosition) {
                     $this->SendDebug(__FUNCTION__, 'Rollladen runterfahren: Abbruch, Die aktuelle Position ist bereits niedriger als die neue Position!', 0);
                     return $newLevel;
                 }
+            }
+             */
+            // Only move blind down, if new position is lower then the actual position
+            if ($newPosition >= $actualPosition) {
+                $this->SendDebug(__FUNCTION__, 'Rollladen runterfahren: Abbruch, Die aktuelle Position ist bereits niedriger als die neue Position!', 0);
+                return $newLevel;
             }
         }
         // Up
