@@ -978,7 +978,7 @@ class Rollladensteuerung extends IPSModule
         $level = $this->GetActualPosition();
         $this->SetValue('SetpointPosition', $level);
         // Update blind slider
-        $this->SetValue('BlindSlider', $level);
+        $this->SetValue('BlindSlider', $level / 100);
         // Check door and window sensors
         $this->CheckDoorWindowSensors();
         // Update twilight state
