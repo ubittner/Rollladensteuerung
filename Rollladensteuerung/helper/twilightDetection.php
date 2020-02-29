@@ -31,7 +31,7 @@ trait RS_twilightDetection
             if ($this->ReadPropertyBoolean('TwilightDefinedPosition')) {
                 $level = $this->ReadPropertyInteger('TwilightPositionDay') / 100;
             } else {
-                $level = $this->GetValue('SetpointPosition');
+                $level = $this->GetValue('SetpointPosition') / 100;
             }
             $direction = 1;
             if ($State) {
@@ -39,7 +39,7 @@ trait RS_twilightDetection
                 $level = $this->ReadPropertyInteger('TwilightPositionNight') / 100;
                 $direction = 0;
             }
-            $this->SendDebug(__FUNCTION__, 'Parameter $State = ' . $State . ' = ' . $stateName, 0);
+            $this->SendDebug(__FUNCTION__, 'Parameter $State = ' . json_encode($State) . ' = ' . $stateName, 0);
             // Set blind level if automatic mode is enabled and sleep mode is disabled
             if ($this->CheckModes(__FUNCTION__)) {
                 $level = $this->CheckPosition($level, $direction);
