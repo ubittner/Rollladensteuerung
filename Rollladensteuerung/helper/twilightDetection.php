@@ -21,27 +21,34 @@ trait RS_twilightDetection
         $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $result = false;
         $this->SetValue('TwilightState', $State);
-        $stateName = 'Tag';
-        if ($this->ReadPropertyBoolean('TwilightDefinedPosition')) {
-            $level = $this->ReadPropertyInteger('TwilightPositionDay') / 100;
-        } else {
-            $level = $this->GetValue('SetpointPosition');
+        $id = $this->ReadPropertyInteger('IsDay');
+        if ($id == 0 || !IPS_ObjectExists($id)) {
+            $this->SendDebug(__FUNCTION__, "Abbruch, Die Variable 'Ist es Tag' wurde nicht ausgewählt!", 0);
+            return $result;
         }
-        $direction = 1;
-        if ($State) {
-            $stateName = 'Nacht';
-            $level = $this->ReadPropertyInteger('TwilightPositionNight') / 100;
-            $direction = 0;
-        }
-        $this->SendDebug(__FUNCTION__, 'Parameter $State = ' . $State . ' = ' . $stateName, 0);
-        // Set blind level if automatic mode is enabled and sleep mode is disabled
-        if ($this->CheckModes(__FUNCTION__)) {
-            $level = $this->CheckPosition($level, $direction);
-            if ($level == -1) {
-                // Abort, level is not valid
-                return $result;
+        if (GetValue($id)) {
+            $stateName = 'Tag';
+            if ($this->ReadPropertyBoolean('TwilightDefinedPosition')) {
+                $level = $this->ReadPropertyInteger('TwilightPositionDay') / 100;
+            } else {
+                $level = $this->GetValue('SetpointPosition');
             }
-            $result = $this->SetBlindLevel($level, true);
+            $direction = 1;
+            if ($State) {
+                $stateName = 'Nacht';
+                $level = $this->ReadPropertyInteger('TwilightPositionNight') / 100;
+                $direction = 0;
+            }
+            $this->SendDebug(__FUNCTION__, 'Parameter $State = ' . $State . ' = ' . $stateName, 0);
+            // Set blind level if automatic mode is enabled and sleep mode is disabled
+            if ($this->CheckModes(__FUNCTION__)) {
+                $level = $this->CheckPosition($level, $direction);
+                if ($level == -1) {
+                    // Abort, level is not valid
+                    return $result;
+                }
+                $result = $this->SetBlindLevel($level, true);
+            }
         }
         return $result;
     }
