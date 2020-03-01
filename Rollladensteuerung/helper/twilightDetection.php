@@ -47,7 +47,7 @@ trait RS_twilightDetection
                     // Abort, level is not valid
                     return $result;
                 }
-                $this->WriteAttributeBoolean('UpdateSetpointTemperature', false);
+                $this->WriteAttributeBoolean('UpdateSetpointPosition', false);
                 $result = $this->SetBlindLevel($level, true);
             }
         }

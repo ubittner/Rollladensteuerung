@@ -170,7 +170,7 @@ trait RS_blindActuator
                 $actualPosition = $this->GetActualPosition();
                 $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $actualPosition . '%.', 0);
                 $this->SetValue('BlindSlider', $actualPosition / 100);
-                if ($this->ReadAttributeBoolean('UpdateSetpointTemperature')) {
+                if ($this->ReadAttributeBoolean('UpdateSetpointPosition')) {
                     $this->SetValue('SetpointPosition', $actualPosition);
                 }
                 $this->ResetAttributes();

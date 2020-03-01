@@ -83,6 +83,7 @@ trait RS_doorWindowSensors
                     $actualPosition = $this->GetActualPosition();
                     $newPosition = $this->ReadPropertyInteger('OpenBlindPosition');
                     if ($actualPosition < $newPosition) {
+                        $this->WriteAttributeBoolean('UpdateSetpointPosition', false);
                         $result = $this->SetBlindLevel($newPosition / 100, false);
                     }
                 }
@@ -95,6 +96,7 @@ trait RS_doorWindowSensors
                     } else {
                         $level = $this->GetValue('SetpointPosition') / 100;
                     }
+                    $this->WriteAttributeBoolean('UpdateSetpointPosition', false);
                     $result = $this->SetBlindLevel($level, false);
                 }
             }

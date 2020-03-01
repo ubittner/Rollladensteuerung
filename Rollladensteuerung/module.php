@@ -722,12 +722,12 @@ class Rollladensteuerung extends IPSModule
 
     private function RegisterAttributes(): void
     {
-        $this->RegisterAttributeBoolean('UpdateSetpointTemperature', true);
+        $this->RegisterAttributeBoolean('UpdateSetpointPosition', true);
     }
 
     private function ResetAttributes(): void
     {
-        $this->WriteAttributeBoolean('UpdateSetpointTemperature', true);
+        $this->WriteAttributeBoolean('UpdateSetpointPosition', true);
     }
 
     private function RegisterMessages(): void
