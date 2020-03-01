@@ -351,7 +351,6 @@ class Rollladensteuerung extends IPSModule
                         return;
                     }
                 }
-
             }
         }
         $this->SetValue('BlindSlider', $Level);
