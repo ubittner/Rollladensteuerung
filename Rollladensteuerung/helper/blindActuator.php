@@ -170,6 +170,10 @@ trait RS_blindActuator
                 $actualPosition = $this->GetActualPosition();
                 $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $actualPosition . '%.', 0);
                 $this->SetValue('BlindSlider', $actualPosition / 100);
+                if ($this->ReadAttributeBoolean('UpdateSetpointTemperature')) {
+                    $this->SetValue('SetpointPosition', $actualPosition);
+                }
+                $this->ResetAttributes();
             }
         }
     }
@@ -219,7 +223,7 @@ trait RS_blindActuator
         $this->SendDebug(__FUNCTION__, 'Parameter $MovingDirection = ' . $MovingDirection, 0);
         $newLevel = (float) -1;
         $actualPosition = $this->GetActualPosition();
-        $newPosition = $Level * 100;
+        $newPosition = (int) ($Level * 100);
         // Check minimum blind position difference
         if ($this->ReadPropertyBoolean('CheckMinimumBlindPositionDifference')) {
             $this->SendDebug(__FUNCTION__, 'Der Mindest-Positionsunterschied wird geprüft', 0);
@@ -250,25 +254,8 @@ trait RS_blindActuator
                         $newPosition = $lockoutPosition;
                         $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $newPosition, 0);
                     }
-                    // New position is in the range up to the lockout position
-                    if ($newPosition >= $lockoutPosition) {
-                        // Actual position is already lower then the new position
-                        if ($actualPosition < $newPosition) {
-                            $this->SendDebug(__FUNCTION__, 'Tür-/Fensterprüfung: Abbruch, Die aktuelle Position ist bereits niedriger als die neue Position!', 0);
-                            return $newLevel;
-                        }
-                    }
                 }
             }
-            /*
-             else {
-                // Only move blind down, if new position is lower then the actual position
-                if ($newPosition >= $actualPosition) {
-                    $this->SendDebug(__FUNCTION__, 'Rollladen runterfahren: Abbruch, Die aktuelle Position ist bereits niedriger als die neue Position!', 0);
-                    return $newLevel;
-                }
-            }
-             */
             // Only move blind down, if new position is lower then the actual position
             if ($newPosition >= $actualPosition) {
                 $this->SendDebug(__FUNCTION__, 'Rollladen runterfahren: Abbruch, Die aktuelle Position ist bereits niedriger als die neue Position!', 0);

@@ -12,9 +12,9 @@
  * @license     CC BY-NC-SA 4.0
  *              https://creativecommons.org/licenses/by-nc-sa/4.0/
  *
- * @version     1.00-8
- * @date        2020-02-25, 18:00, 1582650000
- * @review      2020-02-25, 18:00
+ * @version     1.00-9
+ * @date        2020-03-01, 18:00, 1583082000
+ * @review      2020-03-01, 18:00
  *
  * @see         https://github.com/ubittner/Rollladensteuerung
  *
@@ -62,6 +62,9 @@ class Rollladensteuerung extends IPSModule
 
         // Register timers
         $this->RegisterTimers();
+
+        // Register Attributes
+        $this->RegisterAttributes();
     }
 
     public function ApplyChanges()
@@ -332,6 +335,25 @@ class Rollladensteuerung extends IPSModule
     {
         $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $this->SendDebug(__FUNCTION__, 'Parameter $Level = ' . $Level, 0);
+        if ($this->ReadPropertyBoolean('CheckMinimumBlindPositionDifference')) {
+            if (!$this->ReadPropertyBoolean('SkipManualControl')) {
+                $newPosition = (int) ($Level * 100);
+                $actualPosition = $this->GetActualPosition();
+                $this->SendDebug(__FUNCTION__, 'Der Mindest-Positionsunterschied wird geprüft', 0);
+                $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $newPosition . '%.', 0);
+                $minimumDifference = $this->ReadPropertyInteger('BlindPositionDifference');
+                if ($minimumDifference > 0) {
+                    $actualDifference = abs($actualPosition - $newPosition);
+                    $this->SendDebug(__FUNCTION__, 'Positionsunterschied: ' . $actualDifference . '%.', 0);
+                    if ($actualDifference <= $minimumDifference) {
+                        $this->SendDebug(__FUNCTION__, 'Abbruch, Der Positionsunterschied ist zu gering!', 0);
+                        // Abort
+                        return;
+                    }
+                }
+
+            }
+        }
         $this->SetValue('BlindSlider', $Level);
         $this->SetValue('SetpointPosition', $Level * 100);
         $this->SetBlindLevel($Level, false);
@@ -401,6 +423,7 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyBoolean('AdjustBlindLevel', false);
         $this->RegisterPropertyBoolean('CheckMinimumBlindPositionDifference', false);
         $this->RegisterPropertyInteger('BlindPositionDifference', 3);
+        $this->RegisterPropertyBoolean('SkipManualControl', false);
 
         // Sleep duration
         $this->RegisterPropertyInteger('SleepDuration', 12);
@@ -695,6 +718,16 @@ class Rollladensteuerung extends IPSModule
                 }
             }
         }
+    }
+
+    private function RegisterAttributes(): void
+    {
+        $this->RegisterAttributeBoolean('UpdateSetpointTemperature', true);
+    }
+
+    private function ResetAttributes(): void
+    {
+        $this->WriteAttributeBoolean('UpdateSetpointTemperature', true);
     }
 
     private function RegisterMessages(): void

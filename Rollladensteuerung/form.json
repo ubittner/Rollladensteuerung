@@ -26,11 +26,11 @@
         },
         {
           "type": "Label",
-          "caption": "Version:\t\t\t1.00-8"
+          "caption": "Version:\t\t\t1.00-9"
         },
         {
           "type": "Label",
-          "caption": "Datum:\t\t\t25. Februar 2020"
+          "caption": "Datum:\t\t\t01. März 2020"
         },
         {
           "type": "Label",
@@ -224,6 +224,10 @@
       "items": [
         {
           "type": "Label",
+          "caption": "Positionsanpassung"
+        },
+        {
+          "type": "Label",
           "caption": "Bitte wählen Sie aus, ob bei der Aktivierung der Automatik die Rollladenposition direkt angepasst werden soll:"
         },
         {
@@ -233,7 +237,11 @@
         },
         {
           "type": "Label",
-          "caption": "\n\nBitte wählen Sie aus, ob der Mindest-Positionsunterschied geprüft werden soll:"
+          "caption": "\n\nPositionsunterschied"
+        },
+        {
+          "type": "Label",
+          "caption": "Bitte wählen Sie aus, ob der Mindest-Positionsunterschied geprüft werden soll:"
         },
         {
           "type": "RowLayout",
@@ -252,6 +260,15 @@
               "name": "BlindPositionDifference",
               "caption": "Positionsunterschied",
               "suffix": "%"
+            },
+            {
+              "type": "Label",
+              "caption": " "
+            },
+            {
+              "type": "CheckBox",
+              "name": "SkipManualControl",
+              "caption": "Manuelle Steuerung nicht prüfen"
             }
           ]
         }
