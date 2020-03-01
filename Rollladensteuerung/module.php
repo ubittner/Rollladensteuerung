@@ -346,8 +346,9 @@ class Rollladensteuerung extends IPSModule
                     $actualDifference = abs($actualPosition - $newPosition);
                     $this->SendDebug(__FUNCTION__, 'Positionsunterschied: ' . $actualDifference . '%.', 0);
                     if ($actualDifference <= $minimumDifference) {
-                        $this->SendDebug(__FUNCTION__, 'Abbruch, Der Positionsunterschied ist zu gering!', 0);
                         // Abort
+                        $this->SendDebug(__FUNCTION__, 'Abbruch, Der Positionsunterschied ist zu gering!', 0);
+                        $this->SetValue('BlindSlider', $actualPosition / 100);
                         return;
                     }
                 }
