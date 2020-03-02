@@ -80,7 +80,7 @@ trait RS_doorWindowSensors
             // Opened
             if ($State && $doorWindowState) {
                 if ($this->ReadPropertyBoolean('OpenBlind')) {
-                    $actualPosition = $this->GetActualPosition();
+                    $actualPosition = (int) $this->GetActualLevel() * 100;
                     $newPosition = $this->ReadPropertyInteger('OpenBlindPosition');
                     if ($actualPosition < $newPosition) {
                         $this->WriteAttributeBoolean('UpdateSetpointPosition', false);
@@ -91,8 +91,8 @@ trait RS_doorWindowSensors
             // Closed
             if (!$State && !$doorWindowState) {
                 if ($this->ReadPropertyBoolean('CloseBlind')) {
-                    if ($this->ReadPropertyBoolean('CloseBlindDefinedPosition')) {
-                        $level = $this->GetValue('CloseBlindPosition') / 100;
+                    if (!$this->ReadPropertyBoolean('CloseBlindSetpointPosition')) {
+                        $level = $this->ReadPropertyInteger('CloseBlindPosition') / 100;
                     } else {
                         $level = $this->GetValue('SetpointPosition') / 100;
                     }

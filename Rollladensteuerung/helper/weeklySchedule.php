@@ -97,12 +97,17 @@ trait RS_weeklySchedule
 
             }
             if (isset($level) && isset($direction)) {
-                $level = $this->CheckPosition($level, $direction);
+                $level = $this->CheckPositions($level, $direction);
                 if ($level == -1) {
                     // Abort, level is not valid
                     return $result;
                 }
-                $this->SetValue('SetpointPosition', $level * 100);
+                $updateSetpointPosition = false;
+                if ($this->ReadPropertyBoolean('WeeklyScheduleUpdateSetpointPosition')) {
+                    $this->SetValue('SetpointPosition', $level * 100);
+                    $updateSetpointPosition = true;
+                }
+                $this->WriteAttributeBoolean('UpdateSetpointPosition', $updateSetpointPosition);
                 $result = $this->SetBlindLevel($level, true);
             }
         }

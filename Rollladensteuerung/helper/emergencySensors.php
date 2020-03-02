@@ -19,12 +19,16 @@ trait RS_emergencySensors
         if (!empty($ids)) {
             foreach ($ids as $id) {
                 if ($id->ID == $SenderID && $id->UseSensor) {
-                    // Blind position
-                    $level = $id->BlindPosition / 100;
-                    $this->SetBlindLevel($level, true);
-                    // Automatic mode
-                    if ($id->DisableAutomaticMode) {
-                        $this->ToggleAutomaticMode(false);
+                    $actualValue = boolval(GetValue($SenderID));
+                    $alertingValue = boolval($id->AlertingValue);
+                    if ($actualValue == $alertingValue) {
+                        // Blind position
+                        $level = $id->BlindPosition / 100;
+                        $this->SetBlindLevel($level, true);
+                        // Automatic mode
+                        if ($id->DisableAutomaticMode) {
+                            $this->ToggleAutomaticMode(false);
+                        }
                     }
                 }
             }

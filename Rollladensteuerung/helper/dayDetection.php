@@ -43,11 +43,17 @@ trait RS_dayDetection
         // Set blind level if automatic mode is enabled and sleep mode is disabled
         if ((isset($level)) && (isset($direction))) {
             if ($this->CheckModes(__FUNCTION__)) {
-                $level = $this->CheckPosition($level, $direction);
+                $level = $this->CheckPositions($level, $direction);
                 if ($level == -1) {
                     // Abort, level is not valid
                     return $result;
                 }
+                $updateSetpointPosition = false;
+                if ($this->ReadPropertyBoolean('IsDayUpdateSetpointPosition')) {
+                    $this->SetValue('SetpointPosition', $level * 100);
+                    $updateSetpointPosition = true;
+                }
+                $this->WriteAttributeBoolean('UpdateSetpointPosition', $updateSetpointPosition);
                 $result = $this->SetBlindLevel($level, true);
             }
         }

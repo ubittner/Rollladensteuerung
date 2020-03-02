@@ -12,9 +12,9 @@
  * @license     CC BY-NC-SA 4.0
  *              https://creativecommons.org/licenses/by-nc-sa/4.0/
  *
- * @version     1.00-9
- * @date        2020-03-01, 18:00, 1583082000
- * @review      2020-03-01, 18:00
+ * @version     1.01-10
+ * @date        2020-03-02, 18:00, 1583168400
+ * @review      2020-03-02, 18:00
  *
  * @see         https://github.com/ubittner/Rollladensteuerung
  *
@@ -209,10 +209,7 @@ class Rollladensteuerung extends IPSModule
                 if (!empty($id)) {
                     if (array_search($SenderID, array_column($id, 'ID')) !== false) {
                         if ($Data[1]) {
-                            $state = (bool) $Data[0];
-                            if ($state) {
-                                $this->TriggerEmergencySensor($SenderID);
-                            }
+                            $this->TriggerEmergencySensor($SenderID);
                         }
                     }
                 }
@@ -335,27 +332,18 @@ class Rollladensteuerung extends IPSModule
     {
         $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $this->SendDebug(__FUNCTION__, 'Parameter $Level = ' . $Level, 0);
-        if ($this->ReadPropertyBoolean('CheckMinimumBlindPositionDifference')) {
-            if (!$this->ReadPropertyBoolean('SkipManualControl')) {
-                $newPosition = (int) ($Level * 100);
-                $actualPosition = $this->GetActualPosition();
-                $this->SendDebug(__FUNCTION__, 'Der Mindest-Positionsunterschied wird geprüft', 0);
-                $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $newPosition . '%.', 0);
-                $minimumDifference = $this->ReadPropertyInteger('BlindPositionDifference');
-                if ($minimumDifference > 0) {
-                    $actualDifference = abs($actualPosition - $newPosition);
-                    $this->SendDebug(__FUNCTION__, 'Positionsunterschied: ' . $actualDifference . '%.', 0);
-                    if ($actualDifference <= $minimumDifference) {
-                        // Abort
-                        $this->SendDebug(__FUNCTION__, 'Abbruch, Der Positionsunterschied ist zu gering!', 0);
-                        $this->SetValue('BlindSlider', $actualPosition / 100);
-                        return;
-                    }
-                }
-            }
+        $minimumDifference = $this->CheckMinimumPositionDifference($Level);
+        if ($minimumDifference == -1) {
+            $this->SetValue('BlindSlider', $this->GetActualLevel());
+            return;
         }
         $this->SetValue('BlindSlider', $Level);
-        $this->SetValue('SetpointPosition', $Level * 100);
+        $updateSetpointPosition = false;
+        if ($this->ReadPropertyBoolean('ManualControlUpdateSetpointPosition')) {
+            $this->SetValue('SetpointPosition', $Level * 100);
+            $updateSetpointPosition = true;
+        }
+        $this->WriteAttributeBoolean('UpdateSetpointPosition', $updateSetpointPosition);
         $this->SetBlindLevel($Level, false);
     }
 
@@ -409,36 +397,35 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyBoolean('EnableSleepModeTimer', true);
 
         // Blind actuator
-        $this->RegisterPropertyInteger('DeviceType', 0);
         $this->RegisterPropertyInteger('ActuatorInstance', 0);
+        $this->RegisterPropertyInteger('DeviceType', 0);
+        $this->RegisterPropertyInteger('ActuatorProperty', 0);
+        $this->RegisterPropertyInteger('ExecutionDelay', 3);
         $this->RegisterPropertyInteger('ActuatorStateLevel', 0);
         $this->RegisterPropertyInteger('ActuatorStateProcess', 0);
         $this->RegisterPropertyInteger('ActuatorControlLevel', 0);
-        $this->RegisterPropertyInteger('ActuatorProperty', 0);
-
-        // Execution delay
-        $this->RegisterPropertyInteger('ExecutionDelay', 3);
-
-        // Check blind position
-        $this->RegisterPropertyBoolean('AdjustBlindLevel', false);
         $this->RegisterPropertyBoolean('CheckMinimumBlindPositionDifference', false);
-        $this->RegisterPropertyInteger('BlindPositionDifference', 3);
-        $this->RegisterPropertyBoolean('SkipManualControl', false);
+        $this->RegisterPropertyInteger('BlindPositionDifference', 5);
 
-        // Sleep duration
-        $this->RegisterPropertyInteger('SleepDuration', 12);
+        // Manual control
+        $this->RegisterPropertyBoolean('ManualControlUpdateSetpointPosition', true);
+
+        // Automatic
+        $this->RegisterPropertyBoolean('AdjustBlindLevel', false);
 
         // Sunrise and sunset
         $this->RegisterPropertyInteger('Sunrise', 0);
         $this->RegisterPropertyInteger('SunrisePosition', 50);
         $this->RegisterPropertyInteger('Sunset', 0);
         $this->RegisterPropertyInteger('SunsetPosition', 50);
+        $this->RegisterPropertyBoolean('SunriseSunsetUpdateSetpointPosition', true);
 
         // Weekly schedule
         $this->RegisterPropertyInteger('WeeklySchedule', 0);
         $this->RegisterPropertyInteger('BlindPositionClosed', 0);
         $this->RegisterPropertyInteger('BlindPositionOpened', 100);
         $this->RegisterPropertyInteger('BlindPositionShading', 50);
+        $this->RegisterPropertyBoolean('WeeklyScheduleUpdateSetpointPosition', true);
 
         // Is day
         $this->RegisterPropertyInteger('IsDay', 0);
@@ -446,22 +433,27 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyInteger('IsDayPosition', 100);
         $this->RegisterPropertyBoolean('IsNightAdjustPosition', false);
         $this->RegisterPropertyInteger('IsNightPosition', 0);
+        $this->RegisterPropertyBoolean('IsDayUpdateSetpointPosition', false);
 
         // Twilight state
         $this->RegisterPropertyInteger('TwilightState', 0);
-        $this->RegisterPropertyBoolean('TwilightDefinedPosition', false);
         $this->RegisterPropertyInteger('TwilightPositionDay', 100);
+        $this->RegisterPropertyBoolean('TwilightSetpointPositionDay', true);
         $this->RegisterPropertyInteger('TwilightPositionNight', 40);
+        $this->RegisterPropertyBoolean('TwilightUpdateSetpointPosition', false);
+
+        // Sleep duration
+        $this->RegisterPropertyInteger('SleepDuration', 12);
 
         // Door and window sensors
         $this->RegisterPropertyString('DoorWindowSensors', '[]');
         $this->RegisterPropertyBoolean('LockoutProtection', false);
         $this->RegisterPropertyInteger('LockoutPosition', 60);
         $this->RegisterPropertyBoolean('OpenBlind', false);
-        $this->RegisterPropertyInteger('OpenBlindPosition', 60);
+        $this->RegisterPropertyInteger('OpenBlindPosition', 50);
         $this->RegisterPropertyBoolean('CloseBlind', false);
-        $this->RegisterPropertyBoolean('CloseBlindDefinedPosition', false);
-        $this->RegisterPropertyInteger('CloseBlindPosition', 0);
+        $this->RegisterPropertyInteger('CloseBlindPosition', 100);
+        $this->RegisterPropertyBoolean('CloseBlindSetpointPosition', false);
 
         // Emergency sensors
         $this->RegisterPropertyString('EmergencySensors', '[]');
@@ -1008,10 +1000,10 @@ class Rollladensteuerung extends IPSModule
          */
         $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         // Update and setpoint position
-        $level = $this->GetActualPosition();
-        $this->SetValue('SetpointPosition', $level);
+        $level = $this->GetActualLevel();
+        $this->SetValue('SetpointPosition', $level * 100);
         // Update blind slider
-        $this->SetValue('BlindSlider', $level / 100);
+        $this->SetValue('BlindSlider', $level);
         // Check door and window sensors
         $this->CheckDoorWindowSensors();
         // Update twilight state

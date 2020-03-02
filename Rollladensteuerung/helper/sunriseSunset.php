@@ -31,12 +31,17 @@ trait RS_sunriseSunset
         $this->SendDebug(__FUNCTION__, 'Parameter $Mode = ' . $Mode . ' = ' . $modeName, 0);
         // Set blind if automatic mode is enabled and sleep mode is disabled
         if ($this->CheckModes(__FUNCTION__)) {
-            $level = $this->CheckPosition($level, $direction);
+            $level = $this->CheckPositions($level, $direction);
             if ($level == -1) {
                 // Abort, level is not valid
                 return $result;
             }
-            $this->SetValue('SetpointPosition', $level * 100);
+            $updateSetpointPosition = false;
+            if ($this->ReadPropertyBoolean('SunriseSunsetUpdateSetpointPosition')) {
+                $this->SetValue('SetpointPosition', $level * 100);
+                $updateSetpointPosition = true;
+            }
+            $this->WriteAttributeBoolean('UpdateSetpointPosition', $updateSetpointPosition);
             $result = $this->SetBlindLevel($level, true);
         }
         return $result;

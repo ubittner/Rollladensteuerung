@@ -167,11 +167,11 @@ trait RS_blindActuator
         $id = $this->ReadPropertyInteger('ActuatorStateProcess');
         if ($id != 0 && @IPS_ObjectExists($id)) {
             if (GetValue($id) == 0) {
-                $actualPosition = $this->GetActualPosition();
-                $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $actualPosition . '%.', 0);
-                $this->SetValue('BlindSlider', $actualPosition / 100);
+                $actualLevel = $this->GetActualLevel();
+                $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $actualLevel * 100 . '%.', 0);
+                $this->SetValue('BlindSlider', $actualLevel);
                 if ($this->ReadAttributeBoolean('UpdateSetpointPosition')) {
-                    $this->SetValue('SetpointPosition', $actualPosition);
+                    $this->SetValue('SetpointPosition', $actualLevel * 100);
                 }
                 $this->ResetAttributes();
             }
@@ -183,12 +183,12 @@ trait RS_blindActuator
     /**
      * Gets the actual blind position.
      *
-     * @return int
+     * @return float
      */
-    private function GetActualPosition(): int
+    private function GetActualLevel(): float
     {
         $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
-        $actualPosition = 0;
+        $actualLevel = (float) 0;
         $id = $this->ReadPropertyInteger('ActuatorStateLevel');
         if ($id != 0 && @IPS_ObjectExists($id)) {
             $actualLevel = (float) GetValue($id);
@@ -198,10 +198,9 @@ trait RS_blindActuator
                 // We have to change the value from 1 to 0 and vise versa
                 $actualLevel = (float) abs($actualLevel - 1);
             }
-            $actualPosition = $actualLevel * 100;
-            $this->SendDebug(__FUNCTION__, 'Aktuelle Position: ' . $actualPosition . '%.', 0);
+            $this->SendDebug(__FUNCTION__, 'Aktuelle Position: ' . $actualLevel * 100 . '%.', 0);
         }
-        return (int) $actualPosition;
+        return $actualLevel;
     }
 
     /**
@@ -216,29 +215,19 @@ trait RS_blindActuator
      * @return float
      * Retruns the level value.
      */
-    private function CheckPosition(float $Level, int $MovingDirection): float
+    private function CheckPositions(float $Level, int $MovingDirection): float
     {
         $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         $this->SendDebug(__FUNCTION__, 'Parameter $Level = ' . $Level, 0);
         $this->SendDebug(__FUNCTION__, 'Parameter $MovingDirection = ' . $MovingDirection, 0);
-        $newLevel = (float) -1;
-        $actualPosition = $this->GetActualPosition();
         $newPosition = (int) ($Level * 100);
         // Check minimum blind position difference
-        if ($this->ReadPropertyBoolean('CheckMinimumBlindPositionDifference')) {
-            $this->SendDebug(__FUNCTION__, 'Der Mindest-Positionsunterschied wird geprüft', 0);
-            $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $newPosition . '%.', 0);
-            $minimumDifference = $this->ReadPropertyInteger('BlindPositionDifference');
-            if ($minimumDifference > 0) {
-                $actualDifference = abs($actualPosition - $newPosition);
-                $this->SendDebug(__FUNCTION__, 'Positionsunterschied: ' . $actualDifference . '%.', 0);
-                if ($actualDifference <= $minimumDifference) {
-                    $this->SendDebug(__FUNCTION__, 'Abbruch, Der Positionsunterschied ist zu gering!', 0);
-                    // Abort
-                    return $newLevel;
-                }
-            }
+        $check = $this->CheckMinimumPositionDifference($Level);
+        if ($check == -1) {
+            // Abort
+            return (float) -1;
         }
+        $actualPosition = (int) $this->GetActualLevel() * 100;
         // Down
         if ($MovingDirection == 0) {
             // Check open doors and windows
@@ -259,7 +248,7 @@ trait RS_blindActuator
             // Only move blind down, if new position is lower then the actual position
             if ($newPosition >= $actualPosition) {
                 $this->SendDebug(__FUNCTION__, 'Rollladen runterfahren: Abbruch, Die aktuelle Position ist bereits niedriger als die neue Position!', 0);
-                return $newLevel;
+                return (float) -1;
             }
         }
         // Up
@@ -267,7 +256,35 @@ trait RS_blindActuator
             // Only move blind up, if new position is higher then the actual position
             if ($newPosition <= $actualPosition) {
                 $this->SendDebug(__FUNCTION__, 'Rollladen rauffahren: Abbruch, Die aktuelle Position ist bereits höher als die neue Position!', 0);
-                return $newLevel;
+                return (float) -1;
+            }
+        }
+        return $Level;
+    }
+
+    /**
+     * Checks the minimum position difference of actual and new position.
+     *
+     * @param float $Level
+     * @return float
+     */
+    private function CheckMinimumPositionDifference(float $Level): float
+    {
+        $actualPosition = (int) $this->GetActualLevel() * 100;
+        $newPosition = (int) ($Level * 100);
+        // Check minimum blind position difference
+        if ($this->ReadPropertyBoolean('CheckMinimumBlindPositionDifference')) {
+            $this->SendDebug(__FUNCTION__, 'Der Mindest-Positionsunterschied wird geprüft', 0);
+            $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $newPosition . '%.', 0);
+            $minimumDifference = $this->ReadPropertyInteger('BlindPositionDifference');
+            if ($minimumDifference > 0) {
+                $actualDifference = abs($actualPosition - $newPosition);
+                $this->SendDebug(__FUNCTION__, 'Positionsunterschied: ' . $actualDifference . '%.', 0);
+                if ($actualDifference <= $minimumDifference) {
+                    $this->SendDebug(__FUNCTION__, 'Abbruch, Der Positionsunterschied ist zu gering!', 0);
+                    // Abort
+                    return (float) -1;
+                }
             }
         }
         return $Level;
