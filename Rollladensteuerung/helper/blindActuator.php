@@ -270,11 +270,12 @@ trait RS_blindActuator
      */
     private function CheckMinimumPositionDifference(float $Level): float
     {
-        $actualPosition = (int) $this->GetActualLevel() * 100;
+        $actualPosition = (int) ($this->GetActualLevel() * 100);
         $newPosition = (int) ($Level * 100);
         // Check minimum blind position difference
         if ($this->ReadPropertyBoolean('CheckMinimumBlindPositionDifference')) {
             $this->SendDebug(__FUNCTION__, 'Der Mindest-Positionsunterschied wird geprüft', 0);
+            $this->SendDebug(__FUNCTION__, 'Aktuelle Position: ' . $actualPosition . '%.', 0);
             $this->SendDebug(__FUNCTION__, 'Neue Position: ' . $newPosition . '%.', 0);
             $minimumDifference = $this->ReadPropertyInteger('BlindPositionDifference');
             if ($minimumDifference > 0) {
