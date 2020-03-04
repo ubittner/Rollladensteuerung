@@ -227,7 +227,7 @@ trait RS_blindActuator
             // Abort
             return (float) -1;
         }
-        $actualPosition = (int) $this->GetActualLevel() * 100;
+        $actualPosition = (int) ($this->GetActualLevel() * 100);
         // Down
         if ($MovingDirection == 0) {
             // Check open doors and windows
