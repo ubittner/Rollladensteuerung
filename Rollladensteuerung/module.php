@@ -12,9 +12,9 @@
  * @license     CC BY-NC-SA 4.0
  *              https://creativecommons.org/licenses/by-nc-sa/4.0/
  *
- * @version     1.01-10
- * @date        2020-03-02, 18:00, 1583168400
- * @review      2020-03-02, 18:00
+ * @version     1.01-87
+ * @date        2020-03-31, 18:00, 1585670400
+ * @review      2020-03-31, 18:00
  *
  * @see         https://github.com/ubittner/Rollladensteuerung
  *
@@ -34,6 +34,7 @@ include_once __DIR__ . '/helper/autoload.php';
 class Rollladensteuerung extends IPSModule
 {
     // Helper
+    use RS_backupRestore;
     use RS_blindActuator;
     use RS_dayDetection;
     use RS_doorWindowSensors;
@@ -106,6 +107,56 @@ class Rollladensteuerung extends IPSModule
 
         // Delete profiles
         $this->DeleteProfiles();
+    }
+
+    public function ReloadConfiguration()
+    {
+        $this->ReloadForm();
+    }
+
+    public function GetConfigurationForm()
+    {
+        $formData = json_decode(file_get_contents(__DIR__ . '/form.json'));
+        // Registered messages
+        $registeredVariables = $this->GetMessageList();
+        foreach ($registeredVariables as $senderID => $messageID) {
+            if (!IPS_ObjectExists($senderID)) {
+                foreach ($messageID as $messageType) {
+                    $this->UnregisterMessage($senderID, $messageType);
+                }
+                continue;
+            } else {
+                $senderName = IPS_GetName($senderID);
+                $description = $senderName;
+                $parentID = IPS_GetParent($senderID);
+                if (is_int($parentID) && $parentID != 0 && @IPS_ObjectExists($parentID)) {
+                    $description = IPS_GetName($parentID);
+                }
+            }
+            switch ($messageID) {
+                case [10001]:
+                    $messageDescription = 'IPS_KERNELSTARTED';
+                    break;
+
+                case [10603]:
+                    $messageDescription = 'VM_UPDATE';
+                    break;
+
+                case [10803]:
+                    $messageDescription = 'EM_UPDATE';
+                    break;
+
+                default:
+                    $messageDescription = 'keine Bezeichnung';
+            }
+            $formData->actions[1]->items[0]->values[] = [
+                'Description'        => $description,
+                'SenderID'           => $senderID,
+                'SenderName'         => $senderName,
+                'MessageID'          => $messageID,
+                'MessageDescription' => $messageDescription];
+        }
+        return json_encode($formData);
     }
 
     public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
@@ -223,44 +274,6 @@ class Rollladensteuerung extends IPSModule
                 break;
 
         }
-    }
-
-    public function GetConfigurationForm()
-    {
-        $formdata = json_decode(file_get_contents(__DIR__ . '/form.json'));
-        // Registered messages
-        $registeredVariables = $this->GetMessageList();
-        foreach ($registeredVariables as $senderID => $messageID) {
-            $senderName = IPS_GetName($senderID);
-            $parentName = $senderName;
-            $parentID = IPS_GetParent($senderID);
-            if (is_int($parentID) && $parentID != 0 && @IPS_ObjectExists($parentID)) {
-                $parentName = IPS_GetName($parentID);
-            }
-            switch ($messageID) {
-                case [10001]:
-                    $messageDescription = 'IPS_KERNELSTARTED';
-                    break;
-
-                case [10603]:
-                    $messageDescription = 'VM_UPDATE';
-                    break;
-
-                case [10803]:
-                    $messageDescription = 'EM_UPDATE';
-                    break;
-
-                default:
-                    $messageDescription = 'keine Bezeichnung';
-            }
-            $formdata->elements[12]->items[0]->values[] = [
-                'ParentName'                                            => $parentName,
-                'SenderID'                                              => $senderID,
-                'SenderName'                                            => $senderName,
-                'MessageID'                                             => $messageID,
-                'MessageDescription'                                    => $messageDescription];
-        }
-        return json_encode($formdata);
     }
 
     //#################### Request action
@@ -698,6 +711,16 @@ class Rollladensteuerung extends IPSModule
         $this->SetValue('SleepModeTimer', '-');
     }
 
+    private function RegisterAttributes(): void
+    {
+        $this->RegisterAttributeBoolean('UpdateSetpointPosition', true);
+    }
+
+    private function ResetAttributes(): void
+    {
+        $this->WriteAttributeBoolean('UpdateSetpointPosition', true);
+    }
+
     private function UnregisterMessages(): void
     {
         foreach ($this->GetMessageList() as $id => $registeredMessage) {
@@ -712,20 +735,11 @@ class Rollladensteuerung extends IPSModule
         }
     }
 
-    private function RegisterAttributes(): void
-    {
-        $this->RegisterAttributeBoolean('UpdateSetpointPosition', true);
-    }
-
-    private function ResetAttributes(): void
-    {
-        $this->WriteAttributeBoolean('UpdateSetpointPosition', true);
-    }
-
     private function RegisterMessages(): void
     {
         // Unregister first
         $this->UnregisterMessages();
+
         // Sunrise
         $id = $this->ReadPropertyInteger('Sunrise');
         if ($id != 0 && @IPS_ObjectExists($id)) {
