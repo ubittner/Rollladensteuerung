@@ -97,7 +97,11 @@ trait RS_doorWindowSensors
                         $level = $this->GetValue('SetpointPosition') / 100;
                     }
                     $this->WriteAttributeBoolean('UpdateSetpointPosition', false);
-                    $result = $this->SetBlindLevel($level, false);
+                    // Check minimum blind position difference
+                    $check = $this->CheckMinimumPositionDifference($level);
+                    if ($check != -1) {
+                        $result = $this->SetBlindLevel($level, false);
+                    }
                 }
             }
         }

@@ -26,11 +26,11 @@
         },
         {
           "type": "Label",
-          "caption": "Version:\t\t\t1.01-10"
+          "caption": "Version:\t\t\t1.01-88"
         },
         {
           "type": "Label",
-          "caption": "Datum:\t\t\t02. März 2020"
+          "caption": "Datum:\t\t\t31. März 2020"
         },
         {
           "type": "Label",
@@ -700,6 +700,66 @@
           ]
         }
       ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "ExpansionPanel",
+      "caption": "Konfiguration",
+      "items": [
+        {
+          "type": "Button",
+          "caption": "Neu einlesen",
+          "onClick": "RS_ReloadConfiguration($id);"
+        },
+        {
+          "type": "RowLayout",
+          "items": [
+            {
+              "type": "SelectCategory",
+              "name": "BackupCategory",
+              "caption": "Kategorie"
+            },
+            {
+              "type": "Label",
+              "caption": " "
+            },
+            {
+              "type": "Button",
+              "caption": "Sichern",
+              "onClick": "RS_CreateBackup($id, $BackupCategory);"
+            }
+          ]
+        },
+        {
+          "type": "RowLayout",
+          "items": [
+            {
+              "type": "SelectScript",
+              "name": "ConfigurationScript",
+              "caption": "Konfigurationsskript"
+            },
+            {
+              "type": "Label",
+              "caption": " "
+            },
+            {
+              "type": "PopupButton",
+              "caption": "Wiederherstellen",
+              "popup": {
+                "caption": "Konfiguration wirklich wiederherstellen?",
+                "items": [
+                  {
+                    "type": "Button",
+                    "caption": "Wiederherstellen",
+                    "onClick": "THLS_RestoreConfiguration($id, $ConfigurationScript);"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
     },
     {
       "type": "ExpansionPanel",
@@ -711,41 +771,39 @@
           "caption": "Registrierte Nachrichten",
           "rowCount": 10,
           "sort": {
-            "column": "ParentName",
+            "column": "Description",
             "direction": "ascending"
           },
           "columns": [
             {
+              "name": "Description",
               "caption": "Bezeichnung",
-              "name": "ParentName",
               "width": "350px"
             },
             {
-              "caption": "Sender ID",
               "name": "SenderID",
-              "width": "150px"
+              "caption": "Sender ID",
+              "width": "110px"
             },
             {
-              "caption": "Sender Name",
               "name": "SenderName",
+              "caption": "Sender Name",
               "width": "250px"
             },
             {
-              "caption": "Nachrichten ID",
               "name": "MessageID",
-              "width": "150px"
+              "caption": "Nachrichten ID",
+              "width": "140px"
             },
             {
-              "caption": "Nachrichten Bezeichnung",
               "name": "MessageDescription",
-              "width": "250px"
+              "caption": "Nachrichten Bezeichnung",
+              "width": "220px"
             }
           ]
         }
       ]
-    }
-  ],
-  "actions": [
+    },
     {
       "type": "ExpansionPanel",
       "caption": "Wochenplan",

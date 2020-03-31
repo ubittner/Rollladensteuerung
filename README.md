@@ -4,10 +4,10 @@
 
 Ein Gemeinschaftsprojekt von Normen Thiel und Ulrich Bittner  
 
-[![Version](https://img.shields.io/badge/Symcon_Version-5.2>-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Module_Version-1.01-blue.svg)]()
-[![Version](https://img.shields.io/badge/Module_Build-10-blue.svg)]()
-[![Version](https://img.shields.io/badge/Code-PHP-blue.svg)]()
+[![Symcon Version](https://img.shields.io/badge/Symcon_Version-5.2>-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
+![Module Version](https://img.shields.io/badge/Module_Version-1.01-blue.svg)
+![Module Build](https://img.shields.io/badge/Module_Build-88-blue.svg)
+![Code](https://img.shields.io/badge/Code-PHP-blue.svg)
 [![Check Style](https://github.com/ubittner/Rollladensteuerung/workflows/Check%20Style/badge.svg)](https://github.com/ubittner/Rollladensteuerung/actions)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)  
 
