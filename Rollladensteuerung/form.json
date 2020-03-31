@@ -26,7 +26,7 @@
         },
         {
           "type": "Label",
-          "caption": "Version:\t\t\t1.01-88"
+          "caption": "Version:\t\t\t1.01-89"
         },
         {
           "type": "Label",
@@ -752,7 +752,7 @@
                   {
                     "type": "Button",
                     "caption": "Wiederherstellen",
-                    "onClick": "THLS_RestoreConfiguration($id, $ConfigurationScript);"
+                    "onClick": "RS_RestoreConfiguration($id, $ConfigurationScript);"
                   }
                 ]
               }
