@@ -26,11 +26,11 @@
         },
         {
           "type": "Label",
-          "caption": "Version:\t\t\t1.01-89"
+          "caption": "Version:\t\t\t1.01-90"
         },
         {
           "type": "Label",
-          "caption": "Datum:\t\t\t31. März 2020"
+          "caption": "Datum:\t\t\t12. April 2020"
         },
         {
           "type": "Label",
@@ -83,6 +83,45 @@
           "type": "CheckBox",
           "name": "EnableBlindSlider",
           "caption": "Rolladensteuerung"
+        },
+        {
+          "type": "CheckBox",
+          "name": "EnablePositionPresets",
+          "caption": "Position Voreinstellungen"
+        },
+        {
+          "type": "List",
+          "name": "PositionPresets",
+          "rowCount": 5,
+          "add": true,
+          "delete": true,
+          "sort": {
+            "column": "Value",
+            "direction": "ascending"
+          },
+          "columns": [
+            {
+              "name": "Value",
+              "caption": "Wert",
+              "width": "100px",
+              "add": 0,
+              "edit": {
+                "type": "NumberSpinner",
+                "suffix": " %",
+                "minimum": 0,
+                "maximum": 100
+              }
+            },
+            {
+              "name": "Text",
+              "caption": "Text",
+              "width": "425px",
+              "add": "",
+              "edit": {
+                "type": "ValidationTextBox"
+              }
+            }
+          ]
         },
         {
           "type": "CheckBox",

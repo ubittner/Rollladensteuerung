@@ -12,9 +12,9 @@
  * @license     CC BY-NC-SA 4.0
  *              https://creativecommons.org/licenses/by-nc-sa/4.0/
  *
- * @version     1.01-89
- * @date        2020-03-31, 18:00, 1585670400
- * @review      2020-03-31, 18:00
+ * @version     1.01-90
+ * @date        2020-04-12, 18:00, 1586710800
+ * @review      2020-04-12, 18:00
  *
  * @see         https://github.com/ubittner/Rollladensteuerung
  *
@@ -92,6 +92,9 @@ class Rollladensteuerung extends IPSModule
 
         // Set options
         $this->SetOptions();
+
+        // Position presets
+        $this->UpdatePositionPresets();
 
         // Register messages
         $this->RegisterMessages();
@@ -289,6 +292,11 @@ class Rollladensteuerung extends IPSModule
                 $this->SetBlindSlider($Value);
                 break;
 
+            case 'PositionPresets':
+                $this->SetValue($Ident, $Value);
+                $this->SetBlindLevel(floatval($Value / 100), false);
+                break;
+
             case 'SleepMode':
                 $this->ToggleSleepMode($Value);
                 break;
@@ -404,6 +412,8 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyBoolean('EnableWeeklySchedule', true);
         $this->RegisterPropertyBoolean('EnableSetpointPosition', true);
         $this->RegisterPropertyBoolean('EnableBlindSlider', true);
+        $this->RegisterPropertyBoolean('EnablePositionPresets', true);
+        $this->RegisterPropertyString('PositionPresets', '[{"Value":0,"Text":"0 %"},{"Value":25,"Text":"25 %"}, {"Value":50,"Text":"50 %"},{"Value":75,"Text":"75 %"},{"Value":100,"Text":"100 %"}]');
         $this->RegisterPropertyBoolean('EnableSleepMode', true);
         $this->RegisterPropertyBoolean('EnableDoorWindowState', true);
         $this->RegisterPropertyBoolean('EnableTwilightState', true);
@@ -501,6 +511,13 @@ class Rollladensteuerung extends IPSModule
         IPS_SetVariableProfileDigits($profile, 1);
         IPS_SetVariableProfileValues($profile, 0, 1, 0.05);
 
+        // Position presets
+        $profile = 'RS.' . $this->InstanceID . '.PositionPresets';
+        if (!IPS_VariableProfileExists($profile)) {
+            IPS_CreateVariableProfile($profile, 1);
+        }
+        IPS_SetVariableProfileIcon($profile, 'Intensity');
+
         // Sleep mode
         $profile = 'RS.' . $this->InstanceID . '.SleepMode';
         if (!IPS_VariableProfileExists($profile)) {
@@ -526,9 +543,29 @@ class Rollladensteuerung extends IPSModule
         IPS_SetVariableProfileAssociation($profile, 1, 'Es ist Nacht', 'Moon', 0x0000FF);
     }
 
+    private function UpdatePositionPresets(): void
+    {
+        // Position presets
+        $profile = 'RS.' . $this->InstanceID . '.PositionPresets';
+        $associations = IPS_GetVariableProfile($profile)['Associations'];
+        if (!empty($associations)) {
+            foreach ($associations as $association) {
+                // Delete
+                IPS_SetVariableProfileAssociation($profile, $association['Value'], '', '', -1);
+            }
+        }
+        $positionPresets = json_decode($this->ReadPropertyString('PositionPresets'));
+        if (!empty($positionPresets)) {
+            foreach ($positionPresets as $preset) {
+                // Create
+                IPS_SetVariableProfileAssociation($profile, $preset->Value, $preset->Text, '', -1);
+            }
+        }
+    }
+
     private function DeleteProfiles(): void
     {
-        $profiles = ['AutomaticMode', 'SetpointPosition', 'BlindSlider.Reversed', 'SleepMode', 'DoorWindowState', 'TwilightState'];
+        $profiles = ['AutomaticMode', 'SetpointPosition', 'BlindSlider.Reversed', 'PositionPresets', 'SleepMode', 'DoorWindowState', 'TwilightState'];
         foreach ($profiles as $profile) {
             $profileName = 'RS.' . $this->InstanceID . '.' . $profile;
             if (@IPS_VariableProfileExists($profileName)) {
@@ -554,21 +591,26 @@ class Rollladensteuerung extends IPSModule
         $this->EnableAction('BlindSlider');
         IPS_SetIcon($this->GetIDForIdent('BlindSlider'), 'Jalousie');
 
+        // Position presets
+        $profile = 'RS.' . $this->InstanceID . '.PositionPresets';
+        $this->RegisterVariableInteger('PositionPresets', 'Position Voreinstellungen', $profile, 6);
+        $this->EnableAction('PositionPresets');
+
         // Sleep mode
         $profile = 'RS.' . $this->InstanceID . '.SleepMode';
-        $this->RegisterVariableBoolean('SleepMode', 'Ruhe-Modus', $profile, 6);
+        $this->RegisterVariableBoolean('SleepMode', 'Ruhe-Modus', $profile, 7);
         $this->EnableAction('SleepMode');
 
         // Door and window state
         $profile = 'RS.' . $this->InstanceID . '.DoorWindowState';
-        $this->RegisterVariableBoolean('DoorWindowState', 'Tür- / Fensterstatus', $profile, 7);
+        $this->RegisterVariableBoolean('DoorWindowState', 'Tür- / Fensterstatus', $profile, 8);
 
         // Twilight state
         $profile = 'RS.' . $this->InstanceID . '.TwilightState';
-        $this->RegisterVariableBoolean('TwilightState', 'Dämmerungsstatus', $profile, 8);
+        $this->RegisterVariableBoolean('TwilightState', 'Dämmerungsstatus', $profile, 9);
 
         // Sleep mode timer info
-        $this->RegisterVariableString('SleepModeTimer', 'Ruhe-Modus Timer', '', 9);
+        $this->RegisterVariableString('SleepModeTimer', 'Ruhe-Modus Timer', '', 10);
         $id = $this->GetIDForIdent('SleepModeTimer');
         IPS_SetIcon($id, 'Clock');
     }
@@ -680,6 +722,9 @@ class Rollladensteuerung extends IPSModule
 
         // Blind slider
         IPS_SetHidden($this->GetIDForIdent('BlindSlider'), !$this->ReadPropertyBoolean('EnableBlindSlider'));
+
+        // Position presets
+        IPS_SetHidden($this->GetIDForIdent('PositionPresets'), !$this->ReadPropertyBoolean('EnablePositionPresets'));
 
         // Sleep Mode
         IPS_SetHidden($this->GetIDForIdent('SleepMode'), !$this->ReadPropertyBoolean('EnableSleepMode'));
