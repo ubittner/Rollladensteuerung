@@ -1,12 +1,12 @@
 {
-  "id": "{BC55481C-37C5-4232-979F-6494F9F6893C}",
-  "author": "Ulrich Bittner",
-  "name": "Rollladensteuerung",
-  "url": "https://github.com/ubittner/Rollladensteuerung",
-  "compatibility": {
-    "version": "5.2"
-  },
-  "version": "1.01",
-  "build": 90,
-  "date": 1586710800
+    "id": "{5A853C5C-2A05-BBCB-1E8A-26E91974C977}",
+    "author": "Ulrich Bittner",
+    "name": "Rollladensteuerung",
+    "url": "https://github.com/ubittner/Rollladensteuerung",
+    "compatibility": {
+        "version": "5.5"
+    },
+    "version": "2.0",
+    "build": 91,
+    "date": 1633438366
 }

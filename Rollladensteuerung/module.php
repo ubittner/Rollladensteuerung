@@ -1,171 +1,671 @@
 <?php
 
 /*
- * @module      Rollladensteuerung
- *
- * @prefix      RS
- *
- * @file        module.php
- *
- * @developer   Ulrich Bittner
- * @copyright   (c) 2019, 2020
+ * @author      Ulrich Bittner
+ * @copyright   (c) 2021
  * @license     CC BY-NC-SA 4.0
- *              https://creativecommons.org/licenses/by-nc-sa/4.0/
- *
- * @version     1.01-90
- * @date        2020-04-12, 18:00, 1586710800
- * @review      2020-04-12, 18:00
- *
- * @see         https://github.com/ubittner/Rollladensteuerung
- *
- * @guids       Library
- *              {BC55481C-37C5-4232-979F-6494F9F6893C}
- *
- *              Rollladensteuerung
- *             	{CEAE98E6-EFB4-4D0E-A7DE-3A9764F12DB6}
+ * @see         https://github.com/ubittner/Rollladensteuerung/tree/master/Rollladensteuerung
  */
 
-// Declare
 declare(strict_types=1);
 
-// Include
 include_once __DIR__ . '/helper/autoload.php';
 
 class Rollladensteuerung extends IPSModule
 {
-    // Helper
+    //Helper
+    use RS_actuator;
     use RS_backupRestore;
-    use RS_blindActuator;
-    use RS_dayDetection;
+    use RS_checkConditions;
     use RS_doorWindowSensors;
-    use RS_emergencySensors;
+    use RS_emergencyTriggers;
+    use RS_isDayDetection;
+    use RS_moveBlind;
+    use RS_presenceDetection;
     use RS_sunriseSunset;
+    use RS_switchingTime;
+    use RS_trigger;
     use RS_twilightDetection;
     use RS_weeklySchedule;
 
-    // Constants
-    private const MINIMUM_DELAY_MILLISECONDS = 100;
+    //Constants
+    private const LIBRARY_GUID = '{5A853C5C-2A05-BBCB-1E8A-26E91974C977}';
+    private const MODULE_NAME = 'Rollladensteuerung';
+    private const MODULE_PREFIX = 'UBRS';
     private const HOMEMATIC_DEVICE_GUID = '{EE4A81C6-5C90-4DB7-AD2F-F6BBD521412E}';
+    private const DEVICE_DELAY_MILLISECONDS = 250;
 
     public function Create()
     {
-        // Never delete this line!
+        //Never delete this line!
         parent::Create();
 
-        // Register properties
-        $this->RegisterProperties();
+        #################### Properties
 
-        // Create profiles
-        $this->CreateProfiles();
+        //Functions
+        $this->RegisterPropertyBoolean('MaintenanceMode', false);
+        $this->RegisterPropertyBoolean('EnableAutomaticMode', true);
+        $this->RegisterPropertyBoolean('EnableSleepMode', true);
+        $this->RegisterPropertyInteger('SleepDuration', 12);
+        $this->RegisterPropertyBoolean('EnableBlindMode', true);
+        $this->RegisterPropertyString('CloseBlind', '[{"LabelCloseBlind":"","UseSettings":true,"Position":0,"UpdateSetpointPosition":false,"UpdateLastPosition":false,"LabelSwitchingConditions":"","CheckPositionDifference":0,"CheckLockoutProtection":0,"CheckAutomaticMode":0,"CheckSleepMode":0,"CheckBlindMode":0,"CheckIsDay":0,"CheckTwilight":0,"CheckPresence":0,"CheckDoorWindowStatus":0}]');
+        $this->RegisterPropertyBoolean('EnableStopFunction', true);
+        $this->RegisterPropertyString('Timer', '[{"LabelTimer":"","UseSettings":true,"Position":50,"UpdateSetpointPosition":false,"UpdateLastPosition":false,"Duration":30,"DurationUnit":1,"LabelSwitchingConditions":"","CheckPositionDifference":0,"CheckLockoutProtection":0,"CheckAutomaticMode":0,"CheckSleepMode":0,"CheckBlindMode":0,"CheckIsDay":0,"CheckTwilight":0,"CheckPresence":0,"CheckDoorWindowStatus":0,"LabelOperationalAction":"","OperationalAction":1,"DefinedPosition":0}]');
+        $this->RegisterPropertyString('OpenBlind', '[{"LabelOpenBlind":"","UseSettings":true,"Position":100,"UpdateSetpointPosition":false,"UpdateLastPosition":false,"LabelSwitchingConditions":"","CheckPositionDifference":0,"CheckLockoutProtection":0,"CheckAutomaticMode":0,"CheckSleepMode":0,"CheckBlindMode":0,"CheckIsDay":0,"CheckTwilight":0,"CheckPresence":0,"CheckDoorWindowStatus":0}]');
+        $this->RegisterPropertyBoolean('EnableBlindSlider', true);
+        $this->RegisterPropertyBoolean('EnableBlindSliderManualChange', true);
+        $this->RegisterPropertyBoolean('BlindSliderUpdateSetpointPosition', false);
+        $this->RegisterPropertyBoolean('BlindSliderUpdateLastPosition', false);
+        $this->RegisterPropertyBoolean('EnablePositionPresets', true);
+        $this->RegisterPropertyString('PositionPresets', '[{"Value":0,"Text":"0 %"},{"Value":25,"Text":"25 %"}, {"Value":50,"Text":"50 %"},{"Value":75,"Text":"75 %"},{"Value":100,"Text":"100 %"}]');
+        $this->RegisterPropertyBoolean('PositionPresetsUpdateButton', false);
+        $this->RegisterPropertyBoolean('PositionPresetsUpdateSetpointPosition', false);
+        $this->RegisterPropertyBoolean('PositionPresetsUpdateLastPosition', false);
+        $this->RegisterPropertyBoolean('EnableSetpointPosition', true);
+        $this->RegisterPropertyBoolean('EnableSetpointPositionManualChange', false);
+        $this->RegisterPropertyBoolean('EnableLastPosition', true);
+        $this->RegisterPropertyBoolean('EnableLastPositionManualChange', false);
+        $this->RegisterPropertyBoolean('EnableDoorWindowStatus', true);
+        $this->RegisterPropertyBoolean('EnableBlindModeTimer', true);
+        $this->RegisterPropertyBoolean('EnableSleepModeTimer', true);
+        $this->RegisterPropertyBoolean('EnableNextSwitchingTime', true);
+        $this->RegisterPropertyBoolean('EnableSunrise', true);
+        $this->RegisterPropertyBoolean('EnableSunset', true);
+        $this->RegisterPropertyBoolean('EnableWeeklySchedule', true);
+        $this->RegisterPropertyBoolean('EnableIsDay', true);
+        $this->RegisterPropertyBoolean('EnableTwilight', true);
+        $this->RegisterPropertyBoolean('EnablePresence', true);
+        //Actuator
+        $this->RegisterPropertyInteger('Actuator', 0);
+        $this->RegisterPropertyInteger('DeviceType', 0);
+        $this->RegisterPropertyInteger('ActuatorProperty', 0);
+        $this->RegisterPropertyInteger('ActuatorBlindPosition', 0);
+        $this->RegisterPropertyBoolean('ActuatorUpdateBlindPosition', false);
+        $this->RegisterPropertyBoolean('ActuatorUpdateSetpointPosition', false);
+        $this->RegisterPropertyBoolean('ActuatorUpdateLastPosition', false);
+        $this->RegisterPropertyInteger('ActuatorActivityStatus', 0);
+        $this->RegisterPropertyInteger('ActuatorControl', 0);
+        //Door and window status
+        $this->RegisterPropertyString('DoorWindowSensors', '[]');
+        $this->RegisterPropertyString('DoorWindowOpenAction', '[]');
+        $this->RegisterPropertyString('DoorWindowCloseAction', '[]');
+        //Switching times
+        $this->RegisterPropertyString('SwitchingTimeOne', '{"hour":0,"minute":0,"second":0}');
+        $this->RegisterPropertyString('SwitchingTimeOneActions', '[]');
+        $this->RegisterPropertyString('SwitchingTimeTwo', '{"hour":0,"minute":0,"second":0}');
+        $this->RegisterPropertyString('SwitchingTimeTwoActions', '[]');
+        $this->RegisterPropertyString('SwitchingTimeThree', '{"hour":0,"minute":0,"second":0}');
+        $this->RegisterPropertyString('SwitchingTimeThreeActions', '[]');
+        $this->RegisterPropertyString('SwitchingTimeFour', '{"hour":0,"minute":0,"second":0}');
+        $this->RegisterPropertyString('SwitchingTimeFourActions', '[]');
+        //Sunrise and sunset
+        $this->RegisterPropertyInteger('Sunrise', 0);
+        $this->RegisterPropertyString('SunriseActions', '[]');
+        $this->RegisterPropertyInteger('Sunset', 0);
+        $this->RegisterPropertyString('SunsetActions', '[]');
+        //Weekly schedule
+        $this->RegisterPropertyInteger('WeeklySchedule', 0);
+        $this->RegisterPropertyString('WeeklyScheduleActionOne', '[]');
+        $this->RegisterPropertyString('WeeklyScheduleActionTwo', '[]');
+        $this->RegisterPropertyString('WeeklyScheduleActionThree', '[]');
+        //Is day
+        $this->RegisterPropertyInteger('IsDay', 0);
+        $this->RegisterPropertyString('NightAction', '[]');
+        $this->RegisterPropertyString('DayAction', '[]');
+        //Twilight
+        $this->RegisterPropertyInteger('TwilightStatus', 0);
+        $this->RegisterPropertyString('TwilightDayAction', '[]');
+        $this->RegisterPropertyString('TwilightNightAction', '[]');
+        //Presence and absence
+        $this->RegisterPropertyInteger('PresenceStatus', 0);
+        $this->RegisterPropertyString('AbsenceAction', '[]');
+        $this->RegisterPropertyString('PresenceAction', '[]');
+        //Triggers
+        $this->RegisterPropertyString('Triggers', '[]');
+        //Emergency triggers
+        $this->RegisterPropertyString('EmergencyTriggers', '[]');
 
-        // Register variables
-        $this->RegisterVariables();
+        #################### Variables
 
-        // Register timers
-        $this->RegisterTimers();
+        //Automatic mode
+        $profile = self::MODULE_PREFIX . '.' . $this->InstanceID . '.AutomaticMode';
+        if (!IPS_VariableProfileExists($profile)) {
+            IPS_CreateVariableProfile($profile, 0);
+        }
+        IPS_SetVariableProfileAssociation($profile, 0, 'Aus', 'Execute', -1);
+        IPS_SetVariableProfileAssociation($profile, 1, 'An', 'Clock', 0x00FF00);
+        $this->RegisterVariableBoolean('AutomaticMode', 'Automatik', $profile, 10);
+        $this->EnableAction('AutomaticMode');
+        //Sleep mode
+        $profile = self::MODULE_PREFIX . '.' . $this->InstanceID . '.SleepMode';
+        if (!IPS_VariableProfileExists($profile)) {
+            IPS_CreateVariableProfile($profile, 0);
+        }
+        IPS_SetVariableProfileAssociation($profile, 0, 'Aus', 'Sleep', -1);
+        IPS_SetVariableProfileAssociation($profile, 1, 'An', 'Sleep', 0x00FF00);
+        $this->RegisterVariableBoolean('SleepMode', 'Ruhe-Modus', $profile, 20);
+        $this->EnableAction('SleepMode');
+        //Blind mode
+        $profile = self::MODULE_PREFIX . '.' . $this->InstanceID . '.BlindMode';
+        if (!IPS_VariableProfileExists($profile)) {
+            IPS_CreateVariableProfile($profile, 1);
+        }
+        IPS_SetVariableProfileIcon($profile, 'Shutter');
+        IPS_SetVariableProfileAssociation($profile, 0, 'Schließen', '', 0x0000FF);
+        IPS_SetVariableProfileAssociation($profile, 1, 'Stop', '', 0xFF0000);
+        IPS_SetVariableProfileAssociation($profile, 2, 'Timer', '', 0xFFFF00);
+        IPS_SetVariableProfileAssociation($profile, 3, 'Öffnen', '', 0x00FF00);
+        $this->RegisterVariableInteger('BlindMode', 'Rollladen', $profile, 30);
+        $this->EnableAction('BlindMode');
+        //Blind slider
+        $id = @$this->GetIDForIdent('BlindSlider');
+        $profile = '~Intensity.100';
+        $this->RegisterVariableInteger('BlindSlider', 'Rollladenposition', $profile, 40);
+        if ($id == false) {
+            IPS_SetIcon($this->GetIDForIdent('BlindSlider'), 'Jalousie');
+        }
+        $this->EnableAction('BlindSlider');
+        //Position presets
+        $profile = self::MODULE_PREFIX . '.' . $this->InstanceID . '.PositionPresets';
+        if (!IPS_VariableProfileExists($profile)) {
+            IPS_CreateVariableProfile($profile, 1);
+        }
+        IPS_SetVariableProfileIcon($profile, 'Menu');
+        $this->RegisterVariableInteger('PositionPresets', 'Position Voreinstellungen', $profile, 50);
+        $this->EnableAction('PositionPresets');
+        //Setpoint position
+        $id = @$this->GetIDForIdent('SetpointPosition');
+        $profile = '~Intensity.100';
+        $this->RegisterVariableInteger('SetpointPosition', 'Soll-Position', $profile, 60);
+        if ($id == false) {
+            IPS_SetIcon($this->GetIDForIdent('SetpointPosition'), 'Information');
+        }
+        //Last position
+        $id = @$this->GetIDForIdent('LastPosition');
+        $profile = '~Intensity.100';
+        $this->RegisterVariableInteger('LastPosition', 'Letzte Position', $profile, 70);
+        if ($id == false) {
+            IPS_SetIcon($this->GetIDForIdent('LastPosition'), 'Information');
+        }
+        //Door and window status
+        $profile = self::MODULE_PREFIX . '.' . $this->InstanceID . '.DoorWindowStatus';
+        if (!IPS_VariableProfileExists($profile)) {
+            IPS_CreateVariableProfile($profile, 0);
+        }
+        IPS_SetVariableProfileAssociation($profile, 0, 'Geschlossen', 'Window', 0x00FF00);
+        IPS_SetVariableProfileAssociation($profile, 1, 'Geöffnet', 'Window', 0x0000FF);
+        $this->RegisterVariableBoolean('DoorWindowStatus', 'Tür- / Fensterstatus', $profile, 80);
+        //Blind mode timer
+        $id = @$this->GetIDForIdent('BlindModeTimer');
+        $this->RegisterVariableString('BlindModeTimer', 'Rollladenposition bis', '', 90);
+        if ($id == false) {
+            IPS_SetIcon($this->GetIDForIdent('BlindModeTimer'), 'Clock');
+        }
+        //Sleep mode timer
+        $id = @$this->GetIDForIdent('SleepModeTimer');
+        $this->RegisterVariableString('SleepModeTimer', 'Ruhe-Modus Timer', '', 100);
+        if ($id == false) {
+            IPS_SetIcon($this->GetIDForIdent('SleepModeTimer'), 'Clock');
+        }
+        //Next switching time
+        $id = @$this->GetIDForIdent('NextSwitchingTime');
+        $this->RegisterVariableString('NextSwitchingTime', 'Nächste Schaltzeit', '', 110);
+        if ($id == false) {
+            IPS_SetIcon($this->GetIDForIdent('NextSwitchingTime'), 'Information');
+        }
 
-        // Register Attributes
-        $this->RegisterAttributes();
+        #################### Timers
+
+        //Sleep mode timer
+        $this->RegisterTimer('SleepMode', 0, self::MODULE_PREFIX . '_DeactivateSleepModeTimer(' . $this->InstanceID . ');');
+        //Blind timer
+        $this->RegisterTimer('StopBlindTimer', 0, self::MODULE_PREFIX . '_StopBlindTimer(' . $this->InstanceID . ');');
+        //Switching timers
+        $this->RegisterTimer('SwitchingTimeOne', 0, self::MODULE_PREFIX . '_ExecuteSwitchingTime(' . $this->InstanceID . ', 1);');
+        $this->RegisterTimer('SwitchingTimeTwo', 0, self::MODULE_PREFIX . '_ExecuteSwitchingTime(' . $this->InstanceID . ', 2);');
+        $this->RegisterTimer('SwitchingTimeThree', 0, self::MODULE_PREFIX . '_ExecuteSwitchingTime(' . $this->InstanceID . ', 3);');
+        $this->RegisterTimer('SwitchingTimeFour', 0, self::MODULE_PREFIX . '_ExecuteSwitchingTime(' . $this->InstanceID . ', 4);');
     }
 
     public function ApplyChanges()
     {
-        // Wait until IP-Symcon is started
+        //Wait until IP-Symcon is started
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
 
-        // Never delete this line!
+        //Never delete this line!
         parent::ApplyChanges();
 
-        // Check runlevel
+        //Check runlevel
         if (IPS_GetKernelRunlevel() != KR_READY) {
             return;
         }
 
-        // Validate configuration
-        $this->ValidateConfiguration();
+        #################### Options
 
-        // Disable timers
-        $this->DisableTimers();
+        //Automatic mode
+        IPS_SetHidden($this->GetIDForIdent('AutomaticMode'), !$this->ReadPropertyBoolean('EnableAutomaticMode'));
+        //Sleep mode
+        IPS_SetHidden($this->GetIDForIdent('SleepMode'), !$this->ReadPropertyBoolean('EnableSleepMode'));
+        //Blind Mode
+        IPS_SetHidden($this->GetIDForIdent('BlindMode'), !$this->ReadPropertyBoolean('EnableBlindMode'));
+        //Blind mode timer
+        $profile = self::MODULE_PREFIX . '.' . $this->InstanceID . '.BlindMode';
+        $associations = IPS_GetVariableProfile($profile)['Associations'];
+        if (!$this->ReadPropertyBoolean('EnableStopFunction')) {
+            //Delete
+            $key = array_search(1, array_column($associations, 'Value'));
+            if (is_int($key)) {
+                IPS_SetVariableProfileAssociation($profile, 1, '', '', -1);
+            }
+        } else {
+            IPS_SetVariableProfileAssociation($profile, 1, 'Stop', '', 0xFF0000);
+        }
+        if (!json_decode($this->ReadPropertyString('Timer'), true)[0]['UseSettings']) {
+            //Delete
+            $key = array_search(2, array_column($associations, 'Value'));
+            if (is_int($key)) {
+                IPS_SetVariableProfileAssociation($profile, 2, '', '', -1);
+            }
+        } else {
+            IPS_SetVariableProfileAssociation($profile, 2, 'Timer', '', 0xFFFF00);
+        }
+        //Blind slider
+        IPS_SetHidden($this->GetIDForIdent('BlindSlider'), !$this->ReadPropertyBoolean('EnableBlindSlider'));
+        if (!$this->ReadPropertyBoolean('EnableBlindSliderManualChange')) {
+            $this->DisableAction('BlindSlider');
+        } else {
+            $this->EnableAction('BlindSlider');
+        }
+        //Position presets
+        IPS_SetHidden($this->GetIDForIdent('PositionPresets'), !$this->ReadPropertyBoolean('EnablePositionPresets'));
+        //Setpoint position
+        IPS_SetHidden($this->GetIDForIdent('SetpointPosition'), !$this->ReadPropertyBoolean('EnableSetpointPosition'));
+        if (!$this->ReadPropertyBoolean('EnableSetpointPositionManualChange')) {
+            $this->DisableAction('SetpointPosition');
+        } else {
+            $this->EnableAction('SetpointPosition');
+        }
+        //Last position
+        IPS_SetHidden($this->GetIDForIdent('LastPosition'), !$this->ReadPropertyBoolean('EnableLastPosition'));
+        if (!$this->ReadPropertyBoolean('EnableLastPositionManualChange')) {
+            $this->DisableAction('LastPosition');
+        } else {
+            $this->EnableAction('LastPosition');
+        }
+        //Door and window status
+        IPS_SetHidden($this->GetIDForIdent('DoorWindowStatus'), !$this->ReadPropertyBoolean('EnableDoorWindowStatus'));
+        //Blind mode timer
+        IPS_SetHidden($this->GetIDForIdent('BlindModeTimer'), !$this->ReadPropertyBoolean('EnableBlindModeTimer'));
+        //Sleep mode timer
+        IPS_SetHidden($this->GetIDForIdent('SleepModeTimer'), !$this->ReadPropertyBoolean('EnableSleepModeTimer'));
+        //Next switching time
+        $hide = !$this->ReadPropertyBoolean('EnableNextSwitchingTime');
+        if (!$hide) {
+            $properties = ['SwitchingTimeOneActions', 'SwitchingTimeTwoActions', 'SwitchingTimeThreeActions', 'SwitchingTimeFourActions'];
+            $hide = true;
+            foreach ($properties as $property) {
+                $actions = json_decode($this->ReadPropertyString($property), true);
+                foreach ($actions as $action) {
+                    if ($action['UseSettings']) {
+                        $hide = false;
+                    }
+                }
+            }
+        }
+        IPS_SetHidden($this->GetIDForIdent('NextSwitchingTime'), $hide);
+        //Sunrise
+        $id = @IPS_GetLinkIDByName('Nächster Sonnenaufgang', $this->InstanceID);
+        if (is_int($id)) {
+            $hide = true;
+            $sunrise = false;
+            foreach (json_decode($this->ReadPropertyString('SunriseActions'), true) as $sunriseAction) {
+                if ($sunriseAction['UseSettings']) {
+                    $sunrise = true;
+                }
+            }
+            if ($sunrise) {
+                $sunriseID = $this->ReadPropertyInteger('Sunrise');
+                if ($sunriseID != 0 && @IPS_ObjectExists($sunriseID)) {
+                    $hide = !$this->ReadPropertyBoolean('EnableSunrise');
+                }
+            }
+            IPS_SetHidden($id, $hide);
+        }
+        //Sunset
+        $id = @IPS_GetLinkIDByName('Nächster Sonnenuntergang', $this->InstanceID);
+        if (is_int($id)) {
+            $hide = true;
+            $sunset = false;
+            foreach (json_decode($this->ReadPropertyString('SunriseActions'), true) as $sunsetAction) {
+                if ($sunsetAction['UseSettings']) {
+                    $sunset = true;
+                }
+            }
+            if ($sunset) {
+                $sunsetID = $this->ReadPropertyInteger('Sunrise');
+                if ($sunsetID != 0 && @IPS_ObjectExists($sunsetID)) {
+                    $hide = !$this->ReadPropertyBoolean('EnableSunset');
+                }
+            }
+            IPS_SetHidden($id, $hide);
+        }
+        //Weekly schedule
+        $id = @IPS_GetLinkIDByName('Nächstes Wochenplanereignis', $this->InstanceID);
+        if (is_int($id)) {
+            $hide = true;
+            if ($this->ReadPropertyBoolean('EnableWeeklySchedule')) {
+                if ($this->ValidateWeeklySchedule()) {
+                    $hide = false;
+                }
+            }
+            IPS_SetHidden($id, $hide);
+        }
+        //Is day
+        $id = @IPS_GetLinkIDByName('Ist es Tag', $this->InstanceID);
+        if (is_int($id)) {
+            $hide = true;
+            $targetID = $this->ReadPropertyInteger('IsDay');
+            if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
+                $profile = 'Location.' . $targetID . '.IsDay';
+                if (!IPS_VariableProfileExists($profile)) {
+                    IPS_CreateVariableProfile($profile, 0);
+                    IPS_SetVariableProfileAssociation($profile, 0, 'Es ist Nacht', 'Moon', 0x0000FF);
+                    IPS_SetVariableProfileAssociation($profile, 1, 'Es ist Tag', 'Sun', 0xFFFF00);
+                    IPS_SetVariableCustomProfile($targetID, $profile);
+                }
+                if ($this->ReadPropertyBoolean('EnableIsDay')) {
+                    $hide = false;
+                }
+            }
+            IPS_SetHidden($id, $hide);
+        }
+        //Twilight
+        $id = @IPS_GetLinkIDByName('Dämmerungsstatus', $this->InstanceID);
+        if (is_int($id)) {
+            $hide = true;
+            $targetID = $this->ReadPropertyInteger('TwilightStatus');
+            if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
+                if ($this->ReadPropertyBoolean('EnableTwilight')) {
+                    $hide = false;
+                }
+            }
+            IPS_SetHidden($id, $hide);
+        }
+        //Presence
+        $id = @IPS_GetLinkIDByName('Anwesenheitsstatus', $this->InstanceID);
+        if (is_int($id)) {
+            $hide = true;
+            $targetID = $this->ReadPropertyInteger('PresenceStatus');
+            if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
+                if ($this->ReadPropertyBoolean('EnablePresence')) {
+                    $hide = false;
+                }
+            }
+            IPS_SetHidden($id, $hide);
+        }
 
-        // Create links
-        $this->CreateLinks();
+        #################### References & message registrations
 
-        // Set options
-        $this->SetOptions();
+        //Delete all references
+        foreach ($this->GetReferenceList() as $referenceID) {
+            $this->UnregisterReference($referenceID);
+        }
 
-        // Position presets
-        $this->UpdatePositionPresets();
+        //Delete all message registrations
+        foreach ($this->GetMessageList() as $senderID => $messages) {
+            foreach ($messages as $message) {
+                if ($message == EM_UPDATE) {
+                    $this->UnregisterMessage($id, EM_UPDATE);
+                }
+                if ($message == VM_UPDATE) {
+                    $this->UnregisterMessage($senderID, VM_UPDATE);
+                }
+            }
+        }
 
-        // Register messages
-        $this->RegisterMessages();
+        //Register
+        if (!$this->CheckMaintenanceMode()) {
+            $this->SendDebug(__FUNCTION__, 'Referenzen und Nachrichten werden registriert.', 0);
+            //Actuator blind position
+            if ($this->ReadPropertyBoolean('ActuatorUpdateBlindPosition')) {
+                $id = $this->ReadPropertyInteger('ActuatorBlindPosition');
+                if ($id != 0 && IPS_ObjectExists($id)) {
+                    $this->RegisterReference($id);
+                    $this->RegisterMessage($id, VM_UPDATE);
+                }
+            }
+            //Door and window sensors
+            foreach (json_decode($this->ReadPropertyString('DoorWindowSensors')) as $sensor) {
+                if ($sensor->UseSettings) {
+                    $id = $sensor->ID;
+                    if ($id != 0 && @IPS_ObjectExists($id)) {
+                        $this->RegisterReference($id);
+                        $this->RegisterMessage($id, VM_UPDATE);
+                    }
+                }
+            }
+            //Sunrise
+            $id = $this->ReadPropertyInteger('Sunrise');
+            if ($id != 0 && @IPS_ObjectExists($id)) {
+                $this->RegisterReference($id);
+                $this->RegisterMessage($id, VM_UPDATE);
+            }
+            //Sunset
+            $id = $this->ReadPropertyInteger('Sunset');
+            if ($id != 0 && @IPS_ObjectExists($id)) {
+                $this->RegisterReference($id);
+                $this->RegisterMessage($id, VM_UPDATE);
+            }
+            //Weekly schedule
+            $id = $this->ReadPropertyInteger('WeeklySchedule');
+            if ($id != 0 && @IPS_ObjectExists($id)) {
+                $this->RegisterReference($id);
+                $this->RegisterMessage($id, EM_UPDATE);
+            }
+            //Is day
+            $id = $this->ReadPropertyInteger('IsDay');
+            if ($id != 0 && @IPS_ObjectExists($id)) {
+                $this->RegisterReference($id);
+                $this->RegisterMessage($id, VM_UPDATE);
+            }
+            //Twilight status
+            $id = $this->ReadPropertyInteger('TwilightStatus');
+            if ($id != 0 && @IPS_ObjectExists($id)) {
+                $this->RegisterReference($id);
+                $this->RegisterMessage($id, VM_UPDATE);
+            }
+            //Presence status
+            $id = $this->ReadPropertyInteger('PresenceStatus');
+            if ($id != 0 && @IPS_ObjectExists($id)) {
+                $this->RegisterReference($id);
+                $this->RegisterMessage($id, VM_UPDATE);
+            }
+            //Triggers
+            foreach (json_decode($this->ReadPropertyString('Triggers')) as $variable) {
+                if ($variable->UseSettings) {
+                    $id = $variable->ID;
+                    if ($id != 0 && @IPS_ObjectExists($id)) {
+                        $this->RegisterReference($id);
+                        $this->RegisterMessage($id, VM_UPDATE);
+                    }
+                }
+            }
+            //Emergency triggers
+            foreach (json_decode($this->ReadPropertyString('EmergencyTriggers')) as $variable) {
+                if ($variable->UseSettings) {
+                    $id = $variable->ID;
+                    if ($id != 0 && @IPS_ObjectExists($id)) {
+                        $this->RegisterReference($id);
+                        $this->RegisterMessage($id, VM_UPDATE);
+                    }
+                }
+            }
+        }
 
-        // Check condition
-        $this->CheckActualCondition();
+        #################### Position presets
+
+        $profile = self::MODULE_PREFIX . '.' . $this->InstanceID . '.PositionPresets';
+        // Delete
+        foreach (IPS_GetVariableProfile($profile)['Associations'] as $association) {
+            IPS_SetVariableProfileAssociation($profile, $association['Value'], '', '', -1);
+        }
+        foreach (json_decode($this->ReadPropertyString('PositionPresets')) as $preset) {
+            // Create
+            IPS_SetVariableProfileAssociation($profile, $preset->Value, $preset->Text, '', -1);
+        }
+
+        #################### Links
+
+        //Sunrise
+        $targetID = 0;
+        $sunrise = $this->ReadPropertyInteger('Sunrise');
+        if ($sunrise != 0 && @IPS_ObjectExists($sunrise)) {
+            $targetID = $sunrise;
+        }
+        $linkID = @IPS_GetLinkIDByName('Nächster Sonnenaufgang', $this->InstanceID);
+        if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
+            //Check for existing link
+            if (!is_int($linkID) && $linkID == false) {
+                $linkID = IPS_CreateLink();
+            }
+            IPS_SetParent($linkID, $this->InstanceID);
+            IPS_SetPosition($linkID, 120);
+            IPS_SetName($linkID, 'Nächster Sonnenaufgang');
+            IPS_SetIcon($linkID, 'Sun');
+            IPS_SetLinkTargetID($linkID, $targetID);
+        } else {
+            if (is_int($linkID)) {
+                IPS_SetHidden($linkID, true);
+            }
+        }
+        //Sunset
+        $targetID = 0;
+        $sunset = $this->ReadPropertyInteger('Sunset');
+        if ($sunset != 0 && @IPS_ObjectExists($sunset)) {
+            $targetID = $sunset;
+        }
+        $linkID = @IPS_GetLinkIDByName('Nächster Sonnenuntergang', $this->InstanceID);
+        if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
+            //Check for existing link
+            if (!is_int($linkID) && $linkID == false) {
+                $linkID = IPS_CreateLink();
+            }
+            IPS_SetParent($linkID, $this->InstanceID);
+            IPS_SetPosition($linkID, 130);
+            IPS_SetName($linkID, 'Nächster Sonnenuntergang');
+            IPS_SetIcon($linkID, 'Moon');
+            IPS_SetLinkTargetID($linkID, $targetID);
+        } else {
+            if (is_int($linkID)) {
+                IPS_SetHidden($linkID, true);
+            }
+        }
+        //Weekly schedule
+        $targetID = $this->ReadPropertyInteger('WeeklySchedule');
+        $linkID = @IPS_GetLinkIDByName('Nächstes Wochenplanereignis', $this->InstanceID);
+        if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
+            //Check for existing link
+            if (!is_int($linkID) && $linkID == false) {
+                $linkID = IPS_CreateLink();
+            }
+            IPS_SetParent($linkID, $this->InstanceID);
+            IPS_SetPosition($linkID, 140);
+            IPS_SetName($linkID, 'Nächstes Wochenplanereignis');
+            IPS_SetIcon($linkID, 'Calendar');
+            IPS_SetLinkTargetID($linkID, $targetID);
+        } else {
+            if (is_int($linkID)) {
+                IPS_SetHidden($linkID, true);
+            }
+        }
+        //Is day
+        $targetID = $this->ReadPropertyInteger('IsDay');
+        $linkID = @IPS_GetLinkIDByName('Ist es Tag', $this->InstanceID);
+        if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
+            //Check for existing link
+            if (!is_int($linkID) && $linkID == false) {
+                $linkID = IPS_CreateLink();
+            }
+            IPS_SetParent($linkID, $this->InstanceID);
+            IPS_SetPosition($linkID, 150);
+            IPS_SetName($linkID, 'Ist es Tag');
+            IPS_SetLinkTargetID($linkID, $targetID);
+        } else {
+            if (is_int($linkID)) {
+                IPS_SetHidden($linkID, true);
+            }
+        }
+        //Twilight
+        $targetID = $this->ReadPropertyInteger('TwilightStatus');
+        $linkID = @IPS_GetLinkIDByName('Dämmerungsstatus', $this->InstanceID);
+        if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
+            //Check for existing link
+            if (!is_int($linkID) && $linkID == false) {
+                $linkID = IPS_CreateLink();
+            }
+            IPS_SetParent($linkID, $this->InstanceID);
+            IPS_SetPosition($linkID, 160);
+            IPS_SetName($linkID, 'Dämmerungsstatus');
+            IPS_SetLinkTargetID($linkID, $targetID);
+        } else {
+            if (is_int($linkID)) {
+                IPS_SetHidden($linkID, true);
+            }
+        }
+        //Presence
+        $targetID = $this->ReadPropertyInteger('PresenceStatus');
+        $linkID = @IPS_GetLinkIDByName('Anwesenheitsstatus', $this->InstanceID);
+        if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
+            //Check for existing link
+            if (!is_int($linkID) && $linkID == false) {
+                $linkID = IPS_CreateLink();
+            }
+            IPS_SetParent($linkID, $this->InstanceID);
+            IPS_SetPosition($linkID, 170);
+            IPS_SetName($linkID, 'Anwesenheitsstatus');
+            IPS_SetLinkTargetID($linkID, $targetID);
+        } else {
+            if (is_int($linkID)) {
+                IPS_SetHidden($linkID, true);
+            }
+        }
+
+        #################### Misc
+
+        //Deactivate sleep mode
+        $this->DeactivateSleepModeTimer();
+
+        //Deactivate blind mode
+        $this->DeactivateBlindModeTimer();
+
+        //Set switching timers
+        $this->SetSwitchingTimes();
+
+        //Check door and windows
+        $this->CheckDoorWindowSensors();
+
+        //Update blind slider
+        $this->UpdateBlindPosition();
     }
 
     public function Destroy()
     {
-        // Never delete this line!
+        //Never delete this line!
         parent::Destroy();
 
-        // Delete profiles
-        $this->DeleteProfiles();
-    }
-
-    public function ReloadConfiguration()
-    {
-        $this->ReloadForm();
-    }
-
-    public function GetConfigurationForm()
-    {
-        $formData = json_decode(file_get_contents(__DIR__ . '/form.json'));
-        // Registered messages
-        $registeredVariables = $this->GetMessageList();
-        foreach ($registeredVariables as $senderID => $messageID) {
-            if (!IPS_ObjectExists($senderID)) {
-                foreach ($messageID as $messageType) {
-                    $this->UnregisterMessage($senderID, $messageType);
-                }
-                continue;
-            } else {
-                $senderName = IPS_GetName($senderID);
-                $description = $senderName;
-                $parentID = IPS_GetParent($senderID);
-                if (is_int($parentID) && $parentID != 0 && @IPS_ObjectExists($parentID)) {
-                    $description = IPS_GetName($parentID);
-                }
+        //Delete profiles
+        $profiles = ['AutomaticMode', 'SleepMode', 'BlindMode', 'PositionPresets', 'DoorWindowStatus'];
+        foreach ($profiles as $profile) {
+            $profileName = self::MODULE_PREFIX . '.' . $this->InstanceID . '.' . $profile;
+            if (@IPS_VariableProfileExists($profileName)) {
+                IPS_DeleteVariableProfile($profileName);
             }
-            switch ($messageID) {
-                case [10001]:
-                    $messageDescription = 'IPS_KERNELSTARTED';
-                    break;
-
-                case [10603]:
-                    $messageDescription = 'VM_UPDATE';
-                    break;
-
-                case [10803]:
-                    $messageDescription = 'EM_UPDATE';
-                    break;
-
-                default:
-                    $messageDescription = 'keine Bezeichnung';
-            }
-            $formData->actions[1]->items[0]->values[] = [
-                'Description'        => $description,
-                'SenderID'           => $senderID,
-                'SenderName'         => $senderName,
-                'MessageID'          => $messageID,
-                'MessageDescription' => $messageDescription];
         }
-        return json_encode($formData);
     }
 
     public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
     {
-        $this->SendDebug(__FUNCTION__, 'SenderID: ' . $SenderID . ', Message: ' . $Message . ', Data: ' . print_r($Data, true), 0);
-        $timeStamp = date('d.m.Y, H:i:s');
+        $this->SendDebug('MessageSink', 'Message from SenderID ' . $SenderID . ' with Message ' . $Message . "\r\n Data: " . print_r($Data, true), 0);
         if (!empty($Data)) {
             foreach ($Data as $key => $value) {
                 $this->SendDebug(__FUNCTION__, 'Data[' . $key . '] = ' . json_encode($value), 0);
@@ -176,110 +676,234 @@ class Rollladensteuerung extends IPSModule
                 $this->KernelReady();
                 break;
 
-            // $Data[0] = actual value
-            // $Data[1] = difference to last value
-            // $Data[2] = last value
             case VM_UPDATE:
-                // Sunrise
-                $id = $this->ReadPropertyInteger('Sunrise');
+
+                //$Data[0] = actual value
+                //$Data[1] = value changed
+                //$Data[2] = last value
+                //$Data[3] = timestamp actual value
+                //$Data[4] = timestamp value changed
+                //$Data[5] = timestamp last value
+
+                if ($this->CheckMaintenanceMode()) {
+                    return;
+                }
+
+                //Actuator blind position
+                $id = $this->ReadPropertyInteger('ActuatorBlindPosition');
                 if ($id != 0 && @IPS_ObjectExists($id)) {
                     if ($SenderID == $id) {
                         if ($Data[1]) {
-                            $this->SendDebug(__FUNCTION__, 'Die Variable Sonnenaufgang hat sich geändert! ' . $timeStamp, 0);
-                            $this->TriggerSunriseSunset(0);
+                            $this->SendDebug(__FUNCTION__, 'Die Rollladenposition hat sich geändert.', 0);
+                            $this->UpdateBlindPosition();
                         }
                     }
                 }
-                // Sunset
-                $id = $this->ReadPropertyInteger('Sunset');
-                if ($id != 0 && @IPS_ObjectExists($id)) {
-                    if ($SenderID == $id) {
-                        if ($Data[1]) {
-                            $this->SendDebug(__FUNCTION__, 'Die Variable Sonnenuntergang hat sich geändert! ' . $timeStamp, 0);
-                            $this->TriggerSunriseSunset(1);
-                        }
-                    }
-                }
-                // Is day
-                $id = $this->ReadPropertyInteger('IsDay');
-                if ($id != 0 && @IPS_ObjectExists($id)) {
-                    if ($SenderID == $id) {
-                        if ($Data[1]) {
-                            $this->SendDebug(__FUNCTION__, "'Ist es Tag' - Erkennung: " . json_encode($Data[0]), 0);
-                            // Night
-                            if (!$Data[0]) {
-                                $this->SendDebug(__FUNCTION__, 'Es ist Nacht (' . $timeStamp . ')', 0);
-                            }
-                            // Day
-                            if ($Data[0]) {
-                                $this->SendDebug(__FUNCTION__, 'Es ist Tag (' . $timeStamp . ')', 0);
-                            }
-                            $this->TriggerIsDayDetection($Data[0]);
-                        }
-                    }
-                }
-                // Twilight state
-                $id = $this->ReadPropertyInteger('TwilightState');
-                if ($id != 0 && @IPS_ObjectExists($id)) {
-                    if ($SenderID == $id) {
-                        if ($Data[1]) {
-                            $this->SendDebug(__FUNCTION__, 'Dämmerungsstatus: ' . json_encode($Data[0]), 0);
-                            $this->SetValue('TwilightState', $Data[0]);
-                            // Day
-                            if (!$Data[0]) {
-                                $this->SendDebug(__FUNCTION__, 'Es ist Tag (' . $timeStamp . ')', 0);
-                            }
-                            // Night
-                            if ($Data[0]) {
-                                $this->SendDebug(__FUNCTION__, 'Es ist Nacht (' . $timeStamp . ')', 0);
-                            }
-                            $this->TriggerTwilightDetection($Data[0]);
-                        }
-                    }
-                }
-                // Actuator state level
-                $id = $this->ReadPropertyInteger('ActuatorStateLevel');
-                if ($id != 0 && @IPS_ObjectExists($id)) {
-                    if ($SenderID == $id) {
-                        if ($Data[1]) {
-                            $this->SendDebug(__FUNCTION__, 'Die Rollladenposition hat sich geändert', 0);
-                            $this->UpdateBlindSlider();
-                        }
-                    }
-                }
-                // Door and window sensors
+                //Door and window sensors
                 $doorWindowSensors = json_decode($this->ReadPropertyString('DoorWindowSensors'), true);
                 if (!empty($doorWindowSensors)) {
                     if (array_search($SenderID, array_column($doorWindowSensors, 'ID')) !== false) {
                         if ($Data[1]) {
                             $this->CheckDoorWindowSensors();
-                            $state = (bool) $Data[0];
-                            $this->TriggerActionByDoorWindowSensor($state);
                         }
                     }
                 }
-                // Emergency sensors
-                $id = json_decode($this->ReadPropertyString('EmergencySensors'), true);
-                if (!empty($id)) {
-                    if (array_search($SenderID, array_column($id, 'ID')) !== false) {
+                //Sunrise
+                $sunrise = $this->ReadPropertyInteger('Sunrise');
+                if ($sunrise != 0 && @IPS_ObjectExists($sunrise)) {
+                    if ($SenderID == $sunrise) {
                         if ($Data[1]) {
-                            $this->TriggerEmergencySensor($SenderID);
+                            $scriptText = self::MODULE_PREFIX . '_ExecuteSunriseSunsetAction(' . $this->InstanceID . ', ' . $SenderID . ', 0);';
+                            IPS_RunScriptText($scriptText);
+                        }
+                    }
+                }
+                //Sunset
+                $sunset = $this->ReadPropertyInteger('Sunset');
+                if ($sunset != 0 && @IPS_ObjectExists($sunset)) {
+                    if ($SenderID == $sunset) {
+                        if ($Data[1]) {
+                            $scriptText = self::MODULE_PREFIX . '_ExecuteSunriseSunsetAction(' . $this->InstanceID . ', ' . $SenderID . ', 1);';
+                            IPS_RunScriptText($scriptText);
+                        }
+                    }
+                }
+                //Is day
+                $id = $this->ReadPropertyInteger('IsDay');
+                if ($id != 0 && @IPS_ObjectExists($id)) {
+                    if ($SenderID == $id) {
+                        if ($Data[1]) {
+                            $scriptText = self::MODULE_PREFIX . '_ExecuteIsDayDetection(' . $this->InstanceID . ');';
+                            IPS_RunScriptText($scriptText);
+                        }
+                    }
+                }
+                //Twilight
+                $id = $this->ReadPropertyInteger('TwilightStatus');
+                if ($id != 0 && @IPS_ObjectExists($id)) {
+                    if ($SenderID == $id) {
+                        if ($Data[1]) {
+                            $scriptText = self::MODULE_PREFIX . '_ExecuteTwilightDetection(' . $this->InstanceID . ');';
+                            IPS_RunScriptText($scriptText);
+                        }
+                    }
+                }
+                //Presence
+                $id = $this->ReadPropertyInteger('PresenceStatus');
+                if ($id != 0 && @IPS_ObjectExists($id)) {
+                    if ($SenderID == $id) {
+                        if ($Data[1]) {
+                            $scriptText = self::MODULE_PREFIX . '_ExecutePresenceDetection(' . $this->InstanceID . ');';
+                            IPS_RunScriptText($scriptText);
+                        }
+                    }
+                }
+                //Triggers
+                $triggers = json_decode($this->ReadPropertyString('Triggers'), true);
+                if (!empty($triggers)) {
+                    if (array_search($SenderID, array_column($triggers, 'ID')) !== false) {
+                        $scriptText = self::MODULE_PREFIX . '_CheckTrigger(' . $this->InstanceID . ', ' . $SenderID . ');';
+                        IPS_RunScriptText($scriptText);
+                    }
+                }
+                //Emergency triggers
+                $emergencyTriggers = json_decode($this->ReadPropertyString('EmergencyTriggers'), true);
+                if (!empty($emergencyTriggers)) {
+                    if (array_search($SenderID, array_column($emergencyTriggers, 'ID')) !== false) {
+                        if ($Data[1]) {
+                            $scriptText = self::MODULE_PREFIX . '_ExecuteEmergencyTrigger(' . $this->InstanceID . ', ' . $SenderID . ');';
+                            IPS_RunScriptText($scriptText);
                         }
                     }
                 }
                 break;
 
-            // $Data[0] = last run
-            // $Data[1] = next run
             case EM_UPDATE:
+
+                //$Data[0] = last run
+                //$Data[1] = next run
+
+                if ($this->CheckMaintenanceMode()) {
+                    return;
+                }
+
                 // Weekly schedule
-                $this->TriggerActionByWeeklySchedule();
+                $scriptText = self::MODULE_PREFIX . '_ExecuteWeeklyScheduleAction(' . $this->InstanceID . ');';
+                IPS_RunScriptText($scriptText);
                 break;
 
         }
     }
 
-    //#################### Request action
+    public function GetConfigurationForm()
+    {
+        $form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
+        //Door and window sensors
+        foreach (json_decode($this->ReadPropertyString('DoorWindowSensors')) as $variable) {
+            $rowColor = '#FFC0C0'; # red
+            $id = $variable->ID;
+            if ($id != 0 && @IPS_ObjectExists($id)) {
+                $rowColor = '#C0FFC0'; # light green
+                //Deactivated
+                if (!$variable->UseSettings) {
+                    $rowColor = '#DFDFDF'; # grey
+                }
+            }
+            $form['elements'][2]['items'][1]['values'][] = ['rowColor' => $rowColor];
+        }
+        //Triggers
+        foreach (json_decode($this->ReadPropertyString('Triggers')) as $variable) {
+            $rowColor = '#FFC0C0'; # red
+            $id = $variable->ID;
+            if ($id != 0 && @IPS_ObjectExists($id)) {
+                $rowColor = '#C0FFC0'; # light green
+                //Deactivated
+                if (!$variable->UseSettings) {
+                    $rowColor = '#DFDFDF'; # grey
+                }
+            }
+            $form['elements'][9]['items'][1]['values'][] = ['rowColor' => $rowColor];
+        }
+        //EmergencyTriggers
+        foreach (json_decode($this->ReadPropertyString('EmergencyTriggers')) as $variable) {
+            $rowColor = '#FFC0C0'; # red
+            $id = $variable->ID;
+            if ($id != 0 && @IPS_ObjectExists($id)) {
+                $rowColor = '#C0FFC0'; # light green
+                //Deactivated
+                if (!$variable->UseSettings) {
+                    $rowColor = '#DFDFDF'; # grey
+                }
+            }
+            $form['elements'][10]['items'][1]['values'][] = ['rowColor' => $rowColor];
+        }
+        //Status
+        $library = IPS_GetLibrary(self::LIBRARY_GUID);
+        $version = '[Version ' . $library['Version'] . '-' . $library['Build'] . ' vom ' . date('d.m.Y', $library['Date']) . ']';
+        $form['status'] = [
+            [
+                'code'    => 101,
+                'icon'    => 'active',
+                'caption' => self::MODULE_NAME . ' wird erstellt',
+            ],
+            [
+                'code'    => 102,
+                'icon'    => 'active',
+                'caption' => self::MODULE_NAME . ' ist aktiv (ID ' . $this->InstanceID . ') ' . $version,
+            ],
+            [
+                'code'    => 103,
+                'icon'    => 'active',
+                'caption' => self::MODULE_NAME . ' wird gelöscht (ID ' . $this->InstanceID . ') ' . $version,
+            ],
+            [
+                'code'    => 104,
+                'icon'    => 'inactive',
+                'caption' => self::MODULE_NAME . ' ist inaktiv (ID ' . $this->InstanceID . ') ' . $version,
+            ],
+            [
+                'code'    => 200,
+                'icon'    => 'inactive',
+                'caption' => 'Es ist Fehler aufgetreten, weitere Informationen unter Meldungen, im Log oder Debug! (ID ' . $this->InstanceID . ') ' . $version
+            ]
+        ];
+        return json_encode($form);
+    }
+
+    public function ReloadConfiguration(): void
+    {
+        $this->ReloadForm();
+    }
+
+    public function ShowAllFunctions(bool $State): void
+    {
+        for ($i = 1; $i <= 17; $i++) {
+            $this->UpdateFormField('Panel' . $i, 'expanded', $State);
+        }
+    }
+
+    public function DeactivateSleepModeTimer(): void
+    {
+        $this->SetValue('SleepMode', false);
+        $this->SetTimerInterval('SleepMode', 0);
+        $this->SetValue('SleepModeTimer', '-');
+    }
+
+    public function CreateScriptExample(): void
+    {
+        $scriptID = IPS_CreateScript(0);
+        IPS_SetName($scriptID, 'Beispielskript (Komfort-Rollladensteuerung #' . $this->InstanceID . ')');
+        $scriptContent = "<?php\n\n// Methode:\n// " . self::MODULE_PREFIX . "_MoveBlind(integer \$InstanceID, integer \$Position, integer \$Duration, integer \$DurationUnit);\n\n### Beispiele:\n\n// Rollladen auf 0% schließen:\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ", 0, 0, 0);\n\n// Rollladen für 180 Sekunden öffnen:\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ", 100, 180, 0);\n\n// Rollladen für 5 Minuten öffnen:\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ", 100, 5, 1);\n\n// Rollladen auf 70% öffnen:\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ', 70, 0, 0);';
+        IPS_SetScriptContent($scriptID, $scriptContent);
+        IPS_SetParent($scriptID, $this->InstanceID);
+        IPS_SetPosition($scriptID, 200);
+        IPS_SetHidden($scriptID, true);
+        if ($scriptID != 0) {
+            echo 'Beispielskript wurde erfolgreich erstellt!';
+        }
+    }
+
+    #################### Request action
 
     public function RequestAction($Ident, $Value)
     {
@@ -288,848 +912,247 @@ class Rollladensteuerung extends IPSModule
                 $this->ToggleAutomaticMode($Value);
                 break;
 
+            case 'SleepMode':
+                $this->ToggleSleepMode($Value);
+                break;
+
+            case 'BlindMode':
+                $this->ExecuteBlindMode($Value);
+                break;
+
             case 'BlindSlider':
                 $this->SetBlindSlider($Value);
                 break;
 
             case 'PositionPresets':
-                $this->SetValue($Ident, $Value);
-                $this->SetBlindLevel(floatval($Value / 100), false);
-                break;
-
-            case 'SleepMode':
-                $this->ToggleSleepMode($Value);
+                $this->ExecutePositionPreset($Value);
                 break;
 
         }
     }
 
-    /**
-     * Toggles the automatic mode.
-     *
-     * @param bool $State
-     */
     public function ToggleAutomaticMode(bool $State): void
     {
-        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
-        $this->SendDebug(__FUNCTION__, 'Parameter $State = ' . json_encode($State), 0);
         $this->SetValue('AutomaticMode', $State);
-        $this->CheckActualCondition();
-        // Weekly schedule visibility
-        $id = @IPS_GetLinkIDByName('Wochenplan', $this->InstanceID);
-        if ($id !== false) {
-            $hide = true;
-            if ($this->ReadPropertyBoolean('EnableWeeklySchedule') && $State) {
-                $hide = false;
-            }
-            IPS_SetHidden($id, $hide);
-        }
-        // Sunset visibility
-        $id = @IPS_GetLinkIDByName('Sonnenuntergang', $this->InstanceID);
-        if ($id !== false) {
-            $hide = true;
-            if ($this->ReadPropertyBoolean('EnableSunset') && $State) {
-                $hide = false;
-            }
-            IPS_SetHidden($id, $hide);
-        }
-        // Sunrise visibility
-        $id = @IPS_GetLinkIDByName('Sonnenaufgang', $this->InstanceID);
-        if ($id !== false) {
-            $hide = true;
-            if ($this->ReadPropertyBoolean('EnableSunrise') && $State) {
-                $hide = false;
-            }
-            IPS_SetHidden($id, $hide);
-        }
     }
 
-    /**
-     * Sets the blind slider.
-     *
-     * @param float $Level
-     */
-    public function SetBlindSlider(float $Level): void
-    {
-        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
-        $this->SendDebug(__FUNCTION__, 'Parameter $Level = ' . $Level, 0);
-        $minimumDifference = $this->CheckMinimumPositionDifference($Level);
-        if ($minimumDifference == -1) {
-            $this->SetValue('BlindSlider', $this->GetActualLevel());
-            return;
-        }
-        $this->SetValue('BlindSlider', $Level);
-        $updateSetpointPosition = false;
-        if ($this->ReadPropertyBoolean('ManualControlUpdateSetpointPosition')) {
-            $this->SetValue('SetpointPosition', $Level * 100);
-            $updateSetpointPosition = true;
-        }
-        $this->WriteAttributeBoolean('UpdateSetpointPosition', $updateSetpointPosition);
-        $this->SetBlindLevel($Level, false);
-    }
-
-    /**
-     * Toggles the sleep mode.
-     *
-     * @param bool $State
-     * false    = sleep mode off
-     * true     = sleep mode on
-     */
     public function ToggleSleepMode(bool $State): void
     {
-        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
-        $this->SendDebug(__FUNCTION__, 'Parameter $State = ' . json_encode($State), 0);
+        $this->SetValue('SleepMode', $State);
         if ($State) {
-            if ($this->GetValue('AutomaticMode')) {
-                $this->SetValue('SleepMode', $State);
-                // Duration from hours to seconds
-                $duration = $this->ReadPropertyInteger('SleepDuration') * 60 * 60;
-                // Set timer interval
-                $this->SetTimerInterval('DeactivateSleepMode', $duration * 1000);
-                $timestamp = time() + $duration;
-                $this->SetValue('SleepModeTimer', date('d.m.Y, H:i:s', ($timestamp)));
-            }
+            $this->SetSleepModeTimer();
         } else {
-            $this->SetValue('SleepMode', $State);
-            $this->DisableTimers();
-            $this->CheckActualCondition();
+            $this->DeactivateSleepModeTimer();
         }
     }
 
-    protected function KernelReady(): void
+    public function ExecuteBlindMode(int $Mode): void
+    {
+        switch ($Mode) {
+            case 0: # Close
+                $settings = json_decode($this->ReadPropertyString('CloseBlind'), true);
+                $action = true;
+                $mode = 0;
+                break;
+
+            case 1: # Stop
+                $action = false;
+                $this->SetValue('BlindMode', 1);
+                $this->DeactivateBlindModeTimer();
+                $this->StopBlindMoving();
+                break;
+
+            case 2: # Timer
+                $settings = json_decode($this->ReadPropertyString('Timer'), true);
+                $action = true;
+                $mode = 2;
+                break;
+
+            case 3: # Open
+                $settings = json_decode($this->ReadPropertyString('OpenBlind'), true);
+                $action = true;
+                $mode = 3;
+                break;
+
+        }
+        //Trigger action
+        if (isset($action) && isset($mode) && $action) {
+            if (!empty($settings)) {
+                foreach ($settings as $setting) {
+                    if ($setting['UseSettings']) {
+                        $position = intval($setting['Position']);
+                        //Check conditions
+                        $checkConditions = $this->CheckAllConditions(json_encode($setting));
+                        if (!$checkConditions) {
+                            return;
+                        }
+                        $this->SetValue('BlindMode', $mode);
+                        if ($setting['UpdateSetpointPosition']) {
+                            $this->SetValue('SetpointPosition', $position);
+                        }
+                        if ($setting['UpdateLastPosition']) {
+                            $this->SetValue('LastPosition', $position);
+                        }
+                        $duration = 0;
+                        $durationUnit = 0;
+                        if ($mode == 2) { # Timer
+                            $duration = $setting['Duration'];
+                            $durationUnit = $setting['DurationUnit'];
+                        }
+                        $this->MoveBlind($position, $duration, $durationUnit);
+                    }
+                }
+            }
+        }
+    }
+
+    public function SetBlindSlider(int $Position): void
+    {
+        if ($this->ReadPropertyBoolean('BlindSliderUpdateSetpointPosition')) {
+            $this->SetValue('SetpointPosition', $Position);
+        }
+        if ($this->ReadPropertyBoolean('BlindSliderUpdateLastPosition')) {
+            $this->SetValue('LastPosition', $Position);
+        }
+        $this->MoveBlind(intval($Position));
+    }
+
+    public function ExecutePositionPreset(int $Position): void
+    {
+        $this->SetValue('PositionPresets', $Position);
+        if ($this->ReadPropertyBoolean('PositionPresetsUpdateSetpointPosition')) {
+            $this->SetValue('SetpointPosition', $Position);
+        }
+        if ($this->ReadPropertyBoolean('PositionPresetsUpdateLastPosition')) {
+            $this->SetValue('LastPosition', $Position);
+        }
+        $this->MoveBlind($Position);
+    }
+
+    #################### Private
+
+    private function KernelReady(): void
     {
         $this->ApplyChanges();
     }
 
-    //##################### Private
-
-    private function RegisterProperties(): void
+    private function SetSleepModeTimer(): void
     {
-        // Visibility
-        $this->RegisterPropertyBoolean('EnableAutomaticMode', true);
-        $this->RegisterPropertyBoolean('EnableSunrise', true);
-        $this->RegisterPropertyBoolean('EnableSunset', true);
-        $this->RegisterPropertyBoolean('EnableWeeklySchedule', true);
-        $this->RegisterPropertyBoolean('EnableSetpointPosition', true);
-        $this->RegisterPropertyBoolean('EnableBlindSlider', true);
-        $this->RegisterPropertyBoolean('EnablePositionPresets', true);
-        $this->RegisterPropertyString('PositionPresets', '[{"Value":0,"Text":"0 %"},{"Value":25,"Text":"25 %"}, {"Value":50,"Text":"50 %"},{"Value":75,"Text":"75 %"},{"Value":100,"Text":"100 %"}]');
-        $this->RegisterPropertyBoolean('EnableSleepMode', true);
-        $this->RegisterPropertyBoolean('EnableDoorWindowState', true);
-        $this->RegisterPropertyBoolean('EnableTwilightState', true);
-        $this->RegisterPropertyBoolean('EnableSleepModeTimer', true);
-
-        // Blind actuator
-        $this->RegisterPropertyInteger('ActuatorInstance', 0);
-        $this->RegisterPropertyInteger('DeviceType', 0);
-        $this->RegisterPropertyInteger('ActuatorProperty', 0);
-        $this->RegisterPropertyInteger('ExecutionDelay', 3);
-        $this->RegisterPropertyInteger('ActuatorStateLevel', 0);
-        $this->RegisterPropertyInteger('ActuatorStateProcess', 0);
-        $this->RegisterPropertyInteger('ActuatorControlLevel', 0);
-        $this->RegisterPropertyBoolean('CheckMinimumBlindPositionDifference', false);
-        $this->RegisterPropertyInteger('BlindPositionDifference', 5);
-
-        // Manual control
-        $this->RegisterPropertyBoolean('ManualControlUpdateSetpointPosition', true);
-
-        // Automatic
-        $this->RegisterPropertyBoolean('AdjustBlindLevel', false);
-
-        // Sunrise and sunset
-        $this->RegisterPropertyInteger('Sunrise', 0);
-        $this->RegisterPropertyInteger('SunrisePosition', 50);
-        $this->RegisterPropertyInteger('Sunset', 0);
-        $this->RegisterPropertyInteger('SunsetPosition', 50);
-        $this->RegisterPropertyBoolean('SunriseSunsetUpdateSetpointPosition', true);
-
-        // Weekly schedule
-        $this->RegisterPropertyInteger('WeeklySchedule', 0);
-        $this->RegisterPropertyInteger('BlindPositionClosed', 0);
-        $this->RegisterPropertyInteger('BlindPositionOpened', 100);
-        $this->RegisterPropertyInteger('BlindPositionShading', 50);
-        $this->RegisterPropertyBoolean('WeeklyScheduleUpdateSetpointPosition', true);
-
-        // Is day
-        $this->RegisterPropertyInteger('IsDay', 0);
-        $this->RegisterPropertyBoolean('IsDayAdjustPosition', false);
-        $this->RegisterPropertyInteger('IsDayPosition', 100);
-        $this->RegisterPropertyBoolean('IsNightAdjustPosition', false);
-        $this->RegisterPropertyInteger('IsNightPosition', 0);
-        $this->RegisterPropertyBoolean('IsDayUpdateSetpointPosition', false);
-
-        // Twilight state
-        $this->RegisterPropertyInteger('TwilightState', 0);
-        $this->RegisterPropertyInteger('TwilightPositionDay', 100);
-        $this->RegisterPropertyBoolean('TwilightSetpointPositionDay', true);
-        $this->RegisterPropertyInteger('TwilightPositionNight', 40);
-        $this->RegisterPropertyBoolean('TwilightUpdateSetpointPosition', false);
-
-        // Sleep duration
-        $this->RegisterPropertyInteger('SleepDuration', 12);
-
-        // Door and window sensors
-        $this->RegisterPropertyString('DoorWindowSensors', '[]');
-        $this->RegisterPropertyBoolean('LockoutProtection', false);
-        $this->RegisterPropertyInteger('LockoutPosition', 60);
-        $this->RegisterPropertyBoolean('OpenBlind', false);
-        $this->RegisterPropertyInteger('OpenBlindPosition', 50);
-        $this->RegisterPropertyBoolean('CloseBlind', false);
-        $this->RegisterPropertyInteger('CloseBlindPosition', 100);
-        $this->RegisterPropertyBoolean('CloseBlindSetpointPosition', false);
-
-        // Emergency sensors
-        $this->RegisterPropertyString('EmergencySensors', '[]');
+        $this->SetValue('SleepMode', true);
+        //Duration from hours to seconds
+        $duration = $this->ReadPropertyInteger('SleepDuration') * 60 * 60;
+        //Set timer interval
+        $this->SetTimerInterval('SleepMode', $duration * 1000);
+        $timestamp = time() + $duration;
+        $this->SetValue('SleepModeTimer', date('d.m.Y, H:i:s', ($timestamp)));
     }
 
-    private function CreateProfiles(): void
+    private function SetClosestPositionPreset(int $Position): void
     {
-        // Automatic mode
-        $profile = 'RS.' . $this->InstanceID . '.AutomaticMode';
-        if (!IPS_VariableProfileExists($profile)) {
-            IPS_CreateVariableProfile($profile, 0);
-        }
-        IPS_SetVariableProfileAssociation($profile, 0, 'Aus', 'Execute', -1);
-        IPS_SetVariableProfileAssociation($profile, 1, 'An', 'Clock', 0x00FF00);
-
-        // Setpoint position
-        $profile = 'RS.' . $this->InstanceID . '.SetpointPosition';
-        if (!IPS_VariableProfileExists($profile)) {
-            IPS_CreateVariableProfile($profile, 1);
-        }
-        IPS_SetVariableProfileIcon($profile, 'Jalousie');
-        IPS_SetVariableProfileText($profile, '', ' %');
-        IPS_SetVariableProfileValues($profile, 0, 100, 0);
-
-        // Blind slider
-        $profile = 'RS.' . $this->InstanceID . '.BlindSlider.Reversed';
-        if (!IPS_VariableProfileExists($profile)) {
-            IPS_CreateVariableProfile($profile, 2);
-        }
-        IPS_SetVariableProfileIcon($profile, 'Intensity');
-        IPS_SetVariableProfileText($profile, '', '%');
-        IPS_SetVariableProfileDigits($profile, 1);
-        IPS_SetVariableProfileValues($profile, 0, 1, 0.05);
-
-        // Position presets
-        $profile = 'RS.' . $this->InstanceID . '.PositionPresets';
-        if (!IPS_VariableProfileExists($profile)) {
-            IPS_CreateVariableProfile($profile, 1);
-        }
-        IPS_SetVariableProfileIcon($profile, 'Intensity');
-
-        // Sleep mode
-        $profile = 'RS.' . $this->InstanceID . '.SleepMode';
-        if (!IPS_VariableProfileExists($profile)) {
-            IPS_CreateVariableProfile($profile, 0);
-        }
-        IPS_SetVariableProfileAssociation($profile, 0, 'Aus', 'Sleep', -1);
-        IPS_SetVariableProfileAssociation($profile, 1, 'An', 'Sleep', 0x0000FF);
-
-        // Door and window state
-        $profile = 'RS.' . $this->InstanceID . '.DoorWindowState';
-        if (!IPS_VariableProfileExists($profile)) {
-            IPS_CreateVariableProfile($profile, 0);
-        }
-        IPS_SetVariableProfileAssociation($profile, 0, 'Geschlossen', 'Window', 0x00FF00);
-        IPS_SetVariableProfileAssociation($profile, 1, 'Geöffnet', 'Window', 0x0000FF);
-
-        // Twilight state
-        $profile = 'RS.' . $this->InstanceID . '.TwilightState';
-        if (!IPS_VariableProfileExists($profile)) {
-            IPS_CreateVariableProfile($profile, 0);
-        }
-        IPS_SetVariableProfileAssociation($profile, 0, 'Es ist Tag', 'Sun', 0xFFFF00);
-        IPS_SetVariableProfileAssociation($profile, 1, 'Es ist Nacht', 'Moon', 0x0000FF);
-    }
-
-    private function UpdatePositionPresets(): void
-    {
-        // Position presets
-        $profile = 'RS.' . $this->InstanceID . '.PositionPresets';
+        $profile = self::MODULE_PREFIX . '.' . $this->InstanceID . '.PositionPresets';
         $associations = IPS_GetVariableProfile($profile)['Associations'];
         if (!empty($associations)) {
+            $closestPreset = null;
             foreach ($associations as $association) {
-                // Delete
-                IPS_SetVariableProfileAssociation($profile, $association['Value'], '', '', -1);
+                if ($closestPreset === null || abs($Position - $closestPreset) > abs($association['Value'] - $Position)) {
+                    $closestPreset = $association['Value'];
+                }
             }
         }
-        $positionPresets = json_decode($this->ReadPropertyString('PositionPresets'));
-        if (!empty($positionPresets)) {
-            foreach ($positionPresets as $preset) {
-                // Create
-                IPS_SetVariableProfileAssociation($profile, $preset->Value, $preset->Text, '', -1);
-            }
+        if (isset($closestPreset)) {
+            $this->SetValue('PositionPresets', $closestPreset);
         }
     }
 
-    private function DeleteProfiles(): void
+    private function CheckAction(string $PropertyVariableName, string $PropertyActionName): bool
     {
-        $profiles = ['AutomaticMode', 'SetpointPosition', 'BlindSlider.Reversed', 'PositionPresets', 'SleepMode', 'DoorWindowState', 'TwilightState'];
-        foreach ($profiles as $profile) {
-            $profileName = 'RS.' . $this->InstanceID . '.' . $profile;
-            if (@IPS_VariableProfileExists($profileName)) {
-                IPS_DeleteVariableProfile($profileName);
+        $result = false;
+        foreach (json_decode($this->ReadPropertyString($PropertyActionName), true) as $action) {
+            if ($action['UseSettings']) {
+                $result = true;
             }
         }
+        if ($result) {
+            $id = $this->ReadPropertyInteger($PropertyVariableName);
+            if ($id == 0 || !@IPS_ObjectExists($id)) {
+                $result = false;
+            }
+        }
+        return $result;
     }
 
-    private function RegisterVariables(): void
+    private function GetTimeStampString(int $Timestamp): string
     {
-        // Automatic mode
-        $profile = 'RS.' . $this->InstanceID . '.AutomaticMode';
-        $this->RegisterVariableBoolean('AutomaticMode', 'Automatik', $profile, 0);
-        $this->EnableAction('AutomaticMode');
+        $day = date('j', ($Timestamp));
+        $month = date('F', ($Timestamp));
+        switch ($month) {
+            case 'January':
+                $month = 'Januar';
+                break;
 
-        // Setpoint position
-        $profile = 'RS.' . $this->InstanceID . '.SetpointPosition';
-        $this->RegisterVariableInteger('SetpointPosition', 'Soll-Position', $profile, 4);
+            case 'February':
+                $month = 'Februar';
+                break;
 
-        // Blind slider
-        $profile = 'RS.' . $this->InstanceID . '.BlindSlider.Reversed';
-        $this->RegisterVariableFloat('BlindSlider', 'Rollladen', $profile, 5);
-        $this->EnableAction('BlindSlider');
-        IPS_SetIcon($this->GetIDForIdent('BlindSlider'), 'Jalousie');
+            case 'March':
+                $month = 'März';
+                break;
 
-        // Position presets
-        $profile = 'RS.' . $this->InstanceID . '.PositionPresets';
-        $this->RegisterVariableInteger('PositionPresets', 'Position Voreinstellungen', $profile, 6);
-        $this->EnableAction('PositionPresets');
+            case 'April':
+                $month = 'April';
+                break;
 
-        // Sleep mode
-        $profile = 'RS.' . $this->InstanceID . '.SleepMode';
-        $this->RegisterVariableBoolean('SleepMode', 'Ruhe-Modus', $profile, 7);
-        $this->EnableAction('SleepMode');
+            case 'May':
+                $month = 'Mai';
+                break;
 
-        // Door and window state
-        $profile = 'RS.' . $this->InstanceID . '.DoorWindowState';
-        $this->RegisterVariableBoolean('DoorWindowState', 'Tür- / Fensterstatus', $profile, 8);
+            case 'June':
+                $month = 'Juni';
+                break;
 
-        // Twilight state
-        $profile = 'RS.' . $this->InstanceID . '.TwilightState';
-        $this->RegisterVariableBoolean('TwilightState', 'Dämmerungsstatus', $profile, 9);
+            case 'July':
+                $month = 'Juli';
+                break;
 
-        // Sleep mode timer info
-        $this->RegisterVariableString('SleepModeTimer', 'Ruhe-Modus Timer', '', 10);
-        $id = $this->GetIDForIdent('SleepModeTimer');
-        IPS_SetIcon($id, 'Clock');
+            case 'August':
+                $month = 'August';
+                break;
+
+            case 'September':
+                $month = 'September';
+                break;
+
+            case 'October':
+                $month = 'Oktober';
+                break;
+
+            case 'November':
+                $month = 'November';
+                break;
+
+            case 'December':
+                $month = 'Dezember';
+                break;
+
+        }
+        $year = date('Y', ($Timestamp));
+        $time = date('H:i:s', ($Timestamp));
+        return $day . '. ' . $month . ' ' . $year . ' ' . $time;
     }
 
-    private function CreateLinks(): void
+    private function CheckMaintenanceMode(): bool
     {
-        // Sunrise
-        $targetID = $this->ReadPropertyInteger('Sunrise');
-        $linkID = @IPS_GetLinkIDByName('Sonnenaufgang', $this->InstanceID);
-        if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
-            // Check for existing link
-            if ($linkID === false) {
-                $linkID = IPS_CreateLink();
-            }
-            IPS_SetParent($linkID, $this->InstanceID);
-            IPS_SetPosition($linkID, 1);
-            IPS_SetName($linkID, 'Sonnenaufgang');
-            IPS_SetIcon($linkID, 'Sun');
-            IPS_SetLinkTargetID($linkID, $targetID);
-        } else {
-            if ($linkID !== false) {
-                IPS_SetHidden($linkID, true);
-            }
+        $result = false;
+        $status = 102;
+        if ($this->ReadPropertyBoolean('MaintenanceMode')) {
+            $result = true;
+            $status = 104;
+            $text = 'Abbruch, der Wartungsmodus ist aktiv!';
+            $this->SendDebug(__FUNCTION__, $text, 0);
+            $this->LogMessage('ID ' . $this->InstanceID . ', ' . $text, KL_WARNING);
         }
-
-        // Sunset
-        $targetID = $this->ReadPropertyInteger('Sunset');
-        $linkID = @IPS_GetLinkIDByName('Sonnenuntergang', $this->InstanceID);
-        if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
-            // Check for existing link
-            if ($linkID === false) {
-                $linkID = IPS_CreateLink();
-            }
-            IPS_SetParent($linkID, $this->InstanceID);
-            IPS_SetPosition($linkID, 1);
-            IPS_SetName($linkID, 'Sonnenuntergang');
-            IPS_SetIcon($linkID, 'Moon');
-            IPS_SetLinkTargetID($linkID, $targetID);
-        } else {
-            if ($linkID !== false) {
-                IPS_SetHidden($linkID, true);
-            }
-        }
-        // Weekly schedule
-        $targetID = $this->ReadPropertyInteger('WeeklySchedule');
-        $linkID = @IPS_GetLinkIDByName('Wochenplan', $this->InstanceID);
-        if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
-            // Check for existing link
-            if ($linkID === false) {
-                $linkID = IPS_CreateLink();
-            }
-            IPS_SetParent($linkID, $this->InstanceID);
-            IPS_SetPosition($linkID, 1);
-            IPS_SetName($linkID, 'Wochenplan');
-            IPS_SetIcon($linkID, 'Calendar');
-            IPS_SetLinkTargetID($linkID, $targetID);
-        } else {
-            if ($linkID !== false) {
-                IPS_SetHidden($linkID, true);
-            }
-        }
-    }
-
-    private function SetOptions(): void
-    {
-        // Automatic mode
-        IPS_SetHidden($this->GetIDForIdent('AutomaticMode'), !$this->ReadPropertyBoolean('EnableAutomaticMode'));
-
-        // Setpoint position
-        IPS_SetHidden($this->GetIDForIdent('SetpointPosition'), !$this->ReadPropertyBoolean('EnableSetpointPosition'));
-
-        // Sunrise
-        $id = @IPS_GetLinkIDByName('Sonnenaufgang', $this->InstanceID);
-        if ($id !== false) {
-            $hide = true;
-            $targetID = $this->ReadPropertyInteger('Sunrise');
-            if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
-                if ($this->ReadPropertyBoolean('EnableSunrise') && $this->GetValue('AutomaticMode')) {
-                    $hide = false;
-                }
-            }
-            IPS_SetHidden($id, $hide);
-        }
-
-        // Sunset
-        $id = @IPS_GetLinkIDByName('Sonnenuntergang', $this->InstanceID);
-        if ($id !== false) {
-            $hide = true;
-            $targetID = $this->ReadPropertyInteger('Sunset');
-            if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
-                if ($this->ReadPropertyBoolean('EnableSunset') && $this->GetValue('AutomaticMode')) {
-                    $hide = false;
-                }
-            }
-            IPS_SetHidden($id, $hide);
-        }
-
-        // Weekly schedule
-        $id = @IPS_GetLinkIDByName('Wochenplan', $this->InstanceID);
-        if ($id !== false) {
-            $hide = true;
-            if ($this->ValidateEventPlan()) {
-                if ($this->ReadPropertyBoolean('EnableWeeklySchedule') && $this->GetValue('AutomaticMode')) {
-                    $hide = false;
-                }
-            }
-            IPS_SetHidden($id, $hide);
-        }
-
-        // Blind slider
-        IPS_SetHidden($this->GetIDForIdent('BlindSlider'), !$this->ReadPropertyBoolean('EnableBlindSlider'));
-
-        // Position presets
-        IPS_SetHidden($this->GetIDForIdent('PositionPresets'), !$this->ReadPropertyBoolean('EnablePositionPresets'));
-
-        // Sleep Mode
-        IPS_SetHidden($this->GetIDForIdent('SleepMode'), !$this->ReadPropertyBoolean('EnableSleepMode'));
-
-        // Door and window state
-        IPS_SetHidden($this->GetIDForIdent('DoorWindowState'), !$this->ReadPropertyBoolean('EnableDoorWindowState'));
-
-        // Twilight state
-        $id = $this->GetIDForIdent('TwilightState');
-        $twilightState = $this->ReadPropertyInteger('TwilightState');
-        $use = false;
-        if ($twilightState != 0 && IPS_ObjectExists($twilightState)) {
-            $use = $this->ReadPropertyBoolean('EnableTwilightState');
-        }
-        IPS_SetHidden($id, !$use);
-
-        // Sleep mode timer info
-        IPS_SetHidden($this->GetIDForIdent('SleepModeTimer'), !$this->ReadPropertyBoolean('EnableSleepModeTimer'));
-    }
-
-    private function RegisterTimers(): void
-    {
-        $this->RegisterTimer('DeactivateSleepMode', 0, 'RS_ToggleSleepMode(' . $this->InstanceID . ', false);');
-    }
-
-    private function DisableTimers(): void
-    {
-        $this->SetTimerInterval('DeactivateSleepMode', 0);
-        $this->SetValue('SleepModeTimer', '-');
-    }
-
-    private function RegisterAttributes(): void
-    {
-        $this->RegisterAttributeBoolean('UpdateSetpointPosition', true);
-    }
-
-    private function ResetAttributes(): void
-    {
-        $this->WriteAttributeBoolean('UpdateSetpointPosition', true);
-    }
-
-    private function UnregisterMessages(): void
-    {
-        foreach ($this->GetMessageList() as $id => $registeredMessage) {
-            foreach ($registeredMessage as $messageType) {
-                if ($messageType == VM_UPDATE) {
-                    $this->UnregisterMessage($id, VM_UPDATE);
-                }
-                if ($messageType == EM_UPDATE) {
-                    $this->UnregisterMessage($id, EM_UPDATE);
-                }
-            }
-        }
-    }
-
-    private function RegisterMessages(): void
-    {
-        // Unregister first
-        $this->UnregisterMessages();
-
-        // Sunrise
-        $id = $this->ReadPropertyInteger('Sunrise');
-        if ($id != 0 && @IPS_ObjectExists($id)) {
-            $this->RegisterMessage($id, VM_UPDATE);
-        }
-
-        // Sunset
-        $id = $this->ReadPropertyInteger('Sunset');
-        if ($id != 0 && @IPS_ObjectExists($id)) {
-            $this->RegisterMessage($id, VM_UPDATE);
-        }
-
-        // Weekly schedule
-        $id = $this->ReadPropertyInteger('WeeklySchedule');
-        if ($id != 0 && @IPS_ObjectExists($id)) {
-            $this->RegisterMessage($id, EM_UPDATE);
-        }
-
-        // Is day
-        if ($this->ReadPropertyBoolean('IsDayAdjustPosition') || $this->ReadPropertyBoolean('IsNightAdjustPosition')) {
-            $id = $this->ReadPropertyInteger('IsDay');
-            if ($id != 0 && @IPS_ObjectExists($id)) {
-                $this->RegisterMessage($id, VM_UPDATE);
-            }
-        }
-
-        // Twilight state
-        $id = $this->ReadPropertyInteger('TwilightState');
-        if ($id != 0 && @IPS_ObjectExists($id)) {
-            $this->RegisterMessage($id, VM_UPDATE);
-        }
-
-        // Actuator state level
-        $id = $this->ReadPropertyInteger('ActuatorStateLevel');
-        if ($id != 0 && IPS_ObjectExists($id)) {
-            $this->RegisterMessage($id, VM_UPDATE);
-        }
-        // Actuator state process
-        $id = $this->ReadPropertyInteger('ActuatorStateProcess');
-        if ($id != 0 && IPS_ObjectExists($id)) {
-            $this->RegisterMessage($id, VM_UPDATE);
-        }
-        // Door and window sensors
-        $doorWindowSensors = $this->GetDoorWindowSensors();
-        if (!empty($doorWindowSensors)) {
-            foreach ($doorWindowSensors as $id) {
-                if ($id != 0 && @IPS_ObjectExists($id)) {
-                    $this->RegisterMessage($id, VM_UPDATE);
-                }
-            }
-        }
-    }
-
-    private function ValidateConfiguration(): void
-    {
-        $state = 102;
-        $deviceType = $this->ReadPropertyInteger('DeviceType');
-        // Blind actuator
-        $id = $this->ReadPropertyInteger('ActuatorInstance');
-        if ($id != 0) {
-            if (!@IPS_ObjectExists($id)) {
-                $this->LogMessage('Konfiguration: Instanz Rollladenaktor ID ungültig!', KL_ERROR);
-                $state = 200;
-            } else {
-                $instance = IPS_GetInstance($id);
-                $moduleID = $instance['ModuleInfo']['ModuleID'];
-                if ($moduleID !== self::HOMEMATIC_DEVICE_GUID) {
-                    $this->LogMessage('Konfiguration: Instanz Rollladenaktor GUID ungültig!', KL_ERROR);
-                    $state = 200;
-                } else {
-                    // Check channel
-                    $config = json_decode(IPS_GetConfiguration($id));
-                    $address = strstr($config->Address, ':', false);
-                    switch ($deviceType) {
-                        // HM
-                        case 1:
-                            if ($address != ':1') {
-                                $this->LogMessage('Konfiguration: Instanz Rollladenaktor Kanal ungültig!', KL_ERROR);
-                                $state = 200;
-                            }
-                            break;
-
-                        // HmIP
-                        case 2:
-                        case 3:
-                            if ($address != ':3') {
-                                $this->LogMessage('Konfiguration: Instanz Rollladenaktor Kanal ungültig!', KL_ERROR);
-                                $state = 200;
-                            }
-                            break;
-
-                    }
-                }
-            }
-        }
-        // Actuator state level
-        $id = $this->ReadPropertyInteger('ActuatorStateLevel');
-        if ($id != 0) {
-            if (!@IPS_ObjectExists($id)) {
-                $this->LogMessage('Konfiguration: Variable Rollladenposition ID ungültig!', KL_ERROR);
-                $state = 200;
-            } else {
-                $parent = IPS_GetParent($id);
-                if ($parent == 0) {
-                    $this->LogMessage('Konfiguration: Variable Rollladenposition, keine übergeordnete ID gefunden!', KL_ERROR);
-                    $state = 200;
-                } else {
-                    $instance = IPS_GetInstance($parent);
-                    $moduleID = $instance['ModuleInfo']['ModuleID'];
-                    if ($moduleID !== self::HOMEMATIC_DEVICE_GUID) {
-                        $this->LogMessage('Konfiguration: Variable Rollladenposition GUID ungültig!', KL_ERROR);
-                        $state = 200;
-                    } else {
-                        // Check channel
-                        $config = json_decode(IPS_GetConfiguration($parent));
-                        $address = strstr($config->Address, ':', false);
-                        switch ($deviceType) {
-                            // HM
-                            case 1:
-                                if ($address != ':1') {
-                                    $this->LogMessage('Konfiguration: Variable Rollladenposition Kanal ungültig!', KL_ERROR);
-                                    $state = 200;
-                                }
-                                break;
-
-                            // HmIP
-                            case 2:
-                            case 3:
-                                if ($address != ':3') {
-                                    $this->LogMessage('Konfiguration: Variable Rollladenposition Kanal ungültig!', KL_ERROR);
-                                    $state = 200;
-                                }
-                                break;
-
-                        }
-                    }
-                }
-                $ident = IPS_GetObject($id)['ObjectIdent'];
-                if ($ident != 'LEVEL') {
-                    $this->LogMessage('Konfiguration: Variable Rollladenposition IDENT ungültig!', KL_ERROR);
-                    $state = 200;
-                }
-            }
-        }
-        // Actuator state process
-        $id = $this->ReadPropertyInteger('ActuatorStateProcess');
-        if ($id != 0) {
-            if (!@IPS_ObjectExists($id)) {
-                $this->LogMessage('Konfiguration: Variable Aktivitätszustand ID ungültig!', KL_ERROR);
-                $state = 200;
-            } else {
-                $parent = IPS_GetParent($id);
-                if ($parent == 0) {
-                    $this->LogMessage('Konfiguration: Variable Aktivitätszustand, keine übergeordnete ID gefunden!', KL_ERROR);
-                    $state = 200;
-                } else {
-                    $instance = IPS_GetInstance($parent);
-                    $moduleID = $instance['ModuleInfo']['ModuleID'];
-                    if ($moduleID !== self::HOMEMATIC_DEVICE_GUID) {
-                        $this->LogMessage('Konfiguration: Variable Aktivitätszustand GUID ungültig!', KL_ERROR);
-                        $state = 200;
-                    } else {
-                        // Check channel
-                        $config = json_decode(IPS_GetConfiguration($parent));
-                        $address = strstr($config->Address, ':', false);
-                        switch ($deviceType) {
-                            // HM
-                            case 1:
-                                if ($address != ':1') {
-                                    $this->LogMessage('Konfiguration: Variable Aktivitätszustand Kanal ungültig!', KL_ERROR);
-                                    $state = 200;
-                                }
-                                break;
-
-                            // HmIP
-                            case 2:
-                            case 3:
-                                if ($address != ':3') {
-                                    $this->LogMessage('Konfiguration: Variable Aktivitätszustand Kanal ungültig!', KL_ERROR);
-                                    $state = 200;
-                                }
-                                break;
-
-                        }
-                    }
-                }
-                $ident = IPS_GetObject($id)['ObjectIdent'];
-                switch ($deviceType) {
-                    // HM
-                    case 1:
-                        if ($ident != 'WORKING') {
-                            $this->LogMessage('Konfiguration: Variable Aktivitätszustand IDENT ungültig!', KL_ERROR);
-                            $state = 200;
-                        }
-                        break;
-
-                    // HmIP
-                    case 2:
-                    case 3:
-                        if ($ident != 'PROCESS') {
-                            $this->LogMessage('Konfiguration: Variable Aktivitätszustand IDENT ungültig!', KL_ERROR);
-                            $state = 200;
-                        }
-                        break;
-                }
-            }
-        }
-        // Actuator control level
-        $id = $this->ReadPropertyInteger('ActuatorControlLevel');
-        if ($id != 0) {
-            if (!@IPS_ObjectExists($id)) {
-                $this->LogMessage('Konfiguration: Variable Rollladensteuerung ID ungültig!', KL_ERROR);
-                $state = 200;
-            } else {
-                $parent = IPS_GetParent($id);
-                if ($parent == 0) {
-                    $this->LogMessage('Konfiguration: Variable Rollladensteuerung, keine übergeordnete ID gefunden!', KL_ERROR);
-                    $state = 200;
-                } else {
-                    $instance = IPS_GetInstance($parent);
-                    $moduleID = $instance['ModuleInfo']['ModuleID'];
-                    if ($moduleID !== self::HOMEMATIC_DEVICE_GUID) {
-                        $this->LogMessage('Konfiguration: Variable Rollladensteuerung GUID ungültig!', KL_ERROR);
-                        $state = 200;
-                    } else {
-                        // Check channel
-                        $config = json_decode(IPS_GetConfiguration($parent));
-                        $address = strstr($config->Address, ':', false);
-                        switch ($deviceType) {
-                            // HM
-                            case 1:
-                                if ($address != ':1') {
-                                    $this->LogMessage('Konfiguration: Variable Rollladensteuerung Kanal ungültig!', KL_ERROR);
-                                    $state = 200;
-                                }
-                                break;
-
-                            // HmIP
-                            case 2:
-                            case 3:
-                                if ($address != ':4') {
-                                    $this->LogMessage('Konfiguration: Variable Rollladensteuerung Kanal ungültig!', KL_ERROR);
-                                    $state = 200;
-                                }
-                                break;
-
-                        }
-                    }
-                }
-                $ident = IPS_GetObject($id)['ObjectIdent'];
-                if ($ident != 'LEVEL') {
-                    $this->LogMessage('Konfiguration: Variable Rollladensteuerung IDENT ungültig!', KL_ERROR);
-                    $state = 200;
-                }
-            }
-        }
-        // Set state
-        $this->SetStatus($state);
-    }
-
-    private function CheckActualCondition(): void
-    {
-        /*
-         * 1. Twilight detection
-         *      If we have twilight detection, the blind level is set based on the twilight position.
-         *
-         * 2. Weekly schedule
-         *      If we don't use twilight detection, the weekly schedule is used and the blind level is set based on the action position.
-         *
-         * 3. Sunrise and sunset
-         *      If we don't use twilight detection and weekly schedule, the blind level is set based on the sunrise or sunset position.
-         */
-        $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
-        // Update and setpoint position
-        $level = $this->GetActualLevel();
-        $this->SetValue('SetpointPosition', $level * 100);
-        // Update blind slider
-        $this->SetValue('BlindSlider', $level);
-        // Check door and window sensors
-        $this->CheckDoorWindowSensors();
-        // Update twilight state
-        $id = $this->ReadPropertyInteger('TwilightState');
-        if ($id != 0 && IPS_ObjectExists($id)) {
-            $this->SetValue('TwilightState', GetValueBoolean($id));
-        }
-        if (!$this->CheckModes(__FUNCTION__)) {
-            return;
-        }
-        if ($this->ReadPropertyBoolean('AdjustBlindLevel')) {
-            // Twilight state
-            $id = $this->ReadPropertyInteger('TwilightState');
-            if ($id != 0 && IPS_ObjectExists($id)) {
-                $this->TriggerTwilightDetection(GetValueBoolean($id));
-                return;
-            }
-            // Weekly schedule
-            $action = $this->DetermineAction();
-            if ($action != 0) {
-                $this->TriggerActionByWeeklySchedule();
-                return;
-            }
-            // Sunrise and sunset
-            $sunrise = $this->ReadPropertyInteger('Sunrise');
-            if ($sunrise != 0 && IPS_ObjectExists($sunrise)) {
-                $sunriseTimestamp = GetValue($sunrise);
-            }
-            $sunset = $this->ReadPropertyInteger('Sunset');
-            if ($sunset != 0 && IPS_ObjectExists($sunset)) {
-                $sunsetTimestamp = GetValue($sunset);
-            }
-            if (isset($sunriseTimestamp) && isset($sunsetTimestamp)) {
-                $timestamp = time();
-                $sunriseDiff = abs($sunriseTimestamp - $timestamp);
-                $sunsetDiff = abs($sunsetTimestamp - $timestamp);
-                $mode = 1;
-                if ($sunriseDiff < $sunsetDiff) {
-                    $mode = 0;
-                }
-                $this->TriggerSunriseSunset($mode);
-            }
-        }
-    }
-
-    /**
-     * Checks the automatic and sleep mode.
-     *
-     * @param string $MethodName
-     *
-     * @return bool
-     * false    = automatic mode is disabled or sleep mode is enabled
-     * true     = automatic mode is enabled and sleep mode is disbaled
-     */
-    private function CheckModes(string $MethodName): bool
-    {
-        $result = true;
-        // Check automatic mode
-        if (!$this->GetValue('AutomaticMode')) {
-            $this->SendDebug($MethodName, 'Abbruch, Die Automatik ist ausgeschaltet!', 0);
-            $result = false;
-        }
-        // Check sleep mode
-        if ($this->GetValue('SleepMode')) {
-            $this->SendDebug($MethodName, 'Abbruch, Der Ruhe-Modus ist eingeschaltet!', 0);
-            $result = false;
-        }
+        $this->SetStatus($status);
+        IPS_SetDisabled($this->InstanceID, $result);
         return $result;
     }
 }

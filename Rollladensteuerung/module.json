@@ -1,14 +1,15 @@
 {
-  "id": "{CEAE98E6-EFB4-4D0E-A7DE-3A9764F12DB6}",
-  "name": "Rollladensteuerung",
-  "type": 3,
-  "vendor": "NTUB",
-  "url": "https://github.com/ubittner/Rollladensteuerung",
-  "aliases": [
-    "Rollladensteuerung"
-  ],
-  "parentRequirements": [],
-  "childRequirements": [],
-  "implemented": [],
-  "prefix": "RS"
+    "id": "{A1EE3E36-3789-C1BB-C40E-9789BD29D394}",
+    "name": "Rollladensteuerung",
+    "type": 3,
+    "vendor": "Ulrich Bittner",
+    "aliases": 
+    [
+        "Rollladensteuerung"
+    ],
+    "url": "https://github.com/ubittner/Rollladensteuerung/tree/master/Rollladensteuerung",
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [],
+    "prefix": "UBRS"
 }
