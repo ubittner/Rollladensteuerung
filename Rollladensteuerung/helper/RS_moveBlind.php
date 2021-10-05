@@ -167,9 +167,7 @@ trait RS_moveBlind
         }
     }
 
-    #################### Private
-
-    private function UpdateBlindPosition(): void
+    public function UpdateBlindPosition(): void
     {
         $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt. (' . microtime(true) . ')', 0);
         $id = $this->ReadPropertyInteger('ActuatorActivityStatus');
@@ -177,8 +175,9 @@ trait RS_moveBlind
             $updateBlindPosition = $this->ReadPropertyBoolean('ActuatorUpdateBlindPosition');
             if (!$updateBlindPosition) {
                 $this->SendDebug(__FUNCTION__, 'Abbruch, die Aktualisierung der Rollladenposition ist deaktiviert!', 0);
+                return;
             }
-            if (GetValue($id) == 0) {
+            if (GetValue($id) == 0) { # WORKING / PROCESS, 0 = idle
                 $id = $this->ReadPropertyInteger('ActuatorBlindPosition');
                 if ($id != 0 && @IPS_ObjectExists($id)) {
                     $actualPosition = $this->GetActualBlindPosition();
@@ -202,6 +201,8 @@ trait RS_moveBlind
             }
         }
     }
+
+    #################### Private
 
     private function StopBlindMoving(): void
     {

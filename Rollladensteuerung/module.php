@@ -695,7 +695,8 @@ class Rollladensteuerung extends IPSModule
                     if ($SenderID == $id) {
                         if ($Data[1]) {
                             $this->SendDebug(__FUNCTION__, 'Die Rollladenposition hat sich geändert.', 0);
-                            $this->UpdateBlindPosition();
+                            $scriptText = self::MODULE_PREFIX . '_UpdateBlindPosition(' . $this->InstanceID . ');';
+                            IPS_RunScriptText($scriptText);
                         }
                     }
                 }

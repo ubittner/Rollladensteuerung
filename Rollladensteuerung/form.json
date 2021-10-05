@@ -1019,7 +1019,7 @@
                   "name": "Text",
                   "caption": "Text",
                   "add": "",
-                  "width": "100px",
+                  "width": "300px",
                   "edit": {
                     "type": "ValidationTextBox"
                   }
