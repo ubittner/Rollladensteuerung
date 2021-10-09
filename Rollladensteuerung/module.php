@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection PhpUnused */
+
 /*
  * @author      Ulrich Bittner
  * @copyright   (c) 2021
@@ -426,9 +428,19 @@ class Rollladensteuerung extends IPSModule
         //Register
         if (!$this->CheckMaintenanceMode()) {
             $this->SendDebug(__FUNCTION__, 'Referenzen und Nachrichten werden registriert.', 0);
-            //Actuator blind position
+            //Actuator instance
+            $id = $this->ReadPropertyInteger('Actuator');
+            if ($id != 0 && IPS_ObjectExists($id)) {
+                $this->RegisterReference($id);
+            }
+            //Actuator blind position, LEVEL
+            $id = $this->ReadPropertyInteger('ActuatorBlindPosition');
+            if ($id != 0 && IPS_ObjectExists($id)) {
+                $this->RegisterReference($id);
+            }
+            //Actuator activity, WORKING, PROCESS
             if ($this->ReadPropertyBoolean('ActuatorUpdateBlindPosition')) {
-                $id = $this->ReadPropertyInteger('ActuatorBlindPosition');
+                $id = $this->ReadPropertyInteger('ActuatorActivityStatus');
                 if ($id != 0 && IPS_ObjectExists($id)) {
                     $this->RegisterReference($id);
                     $this->RegisterMessage($id, VM_UPDATE);
@@ -688,12 +700,11 @@ class Rollladensteuerung extends IPSModule
                 if ($this->CheckMaintenanceMode()) {
                     return;
                 }
-
-                //Actuator blind position
-                $id = $this->ReadPropertyInteger('ActuatorBlindPosition');
+                //Actuator activity
+                $id = $this->ReadPropertyInteger('ActuatorActivityStatus');
                 if ($id != 0 && @IPS_ObjectExists($id)) {
                     if ($SenderID == $id) {
-                        if ($Data[1]) {
+                        if ($Data[1] && $Data[0] == 0) {
                             $this->SendDebug(__FUNCTION__, 'Die Rollladenposition hat sich geändert.', 0);
                             $scriptText = self::MODULE_PREFIX . '_UpdateBlindPosition(' . $this->InstanceID . ');';
                             IPS_RunScriptText($scriptText);
@@ -894,7 +905,7 @@ class Rollladensteuerung extends IPSModule
     {
         $scriptID = IPS_CreateScript(0);
         IPS_SetName($scriptID, 'Beispielskript (Komfort-Rollladensteuerung #' . $this->InstanceID . ')');
-        $scriptContent = "<?php\n\n// Methode:\n// " . self::MODULE_PREFIX . "_MoveBlind(integer \$InstanceID, integer \$Position, integer \$Duration, integer \$DurationUnit);\n\n### Beispiele:\n\n// Rollladen auf 0% schließen:\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ", 0, 0, 0);\n\n// Rollladen für 180 Sekunden öffnen:\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ", 100, 180, 0);\n\n// Rollladen für 5 Minuten öffnen:\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ", 100, 5, 1);\n\n// Rollladen auf 70% öffnen:\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ', 70, 0, 0);';
+        $scriptContent = "<?php\n\n// Methode:\n// " . self::MODULE_PREFIX . "_MoveBlind(integer \$InstanceID, integer \$Position, integer \$Duration, integer \$DurationUnit);\n\n### Beispiele:\n\n// Rollladen auf 0 % schließen:\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ", 0, 0, 0);\n\n// Rollladen für 180 Sekunden öffnen:\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ", 100, 180, 0);\n\n// Rollladen für 5 Minuten öffnen:\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ", 100, 5, 1);\n\n// Rollladen auf 70 % öffnen:\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ', 70, 0, 0);';
         IPS_SetScriptContent($scriptID, $scriptContent);
         IPS_SetParent($scriptID, $this->InstanceID);
         IPS_SetPosition($scriptID, 200);
@@ -1015,7 +1026,7 @@ class Rollladensteuerung extends IPSModule
         if ($this->ReadPropertyBoolean('BlindSliderUpdateLastPosition')) {
             $this->SetValue('LastPosition', $Position);
         }
-        $this->MoveBlind(intval($Position));
+        $this->MoveBlind($Position);
     }
 
     public function ExecutePositionPreset(int $Position): void

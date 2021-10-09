@@ -179,6 +179,7 @@ trait RS_moveBlind
                 return;
             }
             if (GetValue($id) == 0) { # WORKING / PROCESS, 0 = idle
+                IPS_Sleep(250);
                 $id = $this->ReadPropertyInteger('ActuatorBlindPosition');
                 if ($id != 0 && @IPS_ObjectExists($id)) {
                     $actualPosition = $this->GetActualBlindPosition();
