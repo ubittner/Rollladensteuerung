@@ -23,13 +23,14 @@ trait RS_actuator
         if ($moduleID !== self::HOMEMATIC_DEVICE_GUID) {
             return;
         }
+        $result = true;
         $deviceType = $this->ReadPropertyInteger('DeviceType');
         $children = IPS_GetChildrenIDs($id);
         if (!empty($children)) {
             foreach ($children as $child) {
                 $ident = IPS_GetObject($child)['ObjectIdent'];
                 switch ($deviceType) {
-                    case 1: # HM-LC-Bl1-FM
+                    case 1: # HM-LC-Bl1-FM, Channel 1
                         switch ($ident) {
                             case 'LEVEL':
                                 IPS_SetProperty($this->InstanceID, 'ActuatorBlindPosition', $child);
@@ -43,11 +44,12 @@ trait RS_actuator
                         }
                         break;
 
-                    case 2: # HmIP-BROLL
-                    case 3: # HmIP-FROLL
+                    case 2: # HmIP-BROLL, Channel 4
+                    case 3: # HmIP-FROLL, Channel 4
                         switch ($ident) {
                             case 'LEVEL':
                                 IPS_SetProperty($this->InstanceID, 'ActuatorBlindPosition', $child);
+                                IPS_SetProperty($this->InstanceID, 'ActuatorControl', $child);
                                 break;
 
                             case 'PROCESS':
@@ -57,35 +59,19 @@ trait RS_actuator
                         }
                         break;
 
-                }
-            }
-        }
-        //Homematic IP uses also Channel 4
-        if ($deviceType == 2 || $deviceType == 3) {
-            //Actuator control level is on channel 4
-            $config = json_decode(IPS_GetConfiguration($id));
-            $address = strstr($config->Address, ':', true) . ':4';
-            $instances = IPS_GetInstanceListByModuleID(self::HOMEMATIC_DEVICE_GUID);
-            if (!empty($instances)) {
-                foreach ($instances as $instance) {
-                    $config = json_decode(IPS_GetConfiguration($instance));
-                    if ($config->Address == $address) {
-                        $children = IPS_GetChildrenIDs($instance);
-                        if (!empty($children)) {
-                            foreach ($children as $child) {
-                                $ident = IPS_GetObject($child)['ObjectIdent'];
-                                if ($ident == 'LEVEL') {
-                                    IPS_SetProperty($this->InstanceID, 'ActuatorControl', $child);
-                                }
-                            }
-                        }
-                    }
+                    default:
+                        $result = false;
+
                 }
             }
         }
         if (IPS_HasChanges($this->InstanceID)) {
             IPS_ApplyChanges($this->InstanceID);
         }
-        echo 'Die Variablen wurden erfolgreich ermittelt!';
+        if ($result) {
+            echo 'Die Variablen wurden erfolgreich ermittelt!';
+        } else {
+            echo "Es ist ein Fehler aufgetreten,\nbitte Konfiguration prüfen!";
+        }
     }
 }

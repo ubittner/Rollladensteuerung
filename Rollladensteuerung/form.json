@@ -1225,7 +1225,7 @@
       "items": [
         {
           "type": "Label",
-          "caption": "Bitte wählen Sie die Instanz des Rollladenaktors aus:\n\nHM-LC-Bl1-FM\tKanal 1\nHmIP-BROLL\t\tKanal 3\nHmIP-FROLL\t\tKanal 3"
+          "caption": "Bitte wählen Sie die Instanz des Rollladenaktors aus:\n\nHM-LC-Bl1-FM\tKanal 1\nHmIP-BROLL\t\tKanal 4\nHmIP-FROLL\t\tKanal 4"
         },
         {
           "type": "SelectInstance",
@@ -1289,7 +1289,7 @@
         },
         {
           "type": "Label",
-          "caption": "Bitte wählen Sie die Variable für die Rollladenposition aus:\n\nHM-LC-Bl1-FM\tKanal 1\tLEVEL\nHmIP-BROLL\t\tKanal 3\tLEVEL\nHmIP-FROLL\t\tKanal 3\tLEVEL"
+          "caption": "Bitte wählen Sie die Variable für die Rollladenposition aus:\n\nHM-LC-Bl1-FM\tKanal 1\tLEVEL\nHmIP-BROLL\t\tKanal 4\tLEVEL\nHmIP-FROLL\t\tKanal 4\tLEVEL"
         },
         {
           "type": "SelectVariable",
@@ -1318,7 +1318,7 @@
         },
         {
           "type": "Label",
-          "caption": "Bitte wählen Sie die Variable für den Aktivitätszustand aus:\n\nHM-LC-Bl1-FM\tKanal 1\tWORKING\nHmIP-BROLL\t\tKanal 3\tPROCESS\nHmIP-FROLL\t\tKanal 3\tPROCESS"
+          "caption": "Bitte wählen Sie die Variable für den Aktivitätszustand aus:\n\nHM-LC-Bl1-FM\tKanal 1\tWORKING\nHmIP-BROLL\t\tKanal 4\tPROCESS\nHmIP-FROLL\t\tKanal 4\tPROCESS"
         },
         {
           "type": "SelectVariable",

@@ -57,7 +57,7 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyBoolean('BlindSliderUpdateSetpointPosition', false);
         $this->RegisterPropertyBoolean('BlindSliderUpdateLastPosition', false);
         $this->RegisterPropertyBoolean('EnablePositionPresets', true);
-        $this->RegisterPropertyString('PositionPresets', '[{"Value":0,"Text":"0 %"},{"Value":25,"Text":"25 %"}, {"Value":50,"Text":"50 %"},{"Value":75,"Text":"75 %"},{"Value":100,"Text":"100 %"}]');
+        $this->RegisterPropertyString('PositionPresets', '[{"Value":0,"Text":"Geschlossen"}, {"Value":60,"Text":"Beschattet"},{"Value":80,"Text":"Belüfttet"},{"Value":100,"Text":"Geöffnet"}]');
         $this->RegisterPropertyBoolean('PositionPresetsUpdateButton', false);
         $this->RegisterPropertyBoolean('PositionPresetsUpdateSetpointPosition', false);
         $this->RegisterPropertyBoolean('PositionPresetsUpdateLastPosition', false);
@@ -77,8 +77,8 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyBoolean('EnablePresence', true);
         //Actuator
         $this->RegisterPropertyInteger('Actuator', 0);
-        $this->RegisterPropertyInteger('DeviceType', 0);
-        $this->RegisterPropertyInteger('ActuatorProperty', 0);
+        $this->RegisterPropertyInteger('DeviceType', 2);
+        $this->RegisterPropertyInteger('ActuatorProperty', 1);
         $this->RegisterPropertyInteger('ActuatorBlindPosition', 0);
         $this->RegisterPropertyBoolean('ActuatorUpdateBlindPosition', false);
         $this->RegisterPropertyBoolean('ActuatorUpdateSetpointPosition', false);

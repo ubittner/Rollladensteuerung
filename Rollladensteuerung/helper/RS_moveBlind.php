@@ -17,6 +17,7 @@ trait RS_moveBlind
     public function MoveBlind(int $Position, int $Duration = 0, int $DurationUnit = 0): bool
     {
         $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt. (' . microtime(true) . ')', 0);
+        $this->SendDebug(__FUNCTION__, '$Position: ' . $Position, 0);
         if ($this->CheckMaintenanceMode()) {
             return false;
         }
