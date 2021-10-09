@@ -1029,7 +1029,7 @@
             {
               "type": "CheckBox",
               "name": "PositionPresetsUpdateButton",
-              "caption": "Voreinstellung mit Rollladenposition aktualisieren"
+              "caption": "Voreinstellung aktualisieren und mit Rollladenposition abgleichen"
             },
             {
               "type": "CheckBox",
