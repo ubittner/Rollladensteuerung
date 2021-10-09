@@ -38,10 +38,10 @@ trait RS_moveBlind
                 }
             }
         }
-        $actualBlindMode = intval($this->GetValue('BlindMode'));
-        $actualBlindSliderValue = floatval($this->GetValue('BlindSlider'));
-        $actualPositionPreset = intval($this->GetValue('PositionPresets'));
-        $actualLastPosition = intval($this->GetValue('LastPosition'));
+        $actualBlindMode = $this->GetValue('BlindMode');
+        $actualBlindSliderValue = $this->GetValue('BlindSlider');
+        $actualPositionPreset = $this->GetValue('PositionPresets');
+        $actualLastPosition = $this->GetValue('LastPosition');
         //Closed
         if ($Position == 0) {
             $mode = 0;
@@ -198,6 +198,8 @@ trait RS_moveBlind
                         $this->SetValue('LastPosition', $actualPosition);
                     }
                 }
+            } else{
+                $this->SendDebug(__FUNCTION__, 'Rolladen fährt noch, Zielposition noch nicht erreicht!', 0);
             }
         }
     }
