@@ -198,7 +198,7 @@ trait RS_moveBlind
                         $this->SetValue('LastPosition', $actualPosition);
                     }
                 }
-            } else{
+            } else {
                 $this->SendDebug(__FUNCTION__, 'Rolladen fährt noch, Zielposition noch nicht erreicht!', 0);
             }
         }
