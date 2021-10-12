@@ -34,6 +34,7 @@ trait RS_backupRestore
             $config['WeeklyScheduleActionOne'] = json_decode($config['WeeklyScheduleActionOne'], true);
             $config['WeeklyScheduleActionTwo'] = json_decode($config['WeeklyScheduleActionTwo'], true);
             $config['WeeklyScheduleActionThree'] = json_decode($config['WeeklyScheduleActionThree'], true);
+            $config['WeeklyScheduleActionFour'] = json_decode($config['WeeklyScheduleActionFour'], true);
             $config['NightAction'] = json_decode($config['NightAction'], true);
             $config['DayAction'] = json_decode($config['DayAction'], true);
             $config['TwilightDayAction'] = json_decode($config['TwilightDayAction'], true);
@@ -77,6 +78,7 @@ trait RS_backupRestore
                 $config['WeeklyScheduleActionOne'] = json_encode($config['WeeklyScheduleActionOne']);
                 $config['WeeklyScheduleActionTwo'] = json_encode($config['WeeklyScheduleActionTwo']);
                 $config['WeeklyScheduleActionThree'] = json_encode($config['WeeklyScheduleActionThree']);
+                $config['WeeklyScheduleActionFour'] = json_encode($config['WeeklyScheduleActionThree']);
                 $config['NightAction'] = json_encode($config['NightAction']);
                 $config['DayAction'] = json_encode($config['DayAction']);
                 $config['TwilightDayAction'] = json_encode($config['TwilightDayAction']);
