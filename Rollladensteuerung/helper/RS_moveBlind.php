@@ -31,7 +31,7 @@ trait RS_moveBlind
         $activityStatus = $this->ReadPropertyInteger('ActuatorActivityStatus');
         if ($activityStatus != 0 && @IPS_ObjectExists($activityStatus)) {
             if (intval(GetValue($activityStatus)) == 1) {
-                $this->SendDebug(__FUNCTION__, 'Die Rollladenfahrt ist noch nicht abgeschlossen!', 0);
+                $this->SendDebug(__FUNCTION__, 'Rolladen fährt noch, Zielposition noch nicht erreicht!', 0);
                 $useStopFunction = $this->ReadPropertyBoolean('EnableStopFunction');
                 if ($useStopFunction) {
                     $this->StopBlindMoving();
@@ -113,8 +113,9 @@ trait RS_moveBlind
                         $result = @RequestAction($id, $newVariableValue);
                         if (!$result) {
                             if (isset($modeText)) {
-                                $this->SendDebug(__FUNCTION__, 'Fehler, der Rolladen mit der ID ' . $id . ' konnte nicht ' . $modeText . ' werden!', 0);
-                                IPS_LogMessage(__FUNCTION__, 'Fehler, der Rolladen mit der ID ' . $id . ' konnte nicht ' . $modeText . ' werden!');
+                                $logText = 'Fehler, der Rolladen mit der ID ' . $id . ' konnte nicht ' . $modeText . ' werden!';
+                                $this->SendDebug(__FUNCTION__, $logText, 0);
+                                $this->LogMessage('Instanz: ' . $this->InstanceID . ', ' . __FUNCTION__ . ': ' . $logText, KL_WARNING);
                             }
                         }
                     }

@@ -136,8 +136,12 @@ class Rollladensteuerung extends IPSModule
         }
         IPS_SetVariableProfileAssociation($profile, 0, 'Aus', 'Execute', -1);
         IPS_SetVariableProfileAssociation($profile, 1, 'An', 'Clock', 0x00FF00);
+        $id = @$this->GetIDForIdent('AutomaticMode');
         $this->RegisterVariableBoolean('AutomaticMode', 'Automatik', $profile, 10);
         $this->EnableAction('AutomaticMode');
+        if ($id == false) {
+            $this->SetValue('AutomaticMode', true);
+        }
         //Sleep mode
         $profile = self::MODULE_PREFIX . '.' . $this->InstanceID . '.SleepMode';
         if (!IPS_VariableProfileExists($profile)) {
@@ -704,6 +708,9 @@ class Rollladensteuerung extends IPSModule
                 $id = $this->ReadPropertyInteger('ActuatorActivityStatus');
                 if ($id != 0 && @IPS_ObjectExists($id)) {
                     if ($SenderID == $id) {
+                        if ($Data[1] && $Data[0] != 0) {
+                            $this->SendDebug(__FUNCTION__, 'Rolladen fährt noch, Zielposition noch nicht erreicht!', 0);
+                        }
                         if ($Data[1] && $Data[0] == 0) {
                             $this->SendDebug(__FUNCTION__, 'Die Rollladenposition hat sich geändert.', 0);
                             $scriptText = self::MODULE_PREFIX . '_UpdateBlindPosition(' . $this->InstanceID . ');';
@@ -905,7 +912,7 @@ class Rollladensteuerung extends IPSModule
     {
         $scriptID = IPS_CreateScript(0);
         IPS_SetName($scriptID, 'Beispielskript (Komfort-Rollladensteuerung #' . $this->InstanceID . ')');
-        $scriptContent = "<?php\n\n// Methode:\n// " . self::MODULE_PREFIX . "_MoveBlind(integer \$InstanceID, integer \$Position, integer \$Duration, integer \$DurationUnit);\n\n### Beispiele:\n\n// Rollladen auf 0 % schließen:\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ", 0, 0, 0);\n\n// Rollladen für 180 Sekunden öffnen:\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ", 100, 180, 0);\n\n// Rollladen für 5 Minuten öffnen:\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ", 100, 5, 1);\n\n// Rollladen auf 70 % öffnen:\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ', 70, 0, 0);';
+        $scriptContent = "<?php\n\n//Methode:\n//" . self::MODULE_PREFIX . "_MoveBlind(integer \$InstanceID, integer \$Position, integer \$Duration, integer \$DurationUnit);\n\n### Beispiele:\n\n//Rollladen dauerhaft schließen (0 %):\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ", 0, 0, 0);\n\n//Rollladen für 180 Sekunden öffnen (100 %):\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ", 100, 180, 0);\n\n//Rollladen für 5 Minuten öffnen (100 %):\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ", 100, 5, 1);\n\n//Rollladen dauerhaft auf 70 % öffnen:\n" . self::MODULE_PREFIX . '_MoveBlind(' . $this->InstanceID . ', 70, 0, 0);';
         IPS_SetScriptContent($scriptID, $scriptContent);
         IPS_SetParent($scriptID, $this->InstanceID);
         IPS_SetPosition($scriptID, 200);

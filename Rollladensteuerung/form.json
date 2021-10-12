@@ -1234,10 +1234,6 @@
           "width": "600px"
         },
         {
-          "type": "Label",
-          "caption": " "
-        },
-        {
           "type": "Select",
           "name": "DeviceType",
           "caption": "Gerätetyp",
@@ -1259,10 +1255,6 @@
               "value": 3
             }
           ]
-        },
-        {
-          "type": "Label",
-          "caption": " "
         },
         {
           "type": "Select",
@@ -1289,7 +1281,7 @@
         },
         {
           "type": "Label",
-          "caption": "Bitte wählen Sie die Variable für die Rollladenposition aus:\n\nHM-LC-Bl1-FM\tKanal 1\tLEVEL\nHmIP-BROLL\t\tKanal 4\tLEVEL\nHmIP-FROLL\t\tKanal 4\tLEVEL"
+          "caption": "Bitte wählen Sie die Variable für die aktuelle Rollladenposition aus:\n\nHM-LC-Bl1-FM\tKanal 1\tLEVEL\nHmIP-BROLL\t\tKanal 4\tLEVEL\nHmIP-FROLL\t\tKanal 4\tLEVEL"
         },
         {
           "type": "SelectVariable",
@@ -3388,7 +3380,7 @@
             },
             {
               "name": "CheckBlindMode",
-              "caption": "Rolladen",
+              "caption": "Rollladen",
               "width": "150px",
               "add": 0,
               "edit": {
@@ -3703,7 +3695,7 @@
             },
             {
               "name": "CheckBlindMode",
-              "caption": "Rolladen",
+              "caption": "Rollladen",
               "width": "150px",
               "add": 0,
               "edit": {
@@ -4329,7 +4321,7 @@
             },
             {
               "name": "CheckBlindMode",
-              "caption": "Rolladen",
+              "caption": "Rollladen",
               "width": "150px",
               "add": 0,
               "edit": {
@@ -4634,7 +4626,312 @@
             },
             {
               "name": "CheckBlindMode",
-              "caption": "Rolladen",
+              "caption": "Rollladen",
+              "width": "150px",
+              "add": 0,
+              "edit": {
+                "type": "Select",
+                "options": [
+                  {
+                    "caption": "Keine Prüfung",
+                    "value": 0
+                  },
+                  {
+                    "caption": "Geschlossen",
+                    "value": 1
+                  },
+                  {
+                    "caption": "Timer",
+                    "value": 2
+                  },
+                  {
+                    "caption": "Timer - Geöffnet",
+                    "value": 3
+                  },
+                  {
+                    "caption": "Geöffnet",
+                    "value": 4
+                  }
+                ]
+              }
+            },
+            {
+              "name": "CheckIsDay",
+              "caption": "Ist es Tag",
+              "width": "150px",
+              "add": 0,
+              "edit": {
+                "type": "Select",
+                "options": [
+                  {
+                    "caption": "Keine Prüfung",
+                    "value": 0
+                  },
+                  {
+                    "caption": "Es ist Nacht",
+                    "value": 1
+                  },
+                  {
+                    "caption": "Es ist Tag",
+                    "value": 2
+                  }
+                ]
+              }
+            },
+            {
+              "name": "CheckTwilight",
+              "caption": "Dämmerungsstatus",
+              "width": "200px",
+              "add": 0,
+              "edit": {
+                "type": "Select",
+                "options": [
+                  {
+                    "caption": "Keine Prüfung",
+                    "value": 0
+                  },
+                  {
+                    "caption": "Es ist Tag",
+                    "value": 1
+                  },
+                  {
+                    "caption": "Es ist Nacht",
+                    "value": 2
+                  }
+                ]
+              }
+            },
+            {
+              "name": "CheckPresence",
+              "caption": "Anwesenheitsstatus",
+              "width": "200px",
+              "add": 0,
+              "edit": {
+                "type": "Select",
+                "options": [
+                  {
+                    "caption": "Keine Prüfung",
+                    "value": 0
+                  },
+                  {
+                    "caption": "Abwesenheit",
+                    "value": 1
+                  },
+                  {
+                    "caption": "Anwesenheit",
+                    "value": 2
+                  }
+                ]
+              }
+            },
+            {
+              "name": "CheckDoorWindowStatus",
+              "caption": "Tür- / Fensterstatus",
+              "width": "200px",
+              "add": 0,
+              "edit": {
+                "type": "Select",
+                "options": [
+                  {
+                    "caption": "Keine Prüfung",
+                    "value": 0
+                  },
+                  {
+                    "caption": "Geschlossen",
+                    "value": 1
+                  },
+                  {
+                    "caption": "Geöffnet",
+                    "value": 2
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "Label",
+          "caption": " "
+        },
+        {
+          "type": "List",
+          "name": "WeeklyScheduleActionFour",
+          "caption": "Aktionen für ID 4: Belüften",
+          "add": true,
+          "delete": true,
+          "rowCount": 3,
+          "columns": [
+            {
+              "name": "LabelWeeklyScheduleAction",
+              "caption": "Aktion ID 4: Belüften",
+              "width": "150px",
+              "visible": false,
+              "add": "",
+              "edit": {
+                "type": "Label"
+              }
+            },
+            {
+              "name": "UseSettings",
+              "caption": "Aktiviert",
+              "width": "100px",
+              "add": true,
+              "edit": {
+                "type": "CheckBox"
+              }
+            },
+            {
+              "name": "SelectPosition",
+              "caption": "Positionsauswahl",
+              "width": "170px",
+              "add": 1,
+              "edit": {
+                "type": "Select",
+                "options": [
+                  {
+                    "caption": "Keine",
+                    "value": 0
+                  },
+                  {
+                    "caption": "Definierte Position",
+                    "value": 1
+                  },
+                  {
+                    "caption": "Letzte Position",
+                    "value": 2
+                  },
+                  {
+                    "caption": "Soll-Position",
+                    "value": 3
+                  }
+                ]
+              }
+            },
+            {
+              "name": "Position",
+              "caption": "Definierte Position",
+              "width": "170px",
+              "add": 60,
+              "edit": {
+                "type": "NumberSpinner",
+                "suffix": " %",
+                "minimum": 0,
+                "maximum": 100
+              }
+            },
+            {
+              "name": "UpdateSetpointPosition",
+              "caption": "Soll-Position anpassen",
+              "width": "200px",
+              "add": false,
+              "edit": {
+                "type": "CheckBox"
+              }
+            },
+            {
+              "name": "UpdateLastPosition",
+              "caption": "Letzte Position anpassen",
+              "width": "220px",
+              "add": false,
+              "edit": {
+                "type": "CheckBox"
+              }
+            },
+            {
+              "name": "ExecutionDelay",
+              "caption": "Verzögerung",
+              "width": "150px",
+              "add": 0,
+              "edit": {
+                "type": "NumberSpinner",
+                "suffix": " s",
+                "minimum": 0,
+                "maximum": 10
+              }
+            },
+            {
+              "name": "LabelSwitchingConditions",
+              "caption": "\nSchaltbedingungen:",
+              "width": "150px",
+              "visible": false,
+              "add": "",
+              "edit": {
+                "type": "Label"
+              }
+            },
+            {
+              "name": "CheckPositionDifference",
+              "caption": "Positionsunterschied",
+              "width": "190px",
+              "add": 0,
+              "edit": {
+                "type": "NumberSpinner",
+                "suffix": " %",
+                "minimum": 0,
+                "maximum": 100
+              }
+            },
+            {
+              "name": "CheckLockoutProtection",
+              "caption": "Aussperrschutz",
+              "width": "190px",
+              "add": 0,
+              "edit": {
+                "type": "NumberSpinner",
+                "suffix": " %",
+                "minimum": 0,
+                "maximum": 100
+              }
+            },
+            {
+              "name": "CheckAutomaticMode",
+              "caption": "Automatik",
+              "width": "150px",
+              "add": 0,
+              "edit": {
+                "type": "Select",
+                "options": [
+                  {
+                    "caption": "Keine Prüfung",
+                    "value": 0
+                  },
+                  {
+                    "caption": "Aus",
+                    "value": 1
+                  },
+                  {
+                    "caption": "An",
+                    "value": 2
+                  }
+                ]
+              }
+            },
+            {
+              "name": "CheckSleepMode",
+              "caption": "Ruhe-Modus",
+              "width": "150px",
+              "add": 0,
+              "edit": {
+                "type": "Select",
+                "options": [
+                  {
+                    "caption": "Keine Prüfung",
+                    "value": 0
+                  },
+                  {
+                    "caption": "Aus",
+                    "value": 1
+                  },
+                  {
+                    "caption": "An",
+                    "value": 2
+                  }
+                ]
+              }
+            },
+            {
+              "name": "CheckBlindMode",
+              "caption": "Rollladen",
               "width": "150px",
               "add": 0,
               "edit": {
@@ -4955,7 +5252,7 @@
             },
             {
               "name": "CheckBlindMode",
-              "caption": "Rolladen",
+              "caption": "Rollladen",
               "width": "150px",
               "add": 0,
               "edit": {
@@ -5237,7 +5534,7 @@
             },
             {
               "name": "CheckBlindMode",
-              "caption": "Rolladen",
+              "caption": "Rollladen",
               "width": "150px",
               "add": 0,
               "edit": {
@@ -5535,7 +5832,7 @@
             },
             {
               "name": "CheckBlindMode",
-              "caption": "Rolladen",
+              "caption": "Rollladen",
               "width": "150px",
               "add": 0,
               "edit": {
@@ -5817,7 +6114,7 @@
             },
             {
               "name": "CheckBlindMode",
-              "caption": "Rolladen",
+              "caption": "Rollladen",
               "width": "150px",
               "add": 0,
               "edit": {
@@ -6115,7 +6412,7 @@
             },
             {
               "name": "CheckBlindMode",
-              "caption": "Rolladen",
+              "caption": "Rollladen",
               "width": "150px",
               "add": 0,
               "edit": {
@@ -6397,7 +6694,7 @@
             },
             {
               "name": "CheckBlindMode",
-              "caption": "Rolladen",
+              "caption": "Rollladen",
               "width": "150px",
               "add": 0,
               "edit": {
@@ -6726,7 +7023,7 @@
             },
             {
               "name": "CheckBlindMode",
-              "caption": "Rolladen",
+              "caption": "Rollladen",
               "width": "150px",
               "add": 0,
               "edit": {

@@ -82,6 +82,16 @@ trait RS_weeklySchedule
                 }
                 $this->SendDebug(__FUNCTION__, 'Wochenplanaktion: 3 = Beschatten', 0);
                 break;
+
+            case 4: # Ventilate
+                $actionName = 'WeeklyScheduleActionFour';
+                $action = $this->CheckAction('WeeklySchedule', $actionName);
+                if (!$action) {
+                    $this->SendDebug(__FUNCTION__, 'Abbruch, Wochenplanaktion: 4 = Belüften hat keine aktivierten Aktionen!', 0);
+                    return;
+                }
+                $this->SendDebug(__FUNCTION__, 'Wochenplanaktion: 4 = Belüften', 0);
+                break;
         }
         if (isset($actionName)) {
             foreach (json_decode($this->ReadPropertyString($actionName), true) as $setting) {
