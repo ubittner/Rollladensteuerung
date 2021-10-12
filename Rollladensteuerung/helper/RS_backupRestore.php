@@ -78,7 +78,7 @@ trait RS_backupRestore
                 $config['WeeklyScheduleActionOne'] = json_encode($config['WeeklyScheduleActionOne']);
                 $config['WeeklyScheduleActionTwo'] = json_encode($config['WeeklyScheduleActionTwo']);
                 $config['WeeklyScheduleActionThree'] = json_encode($config['WeeklyScheduleActionThree']);
-                $config['WeeklyScheduleActionFour'] = json_encode($config['WeeklyScheduleActionThree']);
+                $config['WeeklyScheduleActionFour'] = json_encode($config['WeeklyScheduleActionFour']);
                 $config['NightAction'] = json_encode($config['NightAction']);
                 $config['DayAction'] = json_encode($config['DayAction']);
                 $config['TwilightDayAction'] = json_encode($config['TwilightDayAction']);
