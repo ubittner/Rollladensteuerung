@@ -521,12 +521,12 @@ class Rollladensteuerung extends IPSModule
         #################### Position presets
 
         $profile = self::MODULE_PREFIX . '.' . $this->InstanceID . '.PositionPresets';
-        // Delete
+        //Delete
         foreach (IPS_GetVariableProfile($profile)['Associations'] as $association) {
             IPS_SetVariableProfileAssociation($profile, $association['Value'], '', '', -1);
         }
         foreach (json_decode($this->ReadPropertyString('PositionPresets')) as $preset) {
-            // Create
+            //Create
             IPS_SetVariableProfileAssociation($profile, $preset->Value, $preset->Text, '', -1);
         }
 
@@ -806,7 +806,7 @@ class Rollladensteuerung extends IPSModule
                     return;
                 }
 
-                // Weekly schedule
+                //Weekly schedule
                 $scriptText = self::MODULE_PREFIX . '_ExecuteWeeklyScheduleAction(' . $this->InstanceID . ');';
                 IPS_RunScriptText($scriptText);
                 break;

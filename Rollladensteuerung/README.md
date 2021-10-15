@@ -17,14 +17,19 @@ Zur Verwendung dieses Moduls als Privatperson, Einrichter oder Integrator wenden
 
 ### Inhaltverzeichnis
 
-1. [Wochenplan](#1-wochenplan)
-2. [PHP-Befehlsreferenz](#2-php-befehlsreferenz)
+1. [Rollladensteuerung](#1-rollladensteuerung)
+2. [Wochenplan](#2-wochenplan)
+3. [PHP-Befehlsreferenz](#3-php-befehlsreferenz)
 
-### 1. Wochenplan
+### 1. Rollladensteuerung
+
+[![Image](../imgs/Rollladensteuerung.png)]()
+
+### 2. Wochenplan
 
 [![Image](../imgs/Wochenplan.png)]()
 
-### 2. PHP-Befehlsreferenz
+### 3. PHP-Befehlsreferenz
 
 Behanghöhe des Rollladens steuern:
 
