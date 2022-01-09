@@ -110,6 +110,7 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyString('WeeklyScheduleActionOne', '[]');
         $this->RegisterPropertyString('WeeklyScheduleActionTwo', '[]');
         $this->RegisterPropertyString('WeeklyScheduleActionThree', '[]');
+        $this->RegisterPropertyString('WeeklyScheduleActionFour', '[]');
         //Is day
         $this->RegisterPropertyInteger('IsDay', 0);
         $this->RegisterPropertyString('NightAction', '[]');
