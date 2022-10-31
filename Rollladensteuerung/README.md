@@ -15,7 +15,7 @@ Der Nutzer stimmt den o.a. Bedingungen, sowie den Lizenzbedingungen ausdrücklic
 
 Zur Verwendung dieses Moduls als Privatperson, Einrichter oder Integrator wenden Sie sich bitte zunächst an den Autor.
 
-### Inhaltverzeichnis
+### Inhaltsverzeichnis
 
 1. [Rollladensteuerung](#1-rollladensteuerung)
 2. [Wochenplan](#2-wochenplan)

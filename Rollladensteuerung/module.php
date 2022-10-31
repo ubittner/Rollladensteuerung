@@ -1,40 +1,46 @@
 <?php
 
-/** @noinspection PhpUnused */
-
-/*
- * @author      Ulrich Bittner
- * @copyright   (c) 2021
- * @license     CC BY-NC-SA 4.0
- * @see         https://github.com/ubittner/Rollladensteuerung/tree/master/Rollladensteuerung
+/**
+ * @project       Rollladensteuerung/Rollladensteuerung
+ * @file          module.php
+ * @author        Ulrich Bittner
+ * @copyright     2022 Ulrich Bittner
+ * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
  */
+
+/** @noinspection PhpUnhandledExceptionInspection */
+/** @noinspection PhpUnused */
 
 declare(strict_types=1);
 
-include_once __DIR__ . '/helper/autoload.php';
+include_once __DIR__ . '/helper/RS_autoload.php';
 
 class Rollladensteuerung extends IPSModule
 {
     //Helper
-    use RS_actuator;
-    use RS_backupRestore;
-    use RS_checkConditions;
-    use RS_doorWindowSensors;
-    use RS_emergencyTriggers;
-    use RS_isDayDetection;
-    use RS_moveBlind;
-    use RS_presenceDetection;
-    use RS_sunriseSunset;
-    use RS_switchingTime;
-    use RS_trigger;
-    use RS_twilightDetection;
-    use RS_weeklySchedule;
+    use RS_Actuator;
+    use RS_BackupRestore;
+    use RS_CheckConditions;
+    use RS_Config;
+    use RS_DoorWindowSensors;
+    use RS_EmergencyTriggers;
+    use RS_IsDayDetection;
+    use RS_MoveBlind;
+    use RS_PresenceDetection;
+    use RS_SunriseSunset;
+    use RS_SwitchingTime;
+    use RS_Trigger;
+    use RS_TwilightDetection;
+    use RS_WeeklySchedule;
 
     //Constants
     private const LIBRARY_GUID = '{5A853C5C-2A05-BBCB-1E8A-26E91974C977}';
     private const MODULE_NAME = 'Rollladensteuerung';
     private const MODULE_PREFIX = 'UBRS';
+    private const MODULE_VERSION = '2.0-103, 31.10.2022';
     private const HOMEMATIC_DEVICE_GUID = '{EE4A81C6-5C90-4DB7-AD2F-F6BBD521412E}';
+    private const ABLAUFSTEUERUNG_MODULE_GUID = '{0559B287-1052-A73E-B834-EBD9B62CB938}';
+    private const ABLAUFSTEUERUNG_MODULE_PREFIX = 'AST';
     private const DEVICE_DELAY_MILLISECONDS = 250;
 
     public function Create()
@@ -42,8 +48,10 @@ class Rollladensteuerung extends IPSModule
         //Never delete this line!
         parent::Create();
 
-        #################### Properties
+        ########## Properties
 
+        //Info
+        $this->RegisterPropertyString('Note', '');
         //Functions
         $this->RegisterPropertyBoolean('MaintenanceMode', false);
         $this->RegisterPropertyBoolean('EnableAutomaticMode', true);
@@ -127,8 +135,10 @@ class Rollladensteuerung extends IPSModule
         $this->RegisterPropertyString('Triggers', '[]');
         //Emergency triggers
         $this->RegisterPropertyString('EmergencyTriggers', '[]');
+        //Command control
+        $this->RegisterPropertyInteger('CommandControl', 0);
 
-        #################### Variables
+        ########## Variables
 
         //Automatic mode
         $profile = self::MODULE_PREFIX . '.' . $this->InstanceID . '.AutomaticMode';
@@ -140,9 +150,10 @@ class Rollladensteuerung extends IPSModule
         $id = @$this->GetIDForIdent('AutomaticMode');
         $this->RegisterVariableBoolean('AutomaticMode', 'Automatik', $profile, 10);
         $this->EnableAction('AutomaticMode');
-        if ($id == false) {
+        if (!$id) {
             $this->SetValue('AutomaticMode', true);
         }
+
         //Sleep mode
         $profile = self::MODULE_PREFIX . '.' . $this->InstanceID . '.SleepMode';
         if (!IPS_VariableProfileExists($profile)) {
@@ -152,6 +163,7 @@ class Rollladensteuerung extends IPSModule
         IPS_SetVariableProfileAssociation($profile, 1, 'An', 'Sleep', 0x00FF00);
         $this->RegisterVariableBoolean('SleepMode', 'Ruhe-Modus', $profile, 20);
         $this->EnableAction('SleepMode');
+
         //Blind mode
         $profile = self::MODULE_PREFIX . '.' . $this->InstanceID . '.BlindMode';
         if (!IPS_VariableProfileExists($profile)) {
@@ -164,14 +176,16 @@ class Rollladensteuerung extends IPSModule
         IPS_SetVariableProfileAssociation($profile, 3, 'Öffnen', '', 0x00FF00);
         $this->RegisterVariableInteger('BlindMode', 'Rollladen', $profile, 30);
         $this->EnableAction('BlindMode');
+
         //Blind slider
         $id = @$this->GetIDForIdent('BlindSlider');
         $profile = '~Intensity.100';
         $this->RegisterVariableInteger('BlindSlider', 'Rollladenposition', $profile, 40);
-        if ($id == false) {
+        if (!$id) {
             IPS_SetIcon($this->GetIDForIdent('BlindSlider'), 'Jalousie');
         }
         $this->EnableAction('BlindSlider');
+
         //Position presets
         $profile = self::MODULE_PREFIX . '.' . $this->InstanceID . '.PositionPresets';
         if (!IPS_VariableProfileExists($profile)) {
@@ -180,20 +194,22 @@ class Rollladensteuerung extends IPSModule
         IPS_SetVariableProfileIcon($profile, 'Menu');
         $this->RegisterVariableInteger('PositionPresets', 'Position Voreinstellungen', $profile, 50);
         $this->EnableAction('PositionPresets');
+
         //Setpoint position
         $id = @$this->GetIDForIdent('SetpointPosition');
         $profile = '~Intensity.100';
         $this->RegisterVariableInteger('SetpointPosition', 'Soll-Position', $profile, 60);
-        if ($id == false) {
+        if (!$id) {
             IPS_SetIcon($this->GetIDForIdent('SetpointPosition'), 'Information');
         }
+
         //Last position
         $id = @$this->GetIDForIdent('LastPosition');
-        $profile = '~Intensity.100';
         $this->RegisterVariableInteger('LastPosition', 'Letzte Position', $profile, 70);
-        if ($id == false) {
+        if (!$id) {
             IPS_SetIcon($this->GetIDForIdent('LastPosition'), 'Information');
         }
+
         //Door and window status
         $profile = self::MODULE_PREFIX . '.' . $this->InstanceID . '.DoorWindowStatus';
         if (!IPS_VariableProfileExists($profile)) {
@@ -202,31 +218,36 @@ class Rollladensteuerung extends IPSModule
         IPS_SetVariableProfileAssociation($profile, 0, 'Geschlossen', 'Window', 0x00FF00);
         IPS_SetVariableProfileAssociation($profile, 1, 'Geöffnet', 'Window', 0x0000FF);
         $this->RegisterVariableBoolean('DoorWindowStatus', 'Tür- / Fensterstatus', $profile, 80);
+
         //Blind mode timer
         $id = @$this->GetIDForIdent('BlindModeTimer');
         $this->RegisterVariableString('BlindModeTimer', 'Rollladenposition bis', '', 90);
-        if ($id == false) {
+        if (!$id) {
             IPS_SetIcon($this->GetIDForIdent('BlindModeTimer'), 'Clock');
         }
+
         //Sleep mode timer
         $id = @$this->GetIDForIdent('SleepModeTimer');
         $this->RegisterVariableString('SleepModeTimer', 'Ruhe-Modus Timer', '', 100);
-        if ($id == false) {
+        if (!$id) {
             IPS_SetIcon($this->GetIDForIdent('SleepModeTimer'), 'Clock');
         }
+
         //Next switching time
         $id = @$this->GetIDForIdent('NextSwitchingTime');
         $this->RegisterVariableString('NextSwitchingTime', 'Nächste Schaltzeit', '', 110);
-        if ($id == false) {
+        if (!$id) {
             IPS_SetIcon($this->GetIDForIdent('NextSwitchingTime'), 'Information');
         }
 
-        #################### Timers
+        ########## Timer
 
         //Sleep mode timer
         $this->RegisterTimer('SleepMode', 0, self::MODULE_PREFIX . '_DeactivateSleepModeTimer(' . $this->InstanceID . ');');
+
         //Blind timer
         $this->RegisterTimer('StopBlindTimer', 0, self::MODULE_PREFIX . '_StopBlindTimer(' . $this->InstanceID . ');');
+
         //Switching timers
         $this->RegisterTimer('SwitchingTimeOne', 0, self::MODULE_PREFIX . '_ExecuteSwitchingTime(' . $this->InstanceID . ', 1);');
         $this->RegisterTimer('SwitchingTimeTwo', 0, self::MODULE_PREFIX . '_ExecuteSwitchingTime(' . $this->InstanceID . ', 2);');
@@ -247,14 +268,12 @@ class Rollladensteuerung extends IPSModule
             return;
         }
 
-        #################### Options
+        ########## WebFront Options
 
-        //Automatic mode
         IPS_SetHidden($this->GetIDForIdent('AutomaticMode'), !$this->ReadPropertyBoolean('EnableAutomaticMode'));
-        //Sleep mode
         IPS_SetHidden($this->GetIDForIdent('SleepMode'), !$this->ReadPropertyBoolean('EnableSleepMode'));
-        //Blind Mode
         IPS_SetHidden($this->GetIDForIdent('BlindMode'), !$this->ReadPropertyBoolean('EnableBlindMode'));
+
         //Blind mode timer
         $profile = self::MODULE_PREFIX . '.' . $this->InstanceID . '.BlindMode';
         $associations = IPS_GetVariableProfile($profile)['Associations'];
@@ -276,6 +295,7 @@ class Rollladensteuerung extends IPSModule
         } else {
             IPS_SetVariableProfileAssociation($profile, 2, 'Timer', '', 0xFFFF00);
         }
+
         //Blind slider
         IPS_SetHidden($this->GetIDForIdent('BlindSlider'), !$this->ReadPropertyBoolean('EnableBlindSlider'));
         if (!$this->ReadPropertyBoolean('EnableBlindSliderManualChange')) {
@@ -283,6 +303,7 @@ class Rollladensteuerung extends IPSModule
         } else {
             $this->EnableAction('BlindSlider');
         }
+
         //Position presets
         IPS_SetHidden($this->GetIDForIdent('PositionPresets'), !$this->ReadPropertyBoolean('EnablePositionPresets'));
         //Setpoint position
@@ -292,6 +313,7 @@ class Rollladensteuerung extends IPSModule
         } else {
             $this->EnableAction('SetpointPosition');
         }
+
         //Last position
         IPS_SetHidden($this->GetIDForIdent('LastPosition'), !$this->ReadPropertyBoolean('EnableLastPosition'));
         if (!$this->ReadPropertyBoolean('EnableLastPositionManualChange')) {
@@ -299,10 +321,13 @@ class Rollladensteuerung extends IPSModule
         } else {
             $this->EnableAction('LastPosition');
         }
+
         //Door and window status
         IPS_SetHidden($this->GetIDForIdent('DoorWindowStatus'), !$this->ReadPropertyBoolean('EnableDoorWindowStatus'));
+
         //Blind mode timer
         IPS_SetHidden($this->GetIDForIdent('BlindModeTimer'), !$this->ReadPropertyBoolean('EnableBlindModeTimer'));
+
         //Sleep mode timer
         IPS_SetHidden($this->GetIDForIdent('SleepModeTimer'), !$this->ReadPropertyBoolean('EnableSleepModeTimer'));
         //Next switching time
@@ -320,6 +345,7 @@ class Rollladensteuerung extends IPSModule
             }
         }
         IPS_SetHidden($this->GetIDForIdent('NextSwitchingTime'), $hide);
+
         //Sunrise
         $id = @IPS_GetLinkIDByName('Nächster Sonnenaufgang', $this->InstanceID);
         if (is_int($id)) {
@@ -338,6 +364,7 @@ class Rollladensteuerung extends IPSModule
             }
             IPS_SetHidden($id, $hide);
         }
+
         //Sunset
         $id = @IPS_GetLinkIDByName('Nächster Sonnenuntergang', $this->InstanceID);
         if (is_int($id)) {
@@ -356,6 +383,7 @@ class Rollladensteuerung extends IPSModule
             }
             IPS_SetHidden($id, $hide);
         }
+
         //Weekly schedule
         $id = @IPS_GetLinkIDByName('Nächstes Wochenplanereignis', $this->InstanceID);
         if (is_int($id)) {
@@ -367,6 +395,7 @@ class Rollladensteuerung extends IPSModule
             }
             IPS_SetHidden($id, $hide);
         }
+
         //Is day
         $id = @IPS_GetLinkIDByName('Ist es Tag', $this->InstanceID);
         if (is_int($id)) {
@@ -386,6 +415,7 @@ class Rollladensteuerung extends IPSModule
             }
             IPS_SetHidden($id, $hide);
         }
+
         //Twilight
         $id = @IPS_GetLinkIDByName('Dämmerungsstatus', $this->InstanceID);
         if (is_int($id)) {
@@ -398,6 +428,7 @@ class Rollladensteuerung extends IPSModule
             }
             IPS_SetHidden($id, $hide);
         }
+
         //Presence
         $id = @IPS_GetLinkIDByName('Anwesenheitsstatus', $this->InstanceID);
         if (is_int($id)) {
@@ -411,7 +442,7 @@ class Rollladensteuerung extends IPSModule
             IPS_SetHidden($id, $hide);
         }
 
-        #################### References & message registrations
+        ########## References and Messages
 
         //Delete all references
         foreach ($this->GetReferenceList() as $referenceID) {
@@ -519,7 +550,7 @@ class Rollladensteuerung extends IPSModule
             }
         }
 
-        #################### Position presets
+        ########## Position presets
 
         $profile = self::MODULE_PREFIX . '.' . $this->InstanceID . '.PositionPresets';
         //Delete
@@ -531,7 +562,7 @@ class Rollladensteuerung extends IPSModule
             IPS_SetVariableProfileAssociation($profile, $preset->Value, $preset->Text, '', -1);
         }
 
-        #################### Links
+        ########## Links
 
         //Sunrise
         $targetID = 0;
@@ -542,7 +573,7 @@ class Rollladensteuerung extends IPSModule
         $linkID = @IPS_GetLinkIDByName('Nächster Sonnenaufgang', $this->InstanceID);
         if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
             //Check for existing link
-            if (!is_int($linkID) && $linkID == false) {
+            if (!is_int($linkID) && !$linkID) {
                 $linkID = IPS_CreateLink();
             }
             IPS_SetParent($linkID, $this->InstanceID);
@@ -555,6 +586,7 @@ class Rollladensteuerung extends IPSModule
                 IPS_SetHidden($linkID, true);
             }
         }
+
         //Sunset
         $targetID = 0;
         $sunset = $this->ReadPropertyInteger('Sunset');
@@ -564,7 +596,7 @@ class Rollladensteuerung extends IPSModule
         $linkID = @IPS_GetLinkIDByName('Nächster Sonnenuntergang', $this->InstanceID);
         if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
             //Check for existing link
-            if (!is_int($linkID) && $linkID == false) {
+            if (!is_int($linkID) && !$linkID) {
                 $linkID = IPS_CreateLink();
             }
             IPS_SetParent($linkID, $this->InstanceID);
@@ -577,12 +609,13 @@ class Rollladensteuerung extends IPSModule
                 IPS_SetHidden($linkID, true);
             }
         }
+
         //Weekly schedule
         $targetID = $this->ReadPropertyInteger('WeeklySchedule');
         $linkID = @IPS_GetLinkIDByName('Nächstes Wochenplanereignis', $this->InstanceID);
         if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
             //Check for existing link
-            if (!is_int($linkID) && $linkID == false) {
+            if (!is_int($linkID) && !$linkID) {
                 $linkID = IPS_CreateLink();
             }
             IPS_SetParent($linkID, $this->InstanceID);
@@ -595,12 +628,13 @@ class Rollladensteuerung extends IPSModule
                 IPS_SetHidden($linkID, true);
             }
         }
+
         //Is day
         $targetID = $this->ReadPropertyInteger('IsDay');
         $linkID = @IPS_GetLinkIDByName('Ist es Tag', $this->InstanceID);
         if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
             //Check for existing link
-            if (!is_int($linkID) && $linkID == false) {
+            if (!is_int($linkID) && !$linkID) {
                 $linkID = IPS_CreateLink();
             }
             IPS_SetParent($linkID, $this->InstanceID);
@@ -612,12 +646,13 @@ class Rollladensteuerung extends IPSModule
                 IPS_SetHidden($linkID, true);
             }
         }
+
         //Twilight
         $targetID = $this->ReadPropertyInteger('TwilightStatus');
         $linkID = @IPS_GetLinkIDByName('Dämmerungsstatus', $this->InstanceID);
         if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
             //Check for existing link
-            if (!is_int($linkID) && $linkID == false) {
+            if (!is_int($linkID) && !$linkID) {
                 $linkID = IPS_CreateLink();
             }
             IPS_SetParent($linkID, $this->InstanceID);
@@ -629,12 +664,13 @@ class Rollladensteuerung extends IPSModule
                 IPS_SetHidden($linkID, true);
             }
         }
+
         //Presence
         $targetID = $this->ReadPropertyInteger('PresenceStatus');
         $linkID = @IPS_GetLinkIDByName('Anwesenheitsstatus', $this->InstanceID);
         if ($targetID != 0 && @IPS_ObjectExists($targetID)) {
             //Check for existing link
-            if (!is_int($linkID) && $linkID == false) {
+            if (!is_int($linkID) && !$linkID) {
                 $linkID = IPS_CreateLink();
             }
             IPS_SetParent($linkID, $this->InstanceID);
@@ -647,7 +683,7 @@ class Rollladensteuerung extends IPSModule
             }
         }
 
-        #################### Misc
+        ########## Misc
 
         //Deactivate sleep mode
         $this->DeactivateSleepModeTimer();
@@ -705,6 +741,7 @@ class Rollladensteuerung extends IPSModule
                 if ($this->CheckMaintenanceMode()) {
                     return;
                 }
+
                 //Actuator activity
                 $id = $this->ReadPropertyInteger('ActuatorActivityStatus');
                 if ($id != 0 && @IPS_ObjectExists($id)) {
@@ -719,15 +756,17 @@ class Rollladensteuerung extends IPSModule
                         }
                     }
                 }
+
                 //Door and window sensors
                 $doorWindowSensors = json_decode($this->ReadPropertyString('DoorWindowSensors'), true);
                 if (!empty($doorWindowSensors)) {
-                    if (array_search($SenderID, array_column($doorWindowSensors, 'ID')) !== false) {
+                    if (in_array($SenderID, array_column($doorWindowSensors, 'ID'))) {
                         if ($Data[1]) {
                             $this->CheckDoorWindowSensors();
                         }
                     }
                 }
+
                 //Sunrise
                 $sunrise = $this->ReadPropertyInteger('Sunrise');
                 if ($sunrise != 0 && @IPS_ObjectExists($sunrise)) {
@@ -738,6 +777,7 @@ class Rollladensteuerung extends IPSModule
                         }
                     }
                 }
+
                 //Sunset
                 $sunset = $this->ReadPropertyInteger('Sunset');
                 if ($sunset != 0 && @IPS_ObjectExists($sunset)) {
@@ -748,6 +788,7 @@ class Rollladensteuerung extends IPSModule
                         }
                     }
                 }
+
                 //Is day
                 $id = $this->ReadPropertyInteger('IsDay');
                 if ($id != 0 && @IPS_ObjectExists($id)) {
@@ -758,6 +799,7 @@ class Rollladensteuerung extends IPSModule
                         }
                     }
                 }
+
                 //Twilight
                 $id = $this->ReadPropertyInteger('TwilightStatus');
                 if ($id != 0 && @IPS_ObjectExists($id)) {
@@ -768,6 +810,7 @@ class Rollladensteuerung extends IPSModule
                         }
                     }
                 }
+
                 //Presence
                 $id = $this->ReadPropertyInteger('PresenceStatus');
                 if ($id != 0 && @IPS_ObjectExists($id)) {
@@ -778,18 +821,20 @@ class Rollladensteuerung extends IPSModule
                         }
                     }
                 }
+
                 //Triggers
                 $triggers = json_decode($this->ReadPropertyString('Triggers'), true);
                 if (!empty($triggers)) {
-                    if (array_search($SenderID, array_column($triggers, 'ID')) !== false) {
+                    if (in_array($SenderID, array_column($triggers, 'ID'))) {
                         $scriptText = self::MODULE_PREFIX . '_CheckTrigger(' . $this->InstanceID . ', ' . $SenderID . ');';
                         IPS_RunScriptText($scriptText);
                     }
                 }
+
                 //Emergency triggers
                 $emergencyTriggers = json_decode($this->ReadPropertyString('EmergencyTriggers'), true);
                 if (!empty($emergencyTriggers)) {
-                    if (array_search($SenderID, array_column($emergencyTriggers, 'ID')) !== false) {
+                    if (in_array($SenderID, array_column($emergencyTriggers, 'ID'))) {
                         if ($Data[1]) {
                             $scriptText = self::MODULE_PREFIX . '_ExecuteEmergencyTrigger(' . $this->InstanceID . ', ' . $SenderID . ');';
                             IPS_RunScriptText($scriptText);
@@ -813,86 +858,6 @@ class Rollladensteuerung extends IPSModule
                 break;
 
         }
-    }
-
-    public function GetConfigurationForm()
-    {
-        $form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
-        //Door and window sensors
-        foreach (json_decode($this->ReadPropertyString('DoorWindowSensors')) as $variable) {
-            $rowColor = '#FFC0C0'; # red
-            $id = $variable->ID;
-            if ($id != 0 && @IPS_ObjectExists($id)) {
-                $rowColor = '#C0FFC0'; # light green
-                //Deactivated
-                if (!$variable->UseSettings) {
-                    $rowColor = '#DFDFDF'; # grey
-                }
-            }
-            $form['elements'][2]['items'][1]['values'][] = ['rowColor' => $rowColor];
-        }
-        //Triggers
-        foreach (json_decode($this->ReadPropertyString('Triggers')) as $variable) {
-            $rowColor = '#FFC0C0'; # red
-            $id = $variable->ID;
-            if ($id != 0 && @IPS_ObjectExists($id)) {
-                $rowColor = '#C0FFC0'; # light green
-                //Deactivated
-                if (!$variable->UseSettings) {
-                    $rowColor = '#DFDFDF'; # grey
-                }
-            }
-            $form['elements'][9]['items'][1]['values'][] = ['rowColor' => $rowColor];
-        }
-        //EmergencyTriggers
-        foreach (json_decode($this->ReadPropertyString('EmergencyTriggers')) as $variable) {
-            $rowColor = '#FFC0C0'; # red
-            $id = $variable->ID;
-            if ($id != 0 && @IPS_ObjectExists($id)) {
-                $rowColor = '#C0FFC0'; # light green
-                //Deactivated
-                if (!$variable->UseSettings) {
-                    $rowColor = '#DFDFDF'; # grey
-                }
-            }
-            $form['elements'][10]['items'][1]['values'][] = ['rowColor' => $rowColor];
-        }
-        //Status
-        $library = IPS_GetLibrary(self::LIBRARY_GUID);
-        $version = '[Version ' . $library['Version'] . '-' . $library['Build'] . ' vom ' . date('d.m.Y', $library['Date']) . ']';
-        $form['status'] = [
-            [
-                'code'    => 101,
-                'icon'    => 'active',
-                'caption' => self::MODULE_NAME . ' wird erstellt',
-            ],
-            [
-                'code'    => 102,
-                'icon'    => 'active',
-                'caption' => self::MODULE_NAME . ' ist aktiv (ID ' . $this->InstanceID . ') ' . $version,
-            ],
-            [
-                'code'    => 103,
-                'icon'    => 'active',
-                'caption' => self::MODULE_NAME . ' wird gelöscht (ID ' . $this->InstanceID . ') ' . $version,
-            ],
-            [
-                'code'    => 104,
-                'icon'    => 'inactive',
-                'caption' => self::MODULE_NAME . ' ist inaktiv (ID ' . $this->InstanceID . ') ' . $version,
-            ],
-            [
-                'code'    => 200,
-                'icon'    => 'inactive',
-                'caption' => 'Es ist Fehler aufgetreten, weitere Informationen unter Meldungen, im Log oder Debug! (ID ' . $this->InstanceID . ') ' . $version
-            ]
-        ];
-        return json_encode($form);
-    }
-
-    public function ReloadConfiguration(): void
-    {
-        $this->ReloadForm();
     }
 
     public function ShowAllFunctions(bool $State): void
@@ -920,6 +885,17 @@ class Rollladensteuerung extends IPSModule
         IPS_SetHidden($scriptID, true);
         if ($scriptID != 0) {
             echo 'Beispielskript wurde erfolgreich erstellt!';
+        }
+    }
+
+    public function CreateCommandControlInstance(): void
+    {
+        $id = IPS_CreateInstance(self::ABLAUFSTEUERUNG_MODULE_GUID);
+        if (is_int($id)) {
+            IPS_SetName($id, 'Ablaufsteuerung');
+            echo 'Instanz mit der ID ' . $id . ' wurde erfolgreich erstellt!';
+        } else {
+            echo 'Instanz konnte nicht erstellt werden!';
         }
     }
 

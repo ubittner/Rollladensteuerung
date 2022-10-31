@@ -1,18 +1,20 @@
 <?php
 
+/**
+ * @project       Rollladensteuerung/Rollladensteuerung
+ * @file          RS_WeeklySchedule.php
+ * @author        Ulrich Bittner
+ * @copyright     2022 Ulrich Bittner
+ * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
+ */
+
+/** @noinspection PhpUnhandledExceptionInspection */
 /** @noinspection DuplicatedCode */
 /** @noinspection PhpUnused */
 
-/*
- * @author      Ulrich Bittner
- * @copyright   (c) 2021
- * @license     CC BY-NC-SA 4.0
- * @see         https://github.com/ubittner/Rollladensteuerung/tree/master/Rollladensteuerung
- */
-
 declare(strict_types=1);
 
-trait RS_weeklySchedule
+trait RS_WeeklySchedule
 {
     public function ShowActualWeeklyScheduleAction(): void
     {
@@ -29,7 +31,6 @@ trait RS_weeklySchedule
             } else {
                 $actionID = $this->DetermineAction();
                 $actionName = $warning . 'Es wurde keine Aktion gefunden!';
-                $event = IPS_GetEvent($id);
                 foreach ($event['ScheduleActions'] as $action) {
                     if ($action['ID'] === $actionID) {
                         $actionName = json_decode('"\u2705"') . "\tAktuelle Aktion\n\nID " . $actionID . ' = ' . $action['Name'];

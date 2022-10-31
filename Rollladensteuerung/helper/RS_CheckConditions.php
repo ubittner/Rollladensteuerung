@@ -1,17 +1,19 @@
 <?php
 
-/** @noinspection PhpUnusedPrivateMethodInspection */
-
-/*
- * @author      Ulrich Bittner
- * @copyright   (c) 2021
- * @license     CC BY-NC-SA 4.0
- * @see         https://github.com/ubittner/Rollladensteuerung/tree/master/Rollladensteuerung
+/**
+ * @project       Rollladensteuerung/Rollladensteuerung
+ * @file          RS_CheckConditions.php
+ * @author        Ulrich Bittner
+ * @copyright     2022 Ulrich Bittner
+ * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
  */
+
+/** @noinspection PhpUnusedPrivateMethodInspection */
+/** @noinspection PhpUnhandledExceptionInspection */
 
 declare(strict_types=1);
 
-trait RS_checkConditions
+trait RS_CheckConditions
 {
     private function CheckAllConditions(string $Settings): bool
     {
@@ -226,7 +228,7 @@ trait RS_checkConditions
             case 1: # Blind must be closed
                 if ($blindMode == 2 || $blindMode == 3) { # Timer is on or blind is opened
                     $this->SendDebug(__FUNCTION__, 'Bedingung: 1 = Geschlossen', 0);
-                    $this->SendDebug(__FUNCTION__, 'Abbruch, der Rolladen ist nicht geschlossen!', 0);
+                    $this->SendDebug(__FUNCTION__, 'Abbruch, der Rollladen ist nicht geschlossen!', 0);
                     $result = false;
                 }
                 break;
@@ -250,7 +252,7 @@ trait RS_checkConditions
             case 4: # Blind must be opened
                 if ($blindMode == 0 || $blindMode == 2) { # Blind is closed or timer is on
                     $this->SendDebug(__FUNCTION__, 'Bedingung: 4 =  Geöffnet', 0);
-                    $this->SendDebug(__FUNCTION__, 'Abbruch, der Rolladen ist nicht geöffnet!', 0);
+                    $this->SendDebug(__FUNCTION__, 'Abbruch, der Rollladen ist nicht geöffnet!', 0);
                     $result = false;
                 }
                 break;

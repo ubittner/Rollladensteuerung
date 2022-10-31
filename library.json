@@ -4,9 +4,9 @@
     "name": "Rollladensteuerung",
     "url": "https://github.com/ubittner/Rollladensteuerung",
     "compatibility": {
-        "version": "5.5"
+        "version": "6.1"
     },
     "version": "2.0",
-    "build": 102,
-    "date": 1641720283
+    "build": 103,
+    "date": 1667197675
 }

@@ -1,17 +1,19 @@
 <?php
 
-/** @noinspection PhpUnused */
-
-/*
- * @author      Ulrich Bittner
- * @copyright   (c) 2021
- * @license     CC BY-NC-SA 4.0
- * @see         https://github.com/ubittner/Rollladensteuerung/tree/master/Rollladensteuerung
+/**
+ * @project       Rollladensteuerung/Rollladensteuerung
+ * @file          RS_Actuator.php
+ * @author        Ulrich Bittner
+ * @copyright     2022 Ulrich Bittner
+ * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
  */
+
+/** @noinspection PhpUnhandledExceptionInspection */
+/** @noinspection PhpUnused */
 
 declare(strict_types=1);
 
-trait RS_actuator
+trait RS_Actuator
 {
     public function DetermineBlindActuatorVariables(): void
     {

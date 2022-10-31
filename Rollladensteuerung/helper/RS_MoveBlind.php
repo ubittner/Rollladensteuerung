@@ -1,18 +1,21 @@
 <?php
 
-/** @noinspection PhpUnusedPrivateMethodInspection */
-/** @noinspection PhpUnused */
-
-/*
- * @author      Ulrich Bittner
- * @copyright   (c) 2021
- * @license     CC BY-NC-SA 4.0
- * @see         https://github.com/ubittner/Rollladensteuerung/tree/master/Rollladensteuerung
+/**
+ * @project       Rollladensteuerung/Rollladensteuerung
+ * @file          RS_MoveBlind.php
+ * @author        Ulrich Bittner
+ * @copyright     2022 Ulrich Bittner
+ * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
  */
+
+/** @noinspection PhpVoidFunctionResultUsedInspection */
+/** @noinspection PhpUnusedPrivateMethodInspection */
+/** @noinspection PhpUnhandledExceptionInspection */
+/** @noinspection PhpUnused */
 
 declare(strict_types=1);
 
-trait RS_moveBlind
+trait RS_MoveBlind
 {
     public function MoveBlind(int $Position, int $Duration = 0, int $DurationUnit = 0): bool
     {
@@ -21,24 +24,25 @@ trait RS_moveBlind
         if ($this->CheckMaintenanceMode()) {
             return false;
         }
-        $result = false;
         $id = $this->ReadPropertyInteger('ActuatorControl');
         if ($id == 0 || !@IPS_ObjectExists($id)) {
             $this->SendDebug(__FUNCTION__, 'Abbruch, es ist kein Rollladenaktor vorhanden!', 0);
-            return $result;
+            return false;
         }
         //Check activity status
         $activityStatus = $this->ReadPropertyInteger('ActuatorActivityStatus');
         if ($activityStatus != 0 && @IPS_ObjectExists($activityStatus)) {
             if (intval(GetValue($activityStatus)) == 1) {
-                $this->SendDebug(__FUNCTION__, 'Rolladen fährt noch, Zielposition noch nicht erreicht!', 0);
+                $this->SendDebug(__FUNCTION__, 'Rollladen fährt noch, Zielposition noch nicht erreicht!', 0);
                 $useStopFunction = $this->ReadPropertyBoolean('EnableStopFunction');
                 if ($useStopFunction) {
                     $this->StopBlindMoving();
-                    return $result;
+                    return false;
                 }
             }
         }
+        $result = false;
+        $commandControl = $this->ReadPropertyInteger('CommandControl');
         $actualBlindMode = $this->GetValue('BlindMode');
         $actualBlindSliderValue = $this->GetValue('BlindSlider');
         $actualPositionPreset = $this->GetValue('PositionPresets');
@@ -107,15 +111,25 @@ trait RS_moveBlind
                     return false;
                 } else {
                     $this->SendDebug(__FUNCTION__, 'Variable ' . $id . ', neuer Wert: ' . $newVariableValue . ', Position: ' . json_encode($Position) . '%', 0);
-                    $result = @RequestAction($id, $newVariableValue);
-                    if (!$result) {
-                        IPS_Sleep(self::DEVICE_DELAY_MILLISECONDS);
+                    //Command control
+                    if ($commandControl > 1 && @IPS_ObjectExists($commandControl)) { //0 = main category, 1 = none
+                        $commands = [];
+                        $commands[] = '@RequestAction(' . $id . ", '" . $newVariableValue . "');";
+                        $this->SendDebug(__FUNCTION__, 'Befehl: ' . json_encode(json_encode($commands)), 0);
+                        $scriptText = self::ABLAUFSTEUERUNG_MODULE_PREFIX . '_ExecuteCommands(' . $commandControl . ', ' . json_encode(json_encode($commands)) . ');';
+                        $this->SendDebug(__FUNCTION__, 'Ablaufsteuerung: ' . $scriptText, 0);
+                        $result = @IPS_RunScriptText($scriptText);
+                    } else {
                         $result = @RequestAction($id, $newVariableValue);
                         if (!$result) {
-                            if (isset($modeText)) {
-                                $logText = 'Fehler, der Rolladen mit der ID ' . $id . ' konnte nicht ' . $modeText . ' werden!';
-                                $this->SendDebug(__FUNCTION__, $logText, 0);
-                                $this->LogMessage('Instanz: ' . $this->InstanceID . ', ' . __FUNCTION__ . ': ' . $logText, KL_WARNING);
+                            IPS_Sleep(self::DEVICE_DELAY_MILLISECONDS);
+                            $result = @RequestAction($id, $newVariableValue);
+                            if (!$result) {
+                                if (isset($modeText)) {
+                                    $logText = 'Fehler, der Rollladen mit der ID ' . $id . ' konnte nicht ' . $modeText . ' werden!';
+                                    $this->SendDebug(__FUNCTION__, $logText, 0);
+                                    $this->LogMessage('Instanz: ' . $this->InstanceID . ', ' . __FUNCTION__ . ': ' . $logText, KL_WARNING);
+                                }
                             }
                         }
                     }
@@ -202,7 +216,7 @@ trait RS_moveBlind
                     }
                 }
             } else {
-                $this->SendDebug(__FUNCTION__, 'Rolladen fährt noch, Zielposition noch nicht erreicht!', 0);
+                $this->SendDebug(__FUNCTION__, 'Rollladen fährt noch, Zielposition noch nicht erreicht!', 0);
             }
         }
     }
@@ -224,7 +238,18 @@ trait RS_moveBlind
                 $this->SendDebug(__FUNCTION__, 'Abbruch, der zugewiesene Rollladenaktor ist kein Homematic Gerät!', 0);
                 return;
             }
-            $result = HM_WriteValueBoolean($parent, 'STOP', true);
+            //Command control
+            $commandControl = $this->ReadPropertyInteger('CommandControl');
+            if ($commandControl > 1 && @IPS_ObjectExists($commandControl)) { //0 = main category, 1 = none
+                $commands = [];
+                $commands[] = '@HM_WriteValueInteger(' . $id . ', "STOP", true);';
+                $this->SendDebug(__FUNCTION__, 'Befehl: ' . json_encode(json_encode($commands)), 0);
+                $scriptText = self::ABLAUFSTEUERUNG_MODULE_PREFIX . '_ExecuteCommands(' . $commandControl . ', ' . json_encode(json_encode($commands)) . ');';
+                $this->SendDebug(__FUNCTION__, 'Ablaufsteuerung: ' . $scriptText, 0);
+                $result = @IPS_RunScriptText($scriptText);
+            } else {
+                $result = HM_WriteValueBoolean($parent, 'STOP', true);
+            }
             if (!$result) {
                 $this->SendDebug(__FUNCTION__, 'Fehler, die Rollladenfahrt konnte nicht gestoppt werden!', 0);
                 $this->LogMessage('ID ' . $this->InstanceID . ', ' . __FUNCTION__ . ', Fehler, die Rollladenfahrt konnte nicht gestoppt werden!', KL_ERROR);

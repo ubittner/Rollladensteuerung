@@ -1,18 +1,20 @@
 <?php
 
+/**
+ * @project       Rollladensteuerung/Rollladensteuerung
+ * @file          RS_Trigger.php
+ * @author        Ulrich Bittner
+ * @copyright     2022 Ulrich Bittner
+ * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
+ */
+
+/** @noinspection PhpUnhandledExceptionInspection */
 /** @noinspection DuplicatedCode */
 /** @noinspection PhpUnused */
 
-/*
- * @author      Ulrich Bittner
- * @copyright   (c) 2021
- * @license     CC BY-NC-SA 4.0
- * @see         https://github.com/ubittner/Rollladensteuerung/tree/master/Rollladensteuerung
- */
-
 declare(strict_types=1);
 
-trait RS_trigger
+trait RS_Trigger
 {
     public function CheckTrigger(int $VariableID): void
     {

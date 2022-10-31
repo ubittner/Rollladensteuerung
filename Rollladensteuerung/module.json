@@ -2,9 +2,8 @@
     "id": "{A1EE3E36-3789-C1BB-C40E-9789BD29D394}",
     "name": "Rollladensteuerung",
     "type": 3,
-    "vendor": "Ulrich Bittner",
-    "aliases": 
-    [
+    "vendor": "UB",
+    "aliases": [
         "Rollladensteuerung"
     ],
     "url": "https://github.com/ubittner/Rollladensteuerung/tree/master/Rollladensteuerung",
