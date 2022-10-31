@@ -148,6 +148,142 @@ trait RS_Config
 
         ########## Actions
 
+        //Registered references
+        $registeredReferences = [];
+        $references = $this->GetReferenceList();
+        foreach ($references as $reference) {
+            $name = 'Objekt #' . $reference . ' existiert nicht';
+            $rowColor = '#FFC0C0'; //red
+            if (@IPS_ObjectExists($reference)) {
+                $name = IPS_GetName($reference);
+                $rowColor = '#C0FFC0'; //light green
+            }
+            $registeredReferences[] = [
+                'ObjectID' => $reference,
+                'Name'     => $name,
+                'rowColor' => $rowColor];
+        }
+
+        $form['actions'][5] = [
+            'type'    => 'ExpansionPanel',
+            'caption' => 'Registrierte Referenzen',
+            'items'   => [
+                [
+                    'type'     => 'List',
+                    'name'     => 'RegisteredReferences',
+                    'rowCount' => 10,
+                    'sort'     => [
+                        'column'    => 'ObjectID',
+                        'direction' => 'ascending'
+                    ],
+                    'columns' => [
+                        [
+                            'caption' => 'ID',
+                            'name'    => 'ObjectID',
+                            'width'   => '150px',
+                            'onClick' => self::MODULE_PREFIX . '_ModifyButton($id, "RegisteredReferencesConfigurationButton", "ID " . $RegisteredReferences["ObjectID"] . " aufrufen", $RegisteredReferences["ObjectID"]);'
+                        ],
+                        [
+                            'caption' => 'Name',
+                            'name'    => 'Name',
+                            'width'   => '300px',
+                            'onClick' => self::MODULE_PREFIX . '_ModifyButton($id, "RegisteredReferencesConfigurationButton", "ID " . $RegisteredReferences["ObjectID"] . " aufrufen", $RegisteredReferences["ObjectID"]);'
+                        ]
+                    ],
+                    'values' => $registeredReferences
+                ],
+                [
+                    'type'     => 'OpenObjectButton',
+                    'name'     => 'RegisteredReferencesConfigurationButton',
+                    'caption'  => 'Aufrufen',
+                    'visible'  => false,
+                    'objectID' => 0
+                ]
+            ]
+        ];
+
+        //Registered messages
+        $registeredMessages = [];
+        $messages = $this->GetMessageList();
+        foreach ($messages as $id => $messageID) {
+            $name = 'Objekt #' . $id . ' existiert nicht';
+            $rowColor = '#FFC0C0'; //red
+            if (@IPS_ObjectExists($id)) {
+                $name = IPS_GetName($id);
+                $rowColor = '#C0FFC0'; //light green
+            }
+            switch ($messageID) {
+                case [10001]:
+                    $messageDescription = 'IPS_KERNELSTARTED';
+                    break;
+
+                case [10603]:
+                    $messageDescription = 'VM_UPDATE';
+                    break;
+
+                case [10803]:
+                    $messageDescription = 'EM_UPDATE';
+                    break;
+
+                default:
+                    $messageDescription = 'keine Bezeichnung';
+            }
+            $registeredMessages[] = [
+                'ObjectID'           => $id,
+                'Name'               => $name,
+                'MessageID'          => $messageID,
+                'MessageDescription' => $messageDescription,
+                'rowColor'           => $rowColor];
+        }
+
+        $form['actions'][6] = [
+            'type'    => 'ExpansionPanel',
+            'caption' => 'Registrierte Nachrichten',
+            'items'   => [
+                [
+                    'type'     => 'List',
+                    'name'     => 'RegisteredMessages',
+                    'rowCount' => 10,
+                    'sort'     => [
+                        'column'    => 'ObjectID',
+                        'direction' => 'ascending'
+                    ],
+                    'columns' => [
+                        [
+                            'caption' => 'ID',
+                            'name'    => 'ObjectID',
+                            'width'   => '150px',
+                            'onClick' => self::MODULE_PREFIX . '_ModifyButton($id, "RegisteredMessagesConfigurationButton", "ID " . $RegisteredMessages["ObjectID"] . " aufrufen", $RegisteredMessages["ObjectID"]);'
+                        ],
+                        [
+                            'caption' => 'Name',
+                            'name'    => 'Name',
+                            'width'   => '300px',
+                            'onClick' => self::MODULE_PREFIX . '_ModifyButton($id, "RegisteredMessagesConfigurationButton", "ID " . $RegisteredMessages["ObjectID"] . " aufrufen", $RegisteredMessages["ObjectID"]);'
+                        ],
+                        [
+                            'caption' => 'Nachrichten ID',
+                            'name'    => 'MessageID',
+                            'width'   => '150px'
+                        ],
+                        [
+                            'caption' => 'Nachrichten Bezeichnung',
+                            'name'    => 'MessageDescription',
+                            'width'   => '250px'
+                        ]
+                    ],
+                    'values' => $registeredMessages
+                ],
+                [
+                    'type'     => 'OpenObjectButton',
+                    'name'     => 'RegisteredMessagesConfigurationButton',
+                    'caption'  => 'Aufrufen',
+                    'visible'  => false,
+                    'objectID' => 0
+                ]
+            ]
+        ];
+
         ########## Status
 
         $form['status'][] = [

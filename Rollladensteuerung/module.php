@@ -548,6 +548,11 @@ class Rollladensteuerung extends IPSModule
                     }
                 }
             }
+            //Command control
+            $id = $this->ReadPropertyInteger('CommandControl');
+            if ($id != 0 && IPS_ObjectExists($id)) {
+                $this->RegisterReference($id);
+            }
         }
 
         ########## Position presets
@@ -747,7 +752,7 @@ class Rollladensteuerung extends IPSModule
                 if ($id != 0 && @IPS_ObjectExists($id)) {
                     if ($SenderID == $id) {
                         if ($Data[1] && $Data[0] != 0) {
-                            $this->SendDebug(__FUNCTION__, 'Rolladen fährt noch, Zielposition noch nicht erreicht!', 0);
+                            $this->SendDebug(__FUNCTION__, 'Rollladen fährt noch, Zielposition noch nicht erreicht!', 0);
                         }
                         if ($Data[1] && $Data[0] == 0) {
                             $this->SendDebug(__FUNCTION__, 'Die Rollladenposition hat sich geändert.', 0);
